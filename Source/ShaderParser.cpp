@@ -4,14 +4,37 @@
 
 #include "ShaderParser.hpp"
 #include "Shader.hpp"
+#include "ShaderUtility.hpp"
+
+bool ShaderParser::isTracing_ = true;
 
 ShaderParser::ShaderParser(Shader* shader)
 {
+	if(isTracing_)
+	{
+		std::cout<<"Parsing Shader: "<<shader<<"\n";
+	}
+
 	shader_ = shader;
 
 	Setup();
 
 	Parse();
+
+	if(isTracing_)
+	{
+		for(auto expression = samplerExpressions_.getStart(); expression != samplerExpressions_.getEnd(); ++expression)
+		{
+			std::cout<<"Texture has Identifier <"<<expression->name_<<">\n";
+		}
+		std::cout<<"\n";
+
+		for(auto expression = constantExpressions_.getStart(); expression != constantExpressions_.getEnd(); ++expression)
+		{
+			std::cout<<"Constant has Identifier <"<<expression->name_<<"> & Type Name <"<<expression->typeName_<<">\n";
+		}
+		std::cout<<"\n";
+	}
 }
 
 void ShaderParser::Parse()
@@ -45,6 +68,8 @@ void ShaderParser::Parse(ShaderFile* shaderFile)
 
 	LocateSamplers();
 
+	LocateConstants();
+
 	delete[] shaderCode;
 	fclose(file);
 }
@@ -55,9 +80,11 @@ void ShaderParser::Setup()
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maximumSamplerCount);
 
 	samplerExpressions_.initialize(maximumSamplerCount);
+
+	constantExpressions_.initialize(32);
 }
 
-Index LocateNextSymbol(char *shaderCodeIterator, char symbol)
+Index FindNextSymbol(char *shaderCodeIterator, char symbol)
 {
 	for(auto character = shaderCodeIterator; character != shaderCode + fileSize; ++character)
 	{
@@ -81,25 +108,22 @@ void ShaderParser::LocateSamplers()
 {
 	for(auto character = shaderCode; character != shaderCode + fileSize; ++character)
 	{
-		if(*character != 's')
+		const char* typeName = "sampler2D";
+		if(CompareMemory(character, typeName, GetStringLength(typeName)) != 0)
 			continue;
 
-		const char* typeName = "sampler";
-		if(strcmp(character, typeName) != 0)
-			continue;
+		character += GetStringLength(typeName);
 
-		character += strlen(typeName);
-
-		character = shaderCode + LocateNextSymbol(character, ' ');
+		character = shaderCode + FindNextSymbol(character, ' ');
 
 		Index identifierPosition = JumpSymbol(character, ' ');
 
 		character = shaderCode + identifierPosition;
 
-		Index semicolonPosition = LocateNextSymbol(character, ';');
+		Index semicolonPosition = FindNextSymbol(character, ';');
 
 		LongWord identifier;
-		CopyMemory(identifier, character, semicolonPosition - identifierPosition);
+		identifier.Add(character, semicolonPosition - identifierPosition);
 
 		bool hasFound = false;
 		for(auto expression = samplerExpressions_.getStart(); expression != samplerExpressions_.getEnd(); ++expression)
@@ -116,19 +140,79 @@ void ShaderParser::LocateSamplers()
 			continue;
 		}
 
-		*samplerExpressions_.allocate() = SamplerExpression(identifierPosition, identifier);
+		*samplerExpressions_.allocate() = Expression(identifierPosition, identifier);
 	}
 }
 
-const Array <LongWord> *ShaderParser::FetchTextures()
+void ShaderParser::LocateConstants()
 {
-	int textureCount = samplerExpressions_.getSize();
-	Array <LongWord> *textures = new Array <LongWord> (textureCount);
-
-	for(int i = 0; i < textureCount; ++i)
+	for(auto character = shaderCode; character != shaderCode + fileSize; ++character)
 	{
-		*textures->allocate() = samplerExpressions_.get(i)->name_;
+		const char* labelName = "uniform";
+		if(CompareMemory(character, labelName, GetStringLength(labelName)) != 0)
+			continue;
+
+		character += GetStringLength(labelName);
+
+		character = shaderCode + FindNextSymbol(character, ' ');
+
+		Index typeStartPosition = JumpSymbol(character, ' ');
+
+		character = shaderCode + typeStartPosition;
+
+		if(*character == 's')
+			continue;
+
+		Index typeEndPosition = FindNextSymbol(character, ' ');
+
+		LongWord typeName;
+		typeName.Add(character, typeEndPosition - typeStartPosition);
+
+		character = shaderCode + typeEndPosition;
+
+		Index identifierStartPosition = JumpSymbol(character, ' ');
+
+		character = shaderCode + identifierStartPosition;
+
+		Index semiColonPosition = FindNextSymbol(character, ';');
+
+		LongWord identifier;
+		identifier.Add(character, semiColonPosition - identifierStartPosition);
+
+		bool hasFound = false;
+		for(auto expression = constantExpressions_.getStart(); expression != constantExpressions_.getEnd(); ++expression)
+		{
+			if(expression->position_ != identifierStartPosition)
+				continue;
+
+			hasFound = true;
+		}
+
+		if(hasFound)
+		{
+			character = shaderCode + semiColonPosition;
+			continue;
+		}
+
+		*constantExpressions_.allocate() = Expression(identifierStartPosition, identifier, typeName);
 	}
 
-	return textures;
+	std::cout<<"\n";
+}
+
+Array <ShaderParser::Expression> &ShaderParser::FetchTextures()
+{
+	return samplerExpressions_;
+}
+
+Array <ShaderParser::Expression> &ShaderParser::FetchConstants()
+{
+	return constantExpressions_;
+}
+
+ShaderParser::~ShaderParser()
+{
+	samplerExpressions_.Destroy();
+
+	constantExpressions_.Destroy();
 }

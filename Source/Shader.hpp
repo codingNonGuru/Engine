@@ -5,38 +5,15 @@
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 
+class Texture;
+class TextureBinding;
+class ConstantBinding;
+class ShaderFile;
+
 enum class ShaderTypes
 {
 	RENDER,
 	COMPUTE
-};
-
-class TextureBinding
-{
-private:
-	ShortWord name_;
-
-	Index index_;
-
-public:
-	TextureBinding() {}
-
-	TextureBinding(const char*, Index);
-};
-
-class ShaderFile
-{
-private:
-	const char* path_;
-
-public:
-	ShaderFile() {}
-
-	ShaderFile(const char* path) {path_ = path;}
-
-	const char* GetPath() {return path_;}
-
-	void SetPath(const char* path) {path_ = path;}
 };
 
 class Shader
@@ -48,11 +25,15 @@ private:
 
 	Array <ShaderFile> shaderFiles_;
 
-	Array <TextureBinding> textureBindings_;
+	Map <TextureBinding, LongWord> textureBindings_;
+
+	Map <ConstantBinding, LongWord> constantBindings_;
 
 	void Compile(int, GLenum);
 
 	void Link();
+
+	void Parse();
 
 public:
 	void Initialize(const char*);
@@ -71,6 +52,8 @@ public:
 
 	void Unbind();
 
+	bool BindTexture(Texture*, const char*);
+
 	void AddUniform(const char*);
 
 	void Update();
@@ -85,7 +68,7 @@ public:
 class ShaderMap
 {
 private:
-	container::StaticMap <Shader> shaders_;
+	Map <Shader> shaders_;
 
 public:
 	void Initialize(int);

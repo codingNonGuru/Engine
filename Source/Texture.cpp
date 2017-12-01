@@ -12,9 +12,15 @@ Texture::~Texture() {
 
 }
 
-void Texture::Initialize(GLuint key, glm::vec2 size) {
+void Texture::Initialize(GLuint key, glm::vec2 size)
+{
 	key_ = key;
 	size_ = size;
+}
+
+void Texture::Bind()
+{
+	glBindTexture(GL_TEXTURE_2D, key_);
 }
 
 void Texture::Bind(GLuint index, Shader* shader, const char* name)

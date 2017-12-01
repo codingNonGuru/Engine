@@ -291,7 +291,7 @@ namespace container {
 			size_ = size;
 			memorySize_ = size_ * sizeof(O);
 			objectCount_ = 0;
-			destroy();
+			Destroy();
 			objectStart_ = new O[size_];
 
 			MemoryLog::accrue(memorySize_);
@@ -386,7 +386,7 @@ namespace container {
 				*iterator = 0;
 		}
 
-		void destroy() {
+		void Destroy() {
 			if(objectStart_ != nullptr)
 				delete[] objectStart_;
 
@@ -396,16 +396,29 @@ namespace container {
 		}
 	};
 
-	template<int Size>
+	template<int Capacity>
 	class String
 	{
-		char values_[Size];
+		char values_[Capacity];
+
+		int size_;
 	public:
-		String() {}
+		String()
+		{
+			size_ = 0;
+		}
 
 		String(const char* values)
 		{
+			size_ = 0;
 			strcpy(values_, values);
+		}
+
+		void Add(char* string, int length)
+		{
+			memcpy(values_ + size_, string, length);
+			size_ += length;
+			*(values_ + size_) = (char)0;
 		}
 
 		char* Get() {return values_;}
@@ -479,6 +492,19 @@ namespace container {
 		Key* GetLastKey()
 		{
 			return keys_ + size_;
+		}
+
+		void Destroy()
+		{
+			if(keys_ != nullptr)
+				delete[] keys_;
+
+			keys_ = nullptr;
+
+			if(values_ != nullptr)
+				delete[] values_;
+
+			values_ = nullptr;
 		}
 	};
 

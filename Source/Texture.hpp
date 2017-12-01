@@ -20,6 +20,8 @@ public:
 
 	void Initialize(GLuint, glm::vec2);
 
+	void Bind();
+
 	void Bind(GLuint, Shader*, const char*);
 
 	void Unbind();

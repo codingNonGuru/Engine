@@ -8,20 +8,28 @@ class ShaderFile;
 class ShaderParser
 {
 private:
-	struct SamplerExpression
+	struct Expression
 	{
 		Index position_;
 
 		LongWord name_;
 
-		SamplerExpression() {}
+		LongWord typeName_;
 
-		SamplerExpression(Index position, LongWord name) {position_ = position; name_ = name;}
+		Expression() {}
+
+		Expression(Index position, LongWord name) {position_ = position; name_ = name;}
+
+		Expression(Index position, LongWord name, LongWord typeName) {position_ = position; name_ = name; typeName_ = typeName;}
 	};
+
+	static bool isTracing_;
 
 	Shader* shader_;
 
-	Array <SamplerExpression> samplerExpressions_;
+	Array <Expression> samplerExpressions_;
+
+	Array <Expression> constantExpressions_;
 
 	void Parse();
 
@@ -31,10 +39,16 @@ private:
 
 	void LocateSamplers();
 
+	void LocateConstants();
+
 public:
 	ShaderParser() {}
 
 	ShaderParser(Shader*);
 
-	const Array <LongWord> *FetchTextures();
+	Array <Expression> &FetchTextures();
+
+	Array <Expression> &FetchConstants();
+
+	~ShaderParser();
 };

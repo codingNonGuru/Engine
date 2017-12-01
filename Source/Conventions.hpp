@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 typedef glm::vec2 Position;
 typedef float Rotation;
@@ -10,6 +10,7 @@ typedef glm::vec2 Size;
 typedef glm::mat4 Matrix;
 
 typedef unsigned int Index;
+typedef unsigned int Length;
 
 #include "Memory.hpp"
 
@@ -17,8 +18,8 @@ template <class Type>
 using Array = container::Array<Type>;
 template <class Type>
 using Pool = container::DynamicPool<Type>;
-template <class Type>
-using Map = container::StaticMap<Type>;
+template <class ValueType, class KeyType = ShortWord>
+using Map = container::StaticMap<ValueType, KeyType>;
 
 enum class CameraTypes {ORTHO, PERSPECTIVE};
 
@@ -26,6 +27,8 @@ enum class CameraTypes {ORTHO, PERSPECTIVE};
 
 typedef fastdelegate::FastDelegate0<> Callback;
 
-#include <stdio.h>
+void* CopyMemory(void *, const void *, size_t);
 
-void* CopyMemory(void *destination, const void *source, size_t num) {return memcpy(destination, source, num);}
+int CompareMemory(const void *, const void *, size_t);
+
+Length GetStringLength(const char *);

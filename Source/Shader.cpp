@@ -5,6 +5,9 @@
 #include "GL/glew.h"
 
 #include "Shader.hpp"
+#include "ShaderParser.hpp"
+#include "ShaderUtility.hpp"
+#include "Texture.hpp"
 
 // ----- SHADER Definitions
 
@@ -20,6 +23,8 @@ void Shader::Initialize(const char* vertexShaderPath, const char* fragmentShader
 	Compile(1, GL_FRAGMENT_SHADER);
 	Compile(2, GL_GEOMETRY_SHADER);
 	Link();
+
+	Parse();
 }
 
 void Shader::Initialize(const char* vertexShaderPath, const char* fragmentShaderPath)
@@ -32,6 +37,8 @@ void Shader::Initialize(const char* vertexShaderPath, const char* fragmentShader
 	Compile(0, GL_VERTEX_SHADER);
 	Compile(1, GL_FRAGMENT_SHADER);
 	Link();
+
+	Parse();
 }
 
 void Shader::Initialize(const char* computeShaderPath)
@@ -42,6 +49,8 @@ void Shader::Initialize(const char* computeShaderPath)
 
 	Compile(0, GL_COMPUTE_SHADER);
 	Link();
+
+	Parse();
 }
 
 Shader::Shader(const char* computeShaderPath)
@@ -66,6 +75,22 @@ void Shader::Unbind()
 	glUseProgram(0);
 }
 
+bool Shader::BindTexture(Texture* texture, const char* identifier)
+{
+	auto binding = textureBindings_.Get(identifier);
+	if(!binding)
+	{
+		std::cout<<"Texture identifier "<<identifier<<" is not valid.\n";
+		return false;
+	}
+
+	glUniform1i(binding->GetLocation(), binding->GetUnitIndex());
+	glActiveTexture(GL_TEXTURE0 + binding->GetUnitIndex());
+	texture->Bind();
+
+	return true;
+}
+
 void Shader::Compile(int index, GLenum shaderType)
 {
 	GLuint key = glCreateShader(shaderType);
@@ -83,13 +108,16 @@ void Shader::Compile(int index, GLenum shaderType)
 
 	GLint isCompiled = 0;
 	glGetShaderiv(key, GL_COMPILE_STATUS, &isCompiled);
-	if(isCompiled == GL_FALSE) {
+	if(isCompiled == GL_FALSE)
+	{
 		GLint maxLength = 0;
 		glGetShaderiv(key, GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar errorLog[maxLength];
 		glGetShaderInfoLog(key, maxLength, &maxLength, &errorLog[0]);
 		for(int i = 0; i < maxLength; ++i)
+		{
 			std::cout<<errorLog[i];
+		}
 		glDeleteShader(key);
 		return;
 	}
@@ -167,6 +195,66 @@ void Shader::Update()
 GLuint Shader::GetTextureLocation(const char* textureName)
 {
 	return glGetUniformLocation(key_, textureName);
+}
+
+void Shader::Parse()
+{
+	auto parser = new ShaderParser(this);
+
+	auto textureExpressions = parser->FetchTextures();
+
+	textureBindings_.Initialize(textureExpressions.getSize());
+	Index index = 0;
+	for(auto expression = textureExpressions.getStart(); expression != textureExpressions.getEnd(); ++expression, ++index)
+	{
+		Index location = glGetUniformLocation(key_, expression->name_);
+
+		*textureBindings_.Allocate(expression->name_) = TextureBinding(index, location);
+	}
+
+	auto constantExpressions = parser->FetchConstants();
+
+	constantBindings_.Initialize(constantExpressions.getSize());
+	index = 0;
+	for(auto expression = constantExpressions.getStart(); expression != constantExpressions.getEnd(); ++expression, ++index)
+	{
+		Index location = glGetUniformLocation(key_, expression->name_);
+
+		auto& typeName = expression->typeName_;
+		ShaderConstantTypes type;
+		if(CompareMemory(typeName, "int", 3) == 0)
+			type = ShaderConstantTypes::INTEGER_1;
+		else if(CompareMemory(typeName, "ivec2", 5) == 0)
+			type = ShaderConstantTypes::INTEGER_2;
+		else if(CompareMemory(typeName, "ivec3", 5) == 0)
+			type = ShaderConstantTypes::INTEGER_3;
+		else if(CompareMemory(typeName, "ivec4", 5) == 0)
+			type = ShaderConstantTypes::INTEGER_4;
+		else if(CompareMemory(typeName, "uint", 4) == 0)
+			type = ShaderConstantTypes::UINTEGER_1;
+		else if(CompareMemory(typeName, "uvec2", 5) == 0)
+			type = ShaderConstantTypes::UINTEGER_2;
+		else if(CompareMemory(typeName, "uvec3", 5) == 0)
+			type = ShaderConstantTypes::UINTEGER_3;
+		else if(CompareMemory(typeName, "uvec4", 5) == 0)
+			type = ShaderConstantTypes::UINTEGER_4;
+		else if(CompareMemory(typeName, "float", 5) == 0)
+			type = ShaderConstantTypes::FLOAT_1;
+		else if(CompareMemory(typeName, "vec2", 4) == 0)
+			type = ShaderConstantTypes::FLOAT_2;
+		else if(CompareMemory(typeName, "vec3", 4) == 0)
+			type = ShaderConstantTypes::FLOAT_3;
+		else if(CompareMemory(typeName, "vec4", 4) == 0)
+			type = ShaderConstantTypes::FLOAT_4;
+		else if(CompareMemory(typeName, "mat3", 4) == 0)
+			type = ShaderConstantTypes::MATRIX_3;
+		else if(CompareMemory(typeName, "mat4", 4) == 0)
+			type = ShaderConstantTypes::MATRIX_4;
+
+		*constantBindings_.Allocate(expression->name_) = ConstantBinding(location, type);
+	}
+
+	delete parser;
 }
 
 // ----- SHADER MAP Definitions
