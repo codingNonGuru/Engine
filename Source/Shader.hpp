@@ -10,20 +10,16 @@ class TextureBinding;
 class ConstantBinding;
 class ShaderFile;
 
-enum class ShaderTypes
-{
-	RENDER,
-	COMPUTE
-};
-
 class Shader
 {
 private:
 	GLuint key_;
 
+	LongWord name_;
+
 	GLuint shaderKeys_[3];
 
-	Array <ShaderFile> shaderFiles_;
+	Array <ShaderFile*> *shaderFiles_;
 
 	Map <TextureBinding, LongWord> textureBindings_;
 
@@ -36,17 +32,11 @@ private:
 	void Parse();
 
 public:
-	void Initialize(const char*);
-
-	void Initialize(const char*, const char*);
-
-	void Initialize(const char*, const char*, const char*);
-
 	Shader() {}
 
-	Shader(const char*);
+	Shader(const char*, Array <ShaderFile*> &);
 
-	Shader(const char*, const char*);
+	void Initialize(const char*, Array <ShaderFile*> &);
 
 	void Bind();
 
@@ -54,13 +44,15 @@ public:
 
 	bool BindTexture(Texture*, const char*);
 
-	void AddUniform(const char*);
+	void SetConstant(void*, const char*);
 
 	void Update();
 
 	GLuint GetTextureLocation(const char*);
 
-	Array <ShaderFile> &GetShaderFiles() {return shaderFiles_;}
+	Array <ShaderFile*> *GetShaderFiles() {return shaderFiles_;}
+
+	LongWord& GetName() {return name_;}
 
 	~Shader(void);
 };
@@ -71,6 +63,10 @@ private:
 	Map <Shader> shaders_;
 
 public:
+	ShaderMap() {}
+
+	ShaderMap(int);
+
 	void Initialize(int);
 
 	bool Add(const char*, const char*, const char*, const char*);

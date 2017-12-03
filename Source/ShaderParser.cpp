@@ -12,7 +12,7 @@ ShaderParser::ShaderParser(Shader* shader)
 {
 	if(isTracing_)
 	{
-		std::cout<<"Parsing Shader: "<<shader<<"\n";
+		std::cout<<"Parsing Shader: "<<shader->GetName()<<"\n";
 	}
 
 	shader_ = shader;
@@ -23,13 +23,13 @@ ShaderParser::ShaderParser(Shader* shader)
 
 	if(isTracing_)
 	{
-		for(auto expression = samplerExpressions_.getStart(); expression != samplerExpressions_.getEnd(); ++expression)
+		for(auto expression = samplerExpressions_.GetStart(); expression != samplerExpressions_.GetEnd(); ++expression)
 		{
 			std::cout<<"Texture has Identifier <"<<expression->name_<<">\n";
 		}
 		std::cout<<"\n";
 
-		for(auto expression = constantExpressions_.getStart(); expression != constantExpressions_.getEnd(); ++expression)
+		for(auto expression = constantExpressions_.GetStart(); expression != constantExpressions_.GetEnd(); ++expression)
 		{
 			std::cout<<"Constant has Identifier <"<<expression->name_<<"> & Type Name <"<<expression->typeName_<<">\n";
 		}
@@ -43,9 +43,9 @@ void ShaderParser::Parse()
 		return;
 
 	auto shaderFiles = shader_->GetShaderFiles();
-	for(auto shaderFile = shaderFiles.getStart(); shaderFile != shaderFiles.getEnd(); ++shaderFile)
+	for(auto shaderFile = shaderFiles->GetStart(); shaderFile != shaderFiles->GetEnd(); ++shaderFile)
 	{
-		Parse(shaderFile);
+		Parse(*shaderFile);
 	}
 }
 
@@ -79,23 +79,23 @@ void ShaderParser::Setup()
 	int maximumSamplerCount = 0;
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maximumSamplerCount);
 
-	samplerExpressions_.initialize(maximumSamplerCount);
+	samplerExpressions_.Initialize(maximumSamplerCount);
 
-	constantExpressions_.initialize(32);
+	constantExpressions_.Initialize(32);
 }
 
-Index FindNextSymbol(char *shaderCodeIterator, char symbol)
+Index FindNextSymbol(char *codeIterator, char symbol)
 {
-	for(auto character = shaderCodeIterator; character != shaderCode + fileSize; ++character)
+	for(auto character = codeIterator; character != shaderCode + fileSize; ++character)
 	{
 		if(*character == symbol)
 			return character - shaderCode;
 	}
 }
 
-Index JumpSymbol(char* shaderCodeIterator, char symbol)
+Index JumpSymbol(char* codeIterator, char symbol)
 {
-	for(auto character = shaderCodeIterator; character != shaderCode + fileSize; ++character)
+	for(auto character = codeIterator; character != shaderCode + fileSize; ++character)
 	{
 		if(*character == symbol)
 			continue;
@@ -104,10 +104,42 @@ Index JumpSymbol(char* shaderCodeIterator, char symbol)
 	}
 }
 
+bool isSingleComment = false;
+bool isMultiComment = false;
+
+void CheckCommentary(char* codeIterator)
+{
+	if(CompareMemory(codeIterator, "//", 2) == 0)
+	{
+		isSingleComment = true;
+	}
+
+	if(CompareMemory(codeIterator, "\n", 1) == 0)
+	{
+		isSingleComment = false;
+	}
+
+	if(CompareMemory(codeIterator, "/*", 2) == 0)
+	{
+		isMultiComment = true;
+	}
+
+	if(CompareMemory(codeIterator, "*/", 2) == 0)
+	{
+		isMultiComment = false;
+	}
+}
+
 void ShaderParser::LocateSamplers()
 {
+	isSingleComment = isMultiComment = false;
 	for(auto character = shaderCode; character != shaderCode + fileSize; ++character)
 	{
+		CheckCommentary(character);
+
+		if(isMultiComment || isSingleComment)
+			continue;
+
 		const char* typeName = "sampler2D";
 		if(CompareMemory(character, typeName, GetStringLength(typeName)) != 0)
 			continue;
@@ -126,7 +158,7 @@ void ShaderParser::LocateSamplers()
 		identifier.Add(character, semicolonPosition - identifierPosition);
 
 		bool hasFound = false;
-		for(auto expression = samplerExpressions_.getStart(); expression != samplerExpressions_.getEnd(); ++expression)
+		for(auto expression = samplerExpressions_.GetStart(); expression != samplerExpressions_.GetEnd(); ++expression)
 		{
 			if(expression->position_ != identifierPosition)
 				continue;
@@ -140,19 +172,28 @@ void ShaderParser::LocateSamplers()
 			continue;
 		}
 
-		*samplerExpressions_.allocate() = Expression(identifierPosition, identifier);
+		*samplerExpressions_.Allocate() = Expression(identifierPosition, identifier);
 	}
 }
 
 void ShaderParser::LocateConstants()
 {
+	isSingleComment = isMultiComment = false;
 	for(auto character = shaderCode; character != shaderCode + fileSize; ++character)
 	{
+		CheckCommentary(character);
+
+		if(isMultiComment || isSingleComment)
+			continue;
+
 		const char* labelName = "uniform";
 		if(CompareMemory(character, labelName, GetStringLength(labelName)) != 0)
 			continue;
 
 		character += GetStringLength(labelName);
+
+		if(*character != ' ')
+			continue;
 
 		character = shaderCode + FindNextSymbol(character, ' ');
 
@@ -180,7 +221,7 @@ void ShaderParser::LocateConstants()
 		identifier.Add(character, semiColonPosition - identifierStartPosition);
 
 		bool hasFound = false;
-		for(auto expression = constantExpressions_.getStart(); expression != constantExpressions_.getEnd(); ++expression)
+		for(auto expression = constantExpressions_.GetStart(); expression != constantExpressions_.GetEnd(); ++expression)
 		{
 			if(expression->position_ != identifierStartPosition)
 				continue;
@@ -194,10 +235,8 @@ void ShaderParser::LocateConstants()
 			continue;
 		}
 
-		*constantExpressions_.allocate() = Expression(identifierStartPosition, identifier, typeName);
+		*constantExpressions_.Allocate() = Expression(identifierStartPosition, identifier, typeName);
 	}
-
-	std::cout<<"\n";
 }
 
 Array <ShaderParser::Expression> &ShaderParser::FetchTextures()

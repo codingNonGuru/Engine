@@ -6,33 +6,33 @@
  */
 
 #include <math.h>
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Transform.hpp"
 
-Transform::Transform(Position position, Rotation rotation, Scale scale)
+Transform::Transform(Position3 position, Rotation rotation, Scale scale)
 {
 	position_ = position;
 	rotation_ = rotation;
 	scale_ = scale;
 }
 
-void Transform::Initialize(Position position, Rotation rotation, Scale scale)
+void Transform::Initialize(Position3 position, Rotation rotation, Scale scale)
 {
 	position_ = position;
 	rotation_ = rotation;
 	scale_ = scale;
 }
 
-Direction Transform::GetForward()
+Direction3 Transform::GetForward()
 {
-	return Direction(cos(rotation_), sin(rotation_));
+	return Direction3(cos(rotation_), sin(rotation_), 0.0f);
 }
 
 Matrix Transform::GetMatrix()
 {
 	Matrix worldMatrix =
-		glm::translate(Matrix(1.0f), glm::vec3(position_, 0.0f)) *
+		glm::translate(Matrix(1.0f), position_) *
 		glm::rotate(Matrix(1.0f), rotation_, glm::vec3(0.0f, 0.0f, 1.0f)) *
 		glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -42,7 +42,7 @@ Matrix Transform::GetMatrix()
 Matrix Transform::GetPositionMatrix()
 {
 	Matrix worldMatrix =
-		glm::translate(Matrix(1.0f), glm::vec3(position_, 0.0f)) *
+		glm::translate(Matrix(1.0f), position_) *
 		glm::scale(Matrix(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
 	return worldMatrix;

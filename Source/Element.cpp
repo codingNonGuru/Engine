@@ -38,14 +38,14 @@ void Element::Draw(Camera* camera)
 		sprite_->Draw(camera);
 }
 
-Position Element::GetLocalPosition()
+Position2 Element::GetLocalPosition()
 {
 	return transform_->position_;
 }
 
-Position Element::GetPosition()
+Position2 Element::GetPosition()
 {
-	Position position = transform_->position_;
+	Position2 position = transform_->position_;
 
 	if(parent_ == nullptr)
 		return position;

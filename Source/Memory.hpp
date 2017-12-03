@@ -12,7 +12,7 @@ public:
 
 namespace container
 {
-	template<int Size>
+	template<int Capacity>
 	class String;
 }
 
@@ -26,17 +26,23 @@ namespace container {
 	template<class O, typename I>
 	class StaticBlock;
 
-	template<class O>
-	class Pool
+	class Container
 	{
+	public:
+		virtual void* GetData() {return nullptr;}
+
+		virtual unsigned int GetMemoryCapacity() {return 0;}
 	};
 
 	template<typename I = int>
-	class Container {
+	class Matrix
+	{
 	public:
 		virtual I getWidth() const {return 0;}
+
 		virtual I getHeight() const {return 0;}
-		virtual void* getVoidStart() const {return nullptr;}
+
+		virtual void* GetData() const {return nullptr;}
 	};
 
 	template<class O>
@@ -163,7 +169,7 @@ namespace container {
 	};
 
 	template<class O>
-	class Grid : public Container<int> {
+	class Grid : public Matrix<int> {
 	private:
 		int height_;
 		int width_;
@@ -219,7 +225,7 @@ namespace container {
 			return height_;
 		}
 
-		void* getVoidStart() const {
+		void* GetData() const {
 			return (void*)objects_;
 		}
 
@@ -267,130 +273,127 @@ namespace container {
 	};
 
 	template<class O, typename I = int>
-	class Array : public Pool<O> {
-		O* objectStart_;
+	class Array : public Container
+	{
+		O* objects_;
+
+		I capacity_;
+
 		I size_;
+
 		unsigned long memorySize_;
 
+		virtual void* GetData() {return (void*)objects_;}
+
 	public:
-		I objectCount_;
 
-		Array() {
-			objectStart_ = nullptr;
-		}
+		Array() : objects_(nullptr), size_(0), capacity_(0) {}
 
-		Array(I size) : size_(size){
-			memorySize_ = size_ * sizeof(O);
-			objectCount_ = 0;
-			objectStart_ = new O[size_];
+		Array(I capacity) : capacity_(capacity), size_(0)
+		{
+			memorySize_ = capacity_ * sizeof(O);
+			objects_ = new O[capacity_];
 
 			MemoryLog::accrue(memorySize_);
 		}
 
-		void initialize(I size) {
-			size_ = size;
-			memorySize_ = size_ * sizeof(O);
-			objectCount_ = 0;
+		void Initialize(I capacity) {
+			capacity_ = capacity;
+			memorySize_ = capacity_ * sizeof(O);
+			size_ = 0;
 			Destroy();
-			objectStart_ = new O[size_];
+			objects_ = new O[capacity_];
 
 			MemoryLog::accrue(memorySize_);
 		}
 
-		void reset() {
-			objectCount_ = 0;
+		void Reset()
+		{
+			size_ = 0;
 		}
 
-		bool isFull() {
-			return objectCount_ == size_ - 1;
+		bool IsFull()
+		{
+			return size_ == capacity_;
 		}
 
-		O *const allocate(I count) {
-			O *const newObject = (objectStart_ + objectCount_);
-			objectCount_ += count;
+		O *const Allocate(I count)
+		{
+			O *const newObject = (objects_ + size_);
+			size_ += count;
 			return newObject;
 		}
 
-		O *const allocate() {
-			O *const newObject = (objectStart_ + objectCount_);
-			objectCount_++;
-			if(objectCount_ == size_ + 1) {
-				std::cout<<"Abort "<<objectCount_<<"\n";
-				abort();
-			}
+		O *const Allocate()
+		{
+			if(size_ == capacity_)
+				return nullptr;
+
+			O *const newObject = (objects_ + size_);
+			size_++;
+
 			return newObject;
 		}
 
 		template<class DerivedType>
-		O *const allocate() {
-			O *const newObject = (objectStart_ + objectCount_);
+		O *const Allocate()
+		{
+			if(size_ == capacity_)
+				return nullptr;
+
+			O *const newObject = (objects_ + size_);
 			*(long*)newObject = *(long*)&DerivedType();
-			objectCount_++;
-			if(objectCount_ == size_ + 1) {
-				std::cout<<"Abort "<<objectCount_<<"\n";
-				abort();
-			}
+			size_++;
+
 			return newObject;
 		}
 
-		O* get(I index) {
+		O* Get(I index)
+		{
 			if(index < 0)
-				index += size_;
-			if(index >= size_)
-				index -= size_;
+				index += capacity_;
+			if(index >= capacity_)
+				index -= capacity_;
 
-			return objectStart_ + index;
+			return objects_ + index;
 		}
 
-		O* getStart() {
-			return objectStart_;
+		O* GetStart()
+		{
+			return objects_;
 		}
 
-		O* getEnd() {
-			return (objectStart_ + objectCount_);
+		O* GetEnd()
+		{
+			return (objects_ + size_);
 		}
 
-		I getSize() const {
-			return objectCount_;
-		}
-
-		I getCapacity() const {
+		I GetSize() const
+		{
 			return size_;
 		}
 
-		unsigned int getMemorySize() {
-			return objectCount_ * sizeof(O);
+		I GetCapacity() const
+		{
+			return capacity_;
 		}
 
-		unsigned int getMemoryCapacity() {
+		unsigned int GetMemorySize()
+		{
 			return size_ * sizeof(O);
 		}
 
-		void insert(O* from, O first, O last) {
-			O iterator_2 = first;
-			for(O* iterator = from; iterator_2 != last + 1; ++iterator, ++iterator_2) {
-				*iterator = iterator_2;
-			}
+		virtual unsigned int GetMemoryCapacity()
+		{
+			return capacity_ * sizeof(O);
 		}
 
-		void insertAndMove(O* from, O* first, O* last) {
-			O* iterator_2 = first;
-			for(O* iterator = from; iterator_2 != last + 1; ++iterator, ++iterator_2) {
-				*iterator = *iterator_2;
-			}
-			from += (last - first);
-		}
+		void Destroy()
+		{
+			if(objects_ != nullptr)
+				delete[] objects_;
 
-		void setAllToNull() {
-			for(unsigned int* iterator = (unsigned int*)objectStart_; iterator != (unsigned int*)objectStart_ + (memorySize_ / sizeof(unsigned int)); ++iterator)
-				*iterator = 0;
-		}
-
-		void Destroy() {
-			if(objectStart_ != nullptr)
-				delete[] objectStart_;
-
-			objectStart_ = nullptr;
+			objects_ = nullptr;
 
 			MemoryLog::accrue(-memorySize_);
 		}
@@ -410,11 +413,24 @@ namespace container {
 
 		String(const char* values)
 		{
-			size_ = 0;
 			strcpy(values_, values);
+			size_ = strlen(values);
+		}
+
+		void Add(const char* string)
+		{
+			strcpy(values_, string);
+			size_ = strlen(string);
 		}
 
 		void Add(char* string, int length)
+		{
+			memcpy(values_ + size_, string, length);
+			size_ += length;
+			*(values_ + size_) = (char)0;
+		}
+
+		void Add(const char* string, int length)
 		{
 			memcpy(values_ + size_, string, length);
 			size_ += length;

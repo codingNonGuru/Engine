@@ -1,0 +1,43 @@
+#version 450
+
+struct Vector3 {
+	float x, y, z;
+};
+
+layout (std430, binding = 0) buffer POSITIONS {
+	Vector3 positions[];
+};
+
+layout (std430, binding = 1) buffer NORMALS {
+	Vector3 normals[];
+};
+
+layout (local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+	uint i = gl_GlobalInvocationID.x;
+	
+	vec3 posOne = vec3(positions[3 * i].x, positions[3 * i].y, positions[3 * i].z);
+	vec3 posTwo = vec3(positions[3 * i + 1].x, positions[3 * i + 1].y, positions[3 * i + 1].z);
+	vec3 posThree = vec3(positions[3 * i + 2].x, positions[3 * i + 2].y, positions[3 * i + 2].z);
+	
+	vec3 first = posOne - posTwo;
+	vec3 second = posOne - posThree;
+	
+	vec3 normal = cross(first, second);
+	normal = normalize(normal);
+	if(normal.z < 0.0f)
+		normal *= -1.0f;
+	
+	normals[3 * i].x = normal.x;
+	normals[3 * i].y = normal.y;
+	normals[3 * i].z = normal.z;
+	
+	normals[3 * i + 1].x = normal.x;
+	normals[3 * i + 1].y = normal.y;
+	normals[3 * i + 1].z = normal.z;
+	
+	normals[3 * i + 2].x = normal.x;
+	normals[3 * i + 2].y = normal.y;
+	normals[3 * i + 2].z = normal.z;  
+}

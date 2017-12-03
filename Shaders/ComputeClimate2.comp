@@ -1,0 +1,258 @@
+#version 450
+
+#define JUMPS 9
+#define CS2 0.3333f
+#define CS4 0.1111f
+#define STELLAR_RADIANCE 1362.0f
+#define TIMESTEP 600.0f
+#define STEFAN_BOLTZMANN 5.67f
+#define DRY_GREENHOUSE_EFFECT 0.2f
+
+layout (location = 0) uniform int stage;
+layout (location = 1) uniform vec3 sunDirection;
+layout (location = 2) uniform ivec2 size;
+
+
+struct Tile {
+	float u, v;
+	float airu, airv;
+	float rho;
+	float fin[JUMPS];
+	float fstr[JUMPS];
+	float feq[JUMPS];
+	float energy;
+	float airhumidity;
+	float airhumiditystr;
+	float groundhumidity;
+	float newx, newy;
+	int type;
+	float norx, nory, norz;
+	float albedo;
+	float airtemperature;
+	float airtemperaturestr;
+	float groundtemperature;
+};
+
+layout (std430, binding = 0) buffer TILES {
+	Tile tiles[];
+};
+
+layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+
+void update_hydro() {
+	const float cx[JUMPS] = {0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f};
+	const float cy[JUMPS] = {0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f};
+	uint index = gl_GlobalInvocationID.x;
+	float rho = 0.0f;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		rho += tiles[index].fin[jump];
+	}
+	tiles[index].rho = rho;
+	float inverse = 1.0f / rho;
+	float u = 0.0f, v = 0.0f;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		u += tiles[index].fin[jump] * cx[jump];
+		v += tiles[index].fin[jump] * cy[jump];
+	}
+	tiles[index].u = u / rho;
+	tiles[index].v = v / rho;
+	//tiles[index].u = (tiles[index].fin[1] - tiles[index].fin[3] + tiles[index].fin[5] - tiles[index].fin[6] - tiles[index].fin[7] + tiles[index].fin[8]) * inverse;
+	//tiles[index].v = (tiles[index].fin[5] + tiles[index].fin[2] + tiles[index].fin[6] - tiles[index].fin[7] - tiles[index].fin[4] - tiles[index].fin[8]) * inverse;
+}
+
+void update_feq() {
+	const float cx[JUMPS] = {0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f};
+	const float cy[JUMPS] = {0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f};
+	const float weights[JUMPS] = {0.444f, 0.111f, 0.111f, 0.111f, 0.111f, 0.0277f, 0.0277f, 0.0277f, 0.0277f};
+	uint index = gl_GlobalInvocationID.x;
+	float u = tiles[index].u;
+	float v = tiles[index].v;
+	float rho = tiles[index].rho;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		float w = weights[jump];
+		float dot = u * cx[jump] + v * cy[jump];
+		float vel_sq = u * u + v * v;
+		float inner_feq = 1.0f + dot / CS2 + dot * dot / (2.0f * CS4) - vel_sq / (2.0f * CS2);
+		//float inner_feq = 1.0f + (3.0f * dot) + (9.0f * dot * dot * 0.5f) - (vel_sq * 3.0f * 0.5f);
+		tiles[index].feq[jump] = w * rho * inner_feq;
+	}
+}
+
+void collide() {
+	float omega = 0.999f;
+	uint index = gl_GlobalInvocationID.x;
+	int x = int(index) % size.x;
+	int y = int(index) / size.x;
+	tiles[index].airu += tiles[index].u;
+	tiles[index].airv += tiles[index].v;
+	tiles[index].newx = float(x) + tiles[index].airu * 5.0f;
+	tiles[index].newy = float(y) + tiles[index].airv * 5.0f;
+	tiles[index].airu *= 0.999f;
+	tiles[index].airv *= 0.999f;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		float fin = tiles[index].fin[jump];
+		float feq = tiles[index].feq[jump];
+		tiles[index].fin[jump] = fin - 1.9f * (fin - feq);
+	}
+}
+
+void move() {
+	const int cx[JUMPS] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+	const int cy[JUMPS] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+	uint index = gl_GlobalInvocationID.x;
+	int x = int(index) % size.x;
+	int y = int(index) / size.x;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		bool left = false, right = false, up = false, down = false;
+		int stream_x = x + cx[jump];
+		int stream_y = y + cy[jump];
+		if(stream_x < 0) {
+			stream_x = size.x - 1;
+			left = true;
+		}
+		else if(stream_x == size.x) {
+			stream_x = 0;
+			right = true;
+		}
+		if(stream_y < 0) {
+			stream_y = size.y - 1;
+			up = true;
+		}
+		else if(stream_y == size.y) {
+			stream_y = 0;
+			down = true;
+		}
+
+		int newIndex = stream_y * size.x + stream_x;
+		tiles[newIndex].fstr[jump] = tiles[index].fin[jump];
+	}
+}
+
+void move_dye() {
+	const int cx[JUMPS] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+	const int cy[JUMPS] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+	uint index = gl_GlobalInvocationID.x;
+	int x = int(index) % size.x;
+	int y = int(index) / size.x;
+	float dyestr = 0.0f;
+	float tempstr = 0.0f;
+	//float areas = 0.0f;
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		bool left = false, right = false, up = false, down = false;
+		int stream_x = x + cx[jump];
+		int stream_y = y + cy[jump];
+		if(stream_x < 0) {
+			stream_x = size.x - 1;
+			left = true;
+		}
+		else if(stream_x == size.x) {
+			stream_x = 0;
+			right = true;
+		}
+		if(stream_y < 0) {
+			stream_y = size.y - 1;
+			up = true;
+		}
+		else if(stream_y == size.y) {
+			stream_y = 0;
+			down = true;
+		}
+
+		int newIndex = stream_y * size.x + stream_x;
+		float newx = tiles[newIndex].newx;
+		float newy = tiles[newIndex].newy;
+		if(left == true)
+			newx -= float(size.x);
+		else if(right == true)
+			newx += float(size.x);
+		if(up == true)
+			newy -= float(size.y);
+		else if(down == true)
+			newy += float(size.y);
+		float areax = 1.0f - abs(newx - float(x));
+		float areay = 1.0f - abs(newy - float(y));
+		if(areax < 0.0f)
+			areax = 0.0f;
+		if(areay < 0.0f)
+			areay = 0.0f;
+		float area = areax * areay;
+		//areas += area;
+		dyestr += area * tiles[newIndex].airhumidity;
+		tempstr += area * tiles[newIndex].airtemperature;
+	}
+	tiles[index].airhumiditystr = dyestr;
+	tiles[index].airtemperaturestr = tempstr;
+}
+
+void stream_dye() {
+	uint index = gl_GlobalInvocationID.x;
+	tiles[index].airhumidity = tiles[index].airhumiditystr;
+	tiles[index].airtemperature = tiles[index].airtemperaturestr;
+}
+
+void swap() {
+	uint index = gl_GlobalInvocationID.x;
+	int type = tiles[index].type;
+
+	vec3 normal = vec3(tiles[index].norx, tiles[index].nory, tiles[index].norz);
+	float groundabsorption = dot(normal, sunDirection);
+	if(groundabsorption < 0.0f)
+		groundabsorption = 0.0f;
+	groundabsorption *= STELLAR_RADIANCE;
+	groundabsorption *= 1.0f - tiles[index].albedo;
+	float groundemission = pow(tiles[index].groundtemperature, 4.0f) * STEFAN_BOLTZMANN;
+	float airemission = pow(tiles[index].airtemperature, 4.0f) * STEFAN_BOLTZMANN;
+	float groundforcing = (groundabsorption + airemission - groundemission) * TIMESTEP;
+	float airforcing = (groundemission * DRY_GREENHOUSE_EFFECT - 2.0f * airemission) * TIMESTEP;
+	float specificheat;
+	if(type == 0)
+		specificheat = 4182.0f;
+	else
+		specificheat = 2080.0f;
+	tiles[index].groundtemperature += (groundforcing / specificheat) / 2700000.0f;
+	tiles[index].airtemperature += (airforcing / 10.0f) / 2700000.0f;
+
+	float temp = tiles[index].airtemperature;
+	float factor = temp * 0.001f + 1.0f;
+	const float weights[JUMPS] = {0.444f * factor, 0.111f * factor, 0.111f * factor, 0.111f * factor, 0.111f * factor, 0.0277f * factor, 0.0277f * factor, 0.0277f * factor, 0.0277f * factor};
+	for(int jump = 0; jump < JUMPS; ++jump) {
+		if(tiles[index].fstr[jump] > 0.0f)
+			tiles[index].fin[jump] = tiles[index].fstr[jump] + weights[jump];
+		else
+			tiles[index].fin[jump] = tiles[index].fstr[jump] - weights[jump];
+	}
+	float rainfall = tiles[index].airhumidity * exp(-pow(temp, 2.0f) / 0.8f);
+	tiles[index].airhumidity -= rainfall;
+	float evaporation = 0.0f;
+	float groundhumidity = tiles[index].groundhumidity;
+	if(temp > 2.73f) {
+		evaporation = pow(temp - 2.73f, 1.5f) * 0.1f;
+		if(type == 0)
+			tiles[index].airhumidity += evaporation;
+		else {
+			evaporation *= groundhumidity;
+			tiles[index].airhumidity += evaporation;
+		}
+	}
+	else if(type == 1) {
+		float percolation = groundhumidity * 0.02f;
+		tiles[index].groundhumidity += rainfall - evaporation - percolation;
+	}
+}
+
+void main() {
+	if(stage == 0)
+		update_hydro();
+	else if(stage == 1)
+		update_feq();
+	else if(stage == 2)
+		collide();
+	else if(stage == 3)
+		move();
+	else if(stage == 4)
+		move_dye();
+	else if(stage == 5)
+		stream_dye();
+	else if(stage == 6)
+		swap();
+}

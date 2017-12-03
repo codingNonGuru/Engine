@@ -22,7 +22,7 @@ public:
 	void Initialize(Transform*, Sprite*);
 	void Draw(Camera*);
 	bool IsActive();
-	Position GetPosition();
-	Position GetLocalPosition();
+	Position2 GetPosition();
+	Position2 GetLocalPosition();
 	Rotation GetRotation();
 };

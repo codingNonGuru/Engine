@@ -2,22 +2,7 @@
 
 #include "Conventions.hpp"
 
-class File
-{
-private:
-	const char* name_;
-
-	const char* path_;
-
-public:
-	File() {}
-
-	File(const char*, const char*) {}
-
-	const char* GetName() {return name_;}
-
-	const char* GetPath() {return path_;}
-};
+class File;
 
 class FileManager
 {
@@ -29,5 +14,5 @@ private:
 public:
 	static void Initialize();
 
-	static Array <File>& GetFilesInFolder(const char*, bool);
+	static Array <File>* GetFilesInFolder(const char*, bool);
 };

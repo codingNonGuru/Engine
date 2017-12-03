@@ -1,26 +1,34 @@
 #pragma once
 
-enum class ShaderConstantTypes
-{
-	INTEGER_1, INTEGER_2, INTEGER_3, INTEGER_4,
-	FLOAT_1, FLOAT_2, FLOAT_3, FLOAT_4,
-	UINTEGER_1, UINTEGER_2, UINTEGER_3, UINTEGER_4,
-	MATRIX_3, MATRIX_4
-};
+#include "File.hpp"
+#include "Types.hpp"
 
-class ShaderFile
+class ShaderFile : public File
 {
 private:
-	const char* path_;
+	ShaderTypes type_;
 
 public:
 	ShaderFile() {}
 
-	ShaderFile(const char* path) {path_ = path;}
+	ShaderFile(const char* name, const char* path, ShaderTypes type) : File(name, path), type_(type) {}
 
-	const char* GetPath() {return path_;}
+	const char* GetPath() const {return path_;}
 
 	void SetPath(const char* path) {path_ = path;}
+
+	ShaderTypes GetType() const {return type_;}
+};
+
+class BufferBinding
+{
+private:
+	Index index_;
+
+public:
+	BufferBinding() {}
+
+	BufferBinding(Index index) : index_(index) {}
 };
 
 class TextureBinding
@@ -45,14 +53,14 @@ class ConstantBinding
 private:
 	Index location_;
 
-	ShaderConstantTypes type_;
+	AttributeElementTypes type_;
 
 public:
 	ConstantBinding() {}
 
-	ConstantBinding(Index location, ShaderConstantTypes type) : location_(location), type_(type) {}
+	ConstantBinding(Index location, AttributeElementTypes type) : location_(location), type_(type) {}
 
 	Index GetLocation() const {return location_;}
 
-	ShaderConstantTypes GetType() const {return type_;}
+	AttributeElementTypes GetType() const {return type_;}
 };

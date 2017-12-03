@@ -1,0 +1,377 @@
+#version 450
+#extension GL_ARB_compute_variable_group_size: enable
+
+#define PARTICLE_LIMIT 6
+#define STELLAR_RADIANCE 1362.0f
+#define TIMESTEP 600.0f
+#define STEFAN_BOLTZMANN 5.67f
+#define FREEZING_POINT 2.73f
+#define SEARCH_RADIUS 1
+#define DRY_GREENHOUSE_EFFECT 0.2f
+
+layout (location = 0) uniform int stage;
+layout (location = 1) uniform vec3 sunDirection;
+layout (location = 2) uniform ivec2 size;
+layout (location = 3) uniform vec2 sizeFloating;
+
+struct AirParticle {
+	//vec3 position;
+	//vec3 velocity;
+	float posx;
+	float posy;
+	float velx;
+	float vely;
+	float bufvelx;
+	float bufvely;
+	int tile;
+	float humidity;
+	float temperature;
+	float emission;
+	float absorption;
+};
+
+struct TileBin {
+	int airParticles[PARTICLE_LIMIT];
+	int first;
+	int x;
+	int y;
+	unsigned char freeIndices[PARTICLE_LIMIT];
+};
+
+struct TileClimate {
+	int reliefType;
+	float norx;
+	float nory;
+	float norz;
+	float energy;
+	float albedo;
+	float temperature;
+	float emission;
+	float absorption;
+	float rainfall;
+};
+
+layout (std430, binding = 0) buffer AIR_PARTICLES {
+	AirParticle airParticles[];
+};
+
+layout (std430, binding = 1) buffer TILE_BINS {
+	TileBin tileBins[];
+};
+
+layout (std430, binding = 2) buffer SWAP_TILE_BINS {
+	TileBin swapTileBins[];
+};
+
+layout (std430, binding = 3) buffer TILE_CLIMATES {
+	TileClimate tileClimates[];
+};
+
+layout (local_size_x = 4, local_size_y = 4, local_size_z = 1) in;
+
+void stage_0() {
+	uint index = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+	vec3 normal = vec3(tileClimates[index].norx, tileClimates[index].nory, tileClimates[index].norz);
+	float absorption = dot(normal, sunDirection);
+	if(absorption < 0.0f)
+		absorption = 0.0f;
+	absorption *= STELLAR_RADIANCE;
+	tileClimates[index].absorption = absorption * (1.0f - tileClimates[index].albedo);
+	tileClimates[index].emission = pow(tileClimates[index].temperature, 4.0f) * STEFAN_BOLTZMANN;
+	//tileClimates[index].radiativeForcing = (absorbed - tileClimates[index].emission) * TIMESTEP;
+}
+
+void stage_1() {
+	uint index = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+	airParticles[index].emission = pow(airParticles[index].temperature, 4.0f) * STEFAN_BOLTZMANN;
+	float absorption = tileClimates[airParticles[index].tile].emission * DRY_GREENHOUSE_EFFECT;
+	float radiativeForcing = (absorption - 2.0f * airParticles[index].emission) * TIMESTEP;
+	airParticles[index].temperature += (radiativeForcing / 4000.0f) / 27000.0f;
+}
+
+void stage_2() {
+	uint index = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+	float radiativeForcing = tileClimates[index].absorption - tileClimates[index].emission;
+	//float radiativeForcing = ( - tilesClimates[index].emission)
+	float evaporation;
+	float temperature = tileClimates[index].temperature;
+	if(temperature > FREEZING_POINT && tileClimates[index].reliefType == 0)
+		evaporation = pow(temperature - FREEZING_POINT, 1.5f) * 0.02f;
+	else
+		evaporation = 0.0f;
+	float tileRainfall = 0.0f;
+	float precipitationRate = exp(-pow(temperature, 2.0f) / 2.0f) * 0.03f;
+	for(int k = 0; k < PARTICLE_LIMIT; ++k) {
+		int particleIndex = tileBins[index].airParticles[k];
+		if(particleIndex != -1) {
+			float rainfall = airParticles[particleIndex].humidity * precipitationRate;
+			tileRainfall += rainfall;
+			airParticles[particleIndex].humidity += evaporation - rainfall;
+			radiativeForcing += airParticles[particleIndex].emission;
+		}
+	}
+
+	//if(tileClimates[index].reliefType == 1)
+	tileClimates[index].rainfall += tileRainfall;
+
+	radiativeForcing *= TIMESTEP;
+	float specificheat;
+	if(tileClimates[index].reliefType == 0)
+		specificheat = 4182.0f;
+	else
+		specificheat = 2080.0f;
+	tileClimates[index].temperature += (radiativeForcing / specificheat) / 27000.0f;
+}
+
+void stage_3() {
+	uint thisIndex = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+
+	int left = tileBins[airParticles[thisIndex].tile].x - SEARCH_RADIUS;
+	int right = tileBins[airParticles[thisIndex].tile].x + SEARCH_RADIUS;
+	int up = tileBins[airParticles[thisIndex].tile].y - SEARCH_RADIUS;
+	int down = tileBins[airParticles[thisIndex].tile].y + SEARCH_RADIUS;
+	vec2 position = vec2(airParticles[thisIndex].posx, airParticles[thisIndex].posy);
+	vec2 velocity = vec2(airParticles[thisIndex].velx, airParticles[thisIndex].vely);
+	vec2 newVelocity = normalize(velocity) * (tileClimates[airParticles[thisIndex].tile].temperature * 0.02f);
+	airParticles[thisIndex].bufvelx = newVelocity.x;
+	airParticles[thisIndex].bufvely = newVelocity.y;
+	for(int y = up; y <= down; ++y)
+		for(int x = left; x <= right; ++x) {
+			bool isLeft = false, isRight = false, isUp = false, isDown = false;
+		
+			int effectiveX;
+			if(x < 0) {
+				effectiveX = x + size.x;
+				isLeft = true;
+			}
+			else if(x >= size.x) {
+				effectiveX = x - size.x;
+				isRight = true;
+			}
+			else
+				effectiveX = x;
+				
+			int effectiveY;
+			if(y < 0) {
+				effectiveY = y + size.y;
+				isUp = true;
+			}
+			else if(y >= size.y) {
+				effectiveY = y - size.y;
+				isDown = true;
+			}
+			else
+				effectiveY = y;
+				
+			uint tileIndex = size.x * effectiveY + effectiveX;
+			for(int k = 0; k < PARTICLE_LIMIT; ++k) {
+				int particleIndex = tileBins[tileIndex].airParticles[k];
+				if(particleIndex != -1 && particleIndex != thisIndex) {
+					vec2 otherPosition;
+					otherPosition.x = airParticles[particleIndex].posx;
+					otherPosition.y = airParticles[particleIndex].posy;
+
+					/*if(otherPosition.x < 0.0f)
+						otherPosition.x += 768.0f;
+					else if(otherPosition.x >= 768.0f)
+						otherPosition.x -= 768.0f;
+					if(otherPosition.y < 0.0f)
+						otherPosition.y += 512.0f;
+					else if(otherPosition.y >= 512.0f)
+						otherPosition.y -= 512.0f;*/
+					if(isLeft == true)
+						otherPosition.x -= sizeFloating.x;
+					else if(isRight == true)
+						otherPosition.x += sizeFloating.x;
+					if(isUp == true)
+						otherPosition.y -= sizeFloating.y;
+					else if(isDown == true)
+						otherPosition.y += sizeFloating.y;
+						
+					vec2 dir = position - otherPosition;
+					float l = length(dir);
+					dir /= l;
+					float repulsionFactor = exp(-(l * l) * 2.0f);
+					//if(repulsionFactor > 0.3f)
+						//repulsionFactor = 0.3f;
+					//float offsetLength = l - 0.6f;
+					//float closeRepulsionFactor = exp(-(l * l) * 2.0f) * 0.5f;
+					//airParticles[thisIndex].bufvelx += dir.x * closeRepulsionFactor;
+					//airParticles[thisIndex].bufvely += dir.y * closeRepulsionFactor;
+
+					//float toDot = -dir.x * velocity.x - dir.y * velocity.y;
+					float toDot = -dir.x * airParticles[thisIndex].velx - dir.y * airParticles[thisIndex].vely;
+					float fromDot = dir.x * airParticles[particleIndex].velx + dir.y * airParticles[particleIndex].vely;
+
+					const float bufferFactor = 15.0f;
+					float factor;
+					if(toDot > 0.0f) {
+						factor = repulsionFactor * (toDot + bufferFactor);
+					}
+					else
+						factor = repulsionFactor * bufferFactor;
+					airParticles[thisIndex].bufvelx += dir.x * factor;
+					airParticles[thisIndex].bufvely += dir.y * factor;
+
+					if(fromDot > 0.0f) {
+						factor = repulsionFactor * (fromDot + bufferFactor);
+					}
+					else
+						factor = repulsionFactor * bufferFactor;
+					airParticles[thisIndex].bufvelx += dir.x * factor;
+					airParticles[thisIndex].bufvely += dir.y * factor;
+					//dir *= exp(-pow(l, 2.0f) * 0.3f) * 0.5f;
+					//if(l < 1.0f)
+						//dir *= (1.0f - l) * 0.1f;
+					//airParticles[thisIndex].velx += dir.x;
+					//airParticles[thisIndex].vely += dir.y;
+					//airParticles[thisIndex].velocity.xy += dir;
+				}
+			}
+		}
+}
+
+void stage_4() {
+	const float deltaTime = 0.015f;
+	uint thisIndex = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+	airParticles[thisIndex].velx += airParticles[thisIndex].bufvelx;
+	airParticles[thisIndex].vely += airParticles[thisIndex].bufvely;
+	airParticles[thisIndex].posx += airParticles[thisIndex].velx * deltaTime;
+	airParticles[thisIndex].posy += airParticles[thisIndex].vely * deltaTime;
+	airParticles[thisIndex].velx *= 0.99f;
+	airParticles[thisIndex].vely *= 0.99f;
+
+	if(airParticles[thisIndex].posx < 0.0f)
+		airParticles[thisIndex].posx += sizeFloating.x;
+	else if(airParticles[thisIndex].posx >= sizeFloating.x)
+		airParticles[thisIndex].posx -= sizeFloating.x;
+
+	if(airParticles[thisIndex].posx > sizeFloating.x - 0.001f)
+		airParticles[thisIndex].posx = 0.0f;
+
+	if(airParticles[thisIndex].posy < 0.0f)
+		airParticles[thisIndex].posy += sizeFloating.y;
+	else if(airParticles[thisIndex].posy >= sizeFloating.y)
+		airParticles[thisIndex].posy -= sizeFloating.y;
+
+	if(airParticles[thisIndex].posy > sizeFloating.y - 0.001f)
+		airParticles[thisIndex].posy = 0.0f;
+}
+
+void stage_5() {
+	int thisIndex = int(gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x);
+	//vec3 position = airParticles[thisIndex].position.xyz;
+	//int thisX = int(position.x);
+	//int thisY = int(position.y);
+	//int thisX = int(airParticles[thisIndex].posx);
+	//int thisY = int(airParticles[thisIndex].posy);
+	int thisX = tileBins[thisIndex].x;
+	int thisY = tileBins[thisIndex].y;
+	//swapTileBins[thisIndex] = tileBins[thisIndex];
+	for(int i = 0; i < PARTICLE_LIMIT; ++i) {
+		swapTileBins[thisIndex].airParticles[i] = tileBins[thisIndex].airParticles[i];
+		swapTileBins[thisIndex].freeIndices[i] = tileBins[thisIndex].freeIndices[i];
+	}
+	swapTileBins[thisIndex].first = tileBins[thisIndex].first;
+
+	for(int x = thisX - 1; x <= thisX + 1; ++x)
+		for(int y = thisY - 1; y <= thisY + 1; ++y) {
+			if(x != thisX || y != thisY) {
+				bool isLeft = false, isRight = false, isUp = false, isDown = false;
+
+				int effectiveX;
+				if(x < 0) {
+					effectiveX = x + size.x;
+					isLeft = true;
+				}
+				else if(x >= size.x) {
+					effectiveX = x - size.x;
+					isRight = true;
+				}
+				else
+					effectiveX = x;
+
+				int effectiveY;
+				if(y < 0) {
+					effectiveY = y + size.y;
+					isUp = true;
+				}
+				else if(y >= size.y) {
+					effectiveY = y - size.y;
+					isDown = true;
+				}
+				else
+					effectiveY = y;
+
+				uint tileIndex = size.x * effectiveY + effectiveX;
+				for(int k = 0; k < PARTICLE_LIMIT; ++k) {
+					int particleIndex = tileBins[tileIndex].airParticles[k];
+					if(particleIndex != -1) {
+						vec2 otherPosition;
+						otherPosition.x = airParticles[particleIndex].posx;
+						otherPosition.y = airParticles[particleIndex].posy;
+						//vec3 otherPosition = airParticles[particleIndex].position.xyz;
+						/*if(isLeft == true)
+							otherPosition.x -= 768.0f;
+						else if(isRight == true)
+							otherPosition.x += 768.0f;
+						if(isUp == true)
+							otherPosition.y -= 512.0f;
+						else if(isDown == true)
+							otherPosition.y += 512.0f;*/
+
+						int otherX = int(otherPosition.x);
+						int otherY = int(otherPosition.y);
+						if(otherX != effectiveX || otherY != effectiveY)
+							if(otherX == thisX && otherY == thisY) {
+								swapTileBins[thisIndex].airParticles[swapTileBins[thisIndex].freeIndices[swapTileBins[thisIndex].first]] = particleIndex;
+								swapTileBins[thisIndex].first--;
+								airParticles[particleIndex].tile = thisIndex;
+							}
+					}
+				}
+			}
+		}
+
+
+	for(int k = 0; k < PARTICLE_LIMIT; ++k) {
+		int particleIndex = tileBins[thisIndex].airParticles[k];
+		if(particleIndex != -1) {
+			int otherX = int(airParticles[particleIndex].posx);
+			int otherY = int(airParticles[particleIndex].posy);
+
+			if(otherX != thisX || otherY != thisY) {
+				swapTileBins[thisIndex].airParticles[k] = -1;
+				swapTileBins[thisIndex].first++;
+				swapTileBins[thisIndex].freeIndices[swapTileBins[thisIndex].first] = unsigned char(k);
+			}
+		}
+	}
+}
+
+void stage_6() {
+	uint index = gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x;
+	//tiles[index] = swapTiles[index];
+	for(int i = 0; i < PARTICLE_LIMIT; ++i) {
+		tileBins[index].airParticles[i] = swapTileBins[index].airParticles[i];
+		tileBins[index].freeIndices[i] = swapTileBins[index].freeIndices[i];
+	}
+	tileBins[index].first = swapTileBins[index].first;
+}
+
+void main() {
+	if(stage == 0)
+		stage_0();
+	else if(stage == 1)
+		stage_1();
+	else if(stage == 2)
+		stage_2();
+	else if(stage == 3)
+		stage_3();
+	else if(stage == 4)
+		stage_4();
+	else if(stage == 5)
+		stage_5();
+	else if(stage == 6)
+		stage_6();
+}

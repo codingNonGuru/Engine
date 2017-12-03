@@ -4,43 +4,41 @@
 #include "Buffer.hpp"
 #include "Mesh.hpp"
 
-void Model::Initialize(Mesh* mesh)
+void Model::Initialize(Mesh* mesh, Shader* shader, Length textureCount)
 {
 	mesh_ = mesh;
+	shader_ = shader;
 
-	buffer_ = new MasterBuffer(4);
-	buffer_->Bind();
+	textures_.Initialize(textureCount);
 
-	int index = 0;
-	auto vertexDatas = mesh->GetVertexDatas();
-	auto vertexDataKey = vertexDatas.GetFirstKey();
-	for(auto vertexDataIterator = vertexDatas.GetStart(); vertexDataIterator != vertexDatas.GetEnd(); ++vertexDataIterator)
-	{
-		if(vertexDataIterator == nullptr)
-			continue;
+	SetupBuffer();
+}
 
-		auto vertexData = *vertexDataIterator;
-		if(vertexData == nullptr)
-			continue;
-
-		auto slaveBuffer = new SlaveBuffer(
-			vertexData->IsIndices() ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER,
-			vertexData->GetMemoryCapacity(),
-			vertexData->GetData()
-		);
-		if(vertexData->IsIndices())
-		{
-			buffer_->AddElementBuffer(slaveBuffer);
-		}
-		else
-		{
-			buffer_->AddBuffer(index, slaveBuffer, *vertexDataKey, vertexData->GetComponentCount(), vertexData->IsFloating());
-		}
-		index++;
-		vertexDataKey++;
-	}
+void Model::AddTexture(Texture* texture, const char* name)
+{
+	auto texturePointer = textures_.Allocate(LongWord(name));
+	*texturePointer = texture;
 }
 
 void Model::Render(Camera* camera)
 {
+}
+
+void Model::SetupBuffer()
+{
+	buffer_ = new MasterBuffer(4);
+	buffer_->Bind();
+
+	int index = 0;
+	auto meshAttributes = mesh_->GetAttributes();
+	auto meshAttributeKey = meshAttributes.GetFirstKey();
+	for(auto meshAttribute = meshAttributes.GetStart(); meshAttribute != meshAttributes.GetEnd(); ++meshAttribute, ++index, ++meshAttributeKey)
+	{
+		auto meshAttributeData = meshAttribute->GetData();
+		if(meshAttributeData == nullptr)
+			continue;
+
+		auto slaveBuffer = new SlaveBuffer(GL_SHADER_STORAGE_BUFFER, meshAttributeData->GetMemoryCapacity(), meshAttributeData->GetData());
+		buffer_->AddBuffer(index, slaveBuffer, *meshAttributeKey);
+	}
 }

@@ -16,14 +16,14 @@ class Scene;
 class Transform
 {
 public:
-	Position position_;
+	Position3 position_;
 	Rotation rotation_;
 	Scale scale_;
 
-	Direction GetForward();
+	Direction3 GetForward();
 	Transform() {}
-	Transform(Position, Rotation, Scale);
-	void Initialize(Position, Rotation, Scale);
+	Transform(Position3, Rotation, Scale);
+	void Initialize(Position3, Rotation, Scale);
 	Matrix GetMatrix();
 	Matrix GetPositionMatrix();
 	//static Transform* Allocate(Scene*, Position, Rotation, Scale);

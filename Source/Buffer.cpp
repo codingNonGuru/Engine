@@ -84,6 +84,20 @@ void MasterBuffer::AddStorageBuffer(int index, SlaveBuffer* buffer, const char* 
 	buffer->Unbind();
 }
 
+void MasterBuffer::AddBuffer(int index, SlaveBuffer* buffer, const char* name)
+{
+	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(name));
+	if(bufferPointer == nullptr)
+		return;
+
+	*bufferPointer = buffer;
+
+	Bind();
+	buffer->Bind();
+	Unbind();
+	buffer->Unbind();
+}
+
 void MasterBuffer::AddBuffer(int index, SlaveBuffer* buffer, const char* bufferName, GLuint elementSize, bool isFloating)
 {
 

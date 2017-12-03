@@ -1,0 +1,86 @@
+#version 450
+#extension GL_ARB_compute_variable_group_size: enable
+
+layout (location = 0) uniform uvec2 size;
+layout (location = 1) uniform uint typeBinding;
+layout (location = 2) uniform float strength;
+
+struct ByteSizePixel {
+	unsigned char r, g, b, a;
+};
+
+struct Color {
+	float r, g, b;
+};
+
+layout (std430, binding = 0) buffer NORMAL {
+	ByteSizePixel normal[];
+};
+
+layout (std430, binding = 1) buffer VEC3_BASE {
+	Color vec3Base[];
+};
+
+layout (std430, binding = 2) buffer FLOAT_BASE {
+	float floatBase[];
+};
+
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+uint checkBoundary(int x, int y) {
+	int newX = x, newY = y;
+	if(newX < 0)
+		newX += int(size.x);
+	if(newX >= int(size.x))
+		newX -= int(size.x);
+	if(newY < 0)
+		newY += int(size.y);
+	if(newY >= int(size.y))
+		newY -= int(size.y);
+	return uint(newY * int(size.x) + newX);
+}
+
+float getHeight(uint index) {
+	if(typeBinding == 0)
+		return (vec3Base[index].r + vec3Base[index].g + vec3Base[index].b) / 3.0f;
+	else if(typeBinding == 1)
+		return floatBase[index];
+}
+
+void main() {
+	int x = int(gl_GlobalInvocationID.x);
+	int y = int(gl_GlobalInvocationID.y);
+	
+	uint firstIndex = checkBoundary(x, y);
+	uint secondIndex = checkBoundary(x + 1, y);
+	uint thirdIndex = checkBoundary(x, y + 1);
+	uint fourthIndex = checkBoundary(x + 1, y + 1);
+	float firstHeight = getHeight(firstIndex);
+	float secondHeight = getHeight(secondIndex);
+	float thirdHeight = getHeight(thirdIndex);
+	float fourthHeight = getHeight(fourthIndex);
+	vec3 first = vec3(-1.0f, 0.0f, firstHeight - secondHeight);
+	first.z *= strength;
+	first = normalize(first);
+	
+	vec3 second = vec3(1.0f, -1.0f, secondHeight - thirdHeight);
+	second.z *= strength;
+	second = normalize(second);
+	
+	vec3 third = vec3(-1.0f, 1.0f, thirdHeight - secondHeight);
+	third.z *= strength;
+	third = normalize(third);
+	
+	vec3 fourth = vec3(0.0f, -1.0f, secondHeight - fourthHeight);
+	fourth.z *= strength;
+	fourth = normalize(fourth);
+	
+	vec3 result = cross(first, second) + cross(third, fourth);
+	result = normalize(result);
+	
+	result = (result + vec3(1.0f)) * 0.5f;
+	
+	normal[firstIndex].r = unsigned char(result.x * 255.0f);
+	normal[firstIndex].g = unsigned char(result.y * 255.0f);
+	normal[firstIndex].b = unsigned char(result.z * 255.0f);
+}

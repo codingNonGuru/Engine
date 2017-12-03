@@ -36,12 +36,12 @@ void Texture::Unbind()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::Upload(container::Container<> *buffer, GLenum internalFormat, GLenum format, GLenum type) {
+void Texture::Upload(container::Matrix<> *buffer, GLenum internalFormat, GLenum format, GLenum type) {
 	glGenTextures(1, &key_);
 	glBindTexture(GL_TEXTURE_2D, key_);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, buffer->getWidth(), buffer->getHeight(), 0, format, type, buffer->getVoidStart());
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, buffer->getWidth(), buffer->getHeight(), 0, format, type, buffer->GetData());
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 

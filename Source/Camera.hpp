@@ -1,7 +1,7 @@
 #pragma once
-#include <glm.hpp>
 
 #include "Conventions.hpp"
+#include "Types.hpp"
 
 class World;
 class Screen;
@@ -26,7 +26,7 @@ public:
 
 	Camera();
 
-	Camera(glm::vec3 to, float viewDistance);
+	Camera(Position3 to, float viewDistance);
 
 	Camera(CameraTypes);
 

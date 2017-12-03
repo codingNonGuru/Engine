@@ -1,81 +1,58 @@
 #pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 #include "Conventions.hpp"
+#include "Types.hpp"
 
-class GenericVertexData
+class File;
+class AttributeType;
+
+class MeshAttribute
 {
-	int componentCount_;
+private:
+	Container* data_;
 
-	bool isIndices_;
+	AttributeType* type_;
 
-	bool isFloating_;
 public:
-	virtual void* GetData() = 0;
+	Container*& GetData() {return data_;}
 
-	virtual int GetMemoryCapacity() = 0;
+	AttributeType* GetType() {return type_;}
 
-	int GetComponentCount() const {return componentCount_;}
-
-	void SetComponentCount(int componentCount) {componentCount_ = componentCount;}
-
-	bool IsFloating() const {return isFloating_;}
-
-	void IsFloating(bool isFloating) {isFloating_ = isFloating;}
-
-	bool IsIndices() const {return isIndices_;}
-
-	void IsIndices(bool isIndices) {isIndices_ = isIndices;}
-};
-
-template <class DataType = Position>
-class VertexData : public GenericVertexData
-{
-	Array <DataType> data_;
-public:
-	virtual void* GetData() {return (void*)&data_;}
-
-	virtual int GetMemoryCapacity() {return data_.getMemoryCapacity();}
+	void SetType(AttributeType* type) {type_ = type;}
 };
 
 class Mesh
 {
 private:
-	Map <GenericVertexData*> vertexDatas_;
+	Map <MeshAttribute, LongWord> attributes_;
 
-	GLuint indexCount_;
+	Length indexCount_;
 
-	GLuint vertexCount_;
+	Length vertexCount_;
 
 public:
+	static Mesh* GenerateQuad();
+
 	Mesh();
 
 	void Initialize(int);
 
-	template <class DataType>
-	Array<DataType>* AddVertexData(const char*, int, bool, bool);
+	void Initialize(File*);
 
-	template <class DataType>
-	Array<DataType>* GetVertexDataArray(const char*);
+	Map <MeshAttribute, LongWord> & GetAttributes() {return attributes_;}
 
-	template <class DataType>
-	VertexData<DataType>* GetVertexData(const char*);
+	MeshAttribute* GetAttribute(const char*);
 
-	GenericVertexData* GetVertexData(const char*);
+	void* GetAttributeData(const char*);
 
-	int GetVertexDataMemoryCapacity(const char*);
+	Length GetAttributeMemoryCapacity(const char*);
 
-	void* GetVertexDataStart(const char*);
-
-	template <class DataType>
-	DataType GetElement(const char*, int);
-
-	Map <GenericVertexData*> &GetVertexDatas() {return vertexDatas_;}
+	/*template <class DataType>
+	DataType GetElement(const char*, int);*/
 
 	virtual ~Mesh();
-
-	static Mesh* GenerateQuad();
 };
 
 class MeshAtlas

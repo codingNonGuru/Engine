@@ -26,7 +26,7 @@ public:
 
 	void Unbind();
 
-	void Upload(container::Container<>*, GLenum, GLenum, GLenum);
+	void Upload(container::Matrix<>*, GLenum, GLenum, GLenum);
 
 	void Delete();
 

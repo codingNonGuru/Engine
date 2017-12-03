@@ -7,10 +7,12 @@ typedef unsigned int GLenum;
 
 class SlaveBuffer;
 
-class Buffer {
-public:
+class Buffer
+{
+protected:
 	GLuint key_;
 
+public:
 	Buffer() {}
 };
 
@@ -20,31 +22,52 @@ class MasterBuffer : public Buffer
 
 public:
 	MasterBuffer(int);
+
 	void Generate();
+
+	void AddBuffer(int, SlaveBuffer*, const char*);
+
 	void AddBuffer(int, SlaveBuffer*, const char*, GLuint, bool);
+
 	void AddElementBuffer(SlaveBuffer*);
+
 	void AddStorageBuffer(int, SlaveBuffer*, const char*);
+
 	SlaveBuffer* GetBuffer(int);
+
 	SlaveBuffer* GetBuffer(const char*);
+
 	void SetSlaveBindPoint(const char*, GLuint);
+
 	void UploadData(const char*, void*, GLuint);
+
 	void Bind();
+
 	void Unbind();
 };
 
 class SlaveBuffer : public Buffer
 {
 	GLenum type_;
+
 	unsigned int size_;
 
 public:
 	SlaveBuffer(GLenum, int, void*);
+
 	GLenum GetType() const {return type_;}
+
 	void Generate(GLenum, int, void*);
+
 	void UploadData(void*, GLuint);
+
 	void Bind();
+
 	void Bind(GLuint);
+
 	void Unbind();
+
 	void SetSize(unsigned int size) {size_ = size;}
+
 	unsigned int GetSize() const {return size_;}
 };
