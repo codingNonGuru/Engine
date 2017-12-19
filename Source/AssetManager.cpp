@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "AssetManager.hpp"
 
 #include "FileManager.hpp"
@@ -35,6 +37,8 @@ void AssetManager::Initialize()
 	*attributeTypes_.Allocate(LongWord("mat4")) = AttributeType(LongWord("mat4"), 64, 16, AttributeElementTypes::MATRIX_4);
 }
 
+char* code = new char[1024 * 1024];
+
 void AssetManager::LoadAssets()
 {
 	FileManager::Initialize();
@@ -45,7 +49,44 @@ void AssetManager::LoadAssets()
 
 	MeshManager::LoadMeshes();
 
+	//CountScripts();
+
 	OnAssetsLoaded_->Invoke();
+}
+
+void AssetManager::CountScripts()
+{
+	Length scriptCount = 0;
+	Length lineCount = 0;
+	for(auto file = files_->GetStart(); file != files_->GetEnd(); ++file)
+	{
+		if((FindString(file->GetName(), ".hpp") || FindString(file->GetName(), ".cpp")) && !FindString(file->GetName(), "FastDelegate") && !FindString(file->GetName(), ".o") && FindString(file->GetPath(), "Source"))
+		{
+			FILE* fileStream = fopen(file->GetPath(), "r");
+
+			fseek(fileStream, 0, SEEK_END);
+			Length fileSize = ftell(fileStream);
+			rewind(fileStream);
+
+			std::cout<<file->GetName()<<" "<<fileSize<<"\n";
+
+			fread(code, 1, fileSize, fileStream);
+			for(auto sign = code; sign != code + fileSize; ++sign)
+			{
+				if(*sign == '\n')
+				{
+					lineCount++;
+				}
+			}
+
+			fclose(fileStream);
+
+			scriptCount++;
+		}
+	}
+	std::cout<<"\n";
+	std::cout<<scriptCount<<" Scripts found.\n";
+	std::cout<<lineCount<<" Lines found.\n";
 }
 
 Array <File>* AssetManager::GetFiles()

@@ -22,7 +22,7 @@ void Shader::Initialize(const char* name, Array <ShaderFile*> &shaderFiles)
 	name_.Add(name);
 
 	Index index = 0;
-	for(auto shaderFile = shaderFiles.GetStart(); shaderFile != shaderFiles.GetEnd(); ++shaderFile)
+	for(auto shaderFile = shaderFiles.GetStart(); shaderFile != shaderFiles.GetEnd(); ++shaderFile, ++index)
 	{
 		Compile(index, (GLenum)(*shaderFile)->GetType());
 	}
@@ -35,11 +35,15 @@ void Shader::Initialize(const char* name, Array <ShaderFile*> &shaderFiles)
 void Shader::Bind()
 {
 	glUseProgram(key_);
+
+	DEBUG_OPENGL
 }
 
 void Shader::Unbind()
 {
 	glUseProgram(0);
+
+	DEBUG_OPENGL
 }
 
 bool Shader::BindTexture(Texture* texture, const char* identifier)
@@ -54,6 +58,8 @@ bool Shader::BindTexture(Texture* texture, const char* identifier)
 	glUniform1i(binding->GetLocation(), binding->GetUnitIndex());
 	glActiveTexture(GL_TEXTURE0 + binding->GetUnitIndex());
 	texture->Bind();
+
+	DEBUG_OPENGL
 
 	return true;
 }
@@ -92,6 +98,8 @@ void Shader::Compile(int index, GLenum shaderType)
 		glDeleteShader(key);
 		return;
 	}
+
+	DEBUG_OPENGL
 }
 
 void Shader::Link()
@@ -130,6 +138,8 @@ void Shader::Link()
 	{
 		glDetachShader(key_, shaderKeys_[i]);
 	}
+
+	DEBUG_OPENGL
 }
 
 void Shader::SetConstant(void* value, const char* identifier)
@@ -186,6 +196,8 @@ void Shader::SetConstant(void* value, const char* identifier)
 		glUniformMatrix4fv(binding->GetLocation(), 1, GL_FALSE, value);
 		break;
 	}
+
+	DEBUG_OPENGL
 }
 
 void Shader::Update()
@@ -212,6 +224,11 @@ void Shader::Update()
 		Compile(2, GL_GEOMETRY_SHADER);
 	}
 	Link();*/
+}
+
+Length Shader::GetTextureCount() const
+{
+	return textureBindings_.GetSize();
 }
 
 GLuint Shader::GetTextureLocation(const char* textureName)

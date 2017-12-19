@@ -3,16 +3,19 @@
 #include "Conventions.hpp"
 
 class Screen;
-class SDL_Window;
+class RenderManager;
+class Window;
 
 class Engine
 {
 private:
 	static bool isRunning_;
 
-	static SDL_Window* window_;
-
 	static Screen* screen_;
+
+	static Window* window_;
+
+	static RenderManager* renderManager_;
 
 public:
 	static void Initialize();
@@ -20,4 +23,8 @@ public:
 	static void StartGameLoop();
 
 	static void ShutDown();
+
+	static Window* GetWindow();
+
+	static Screen* GetScreen();
 };

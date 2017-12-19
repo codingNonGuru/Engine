@@ -4,180 +4,58 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_opengl.h"
 
-#include "Buffer.hpp"
+#include "DataBuffer.hpp"
 
-SlaveBuffer::SlaveBuffer(GLenum type, int memorySize, void* data = nullptr)
+#include "Conventions.hpp"
+
+DataBuffer::DataBuffer(GLenum type, int memorySize, void* data = nullptr)
 {
 	Generate(type, memorySize, data);
 }
 
-void SlaveBuffer::Generate(GLenum type, int memorySize, void* data = nullptr)
+void DataBuffer::Generate(GLenum type, int memorySize, void* data = nullptr)
 {
 	type_ = type;
 
 	glGenBuffers(1, &key_);
-	glBindBuffer(type_, key_);
-	glBufferData(type_, memorySize, data, GL_STATIC_DRAW);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, memorySize, data, GL_STATIC_DRAW);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	DEBUG_OPENGL
+}
+
+void DataBuffer::UploadData(void* data, GLuint size)
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, size, data);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	DEBUG_OPENGL
+}
+
+void DataBuffer::Bind()
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
+
+	DEBUG_OPENGL
+}
+
+void DataBuffer::Bind(GLuint bindPoint)
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindPoint, key_);
+
+	DEBUG_OPENGL
+}
+
+void DataBuffer::Unbind()
+{
 	glBindBuffer(type_, 0);
-}
 
-void SlaveBuffer::UploadData(void* data, GLuint size)
-{
-	glBindBuffer(type_, key_);
-	glBufferSubData(type_, 0, size, data);
-	glBindBuffer(type_, 0);
-}
-
-void SlaveBuffer::Bind()
-{
-	glBindBuffer(type_, key_);
-}
-
-void SlaveBuffer::Bind(GLuint bindPoint)
-{
-	glBindBuffer(type_, key_);
-	if(type_ == GL_SHADER_STORAGE_BUFFER)
-	{
-		glBindBufferBase(type_, bindPoint, key_);
-	}
-}
-
-void SlaveBuffer::Unbind()
-{
-	glBindBuffer(type_, 0);
+	DEBUG_OPENGL
 }
 
 
-MasterBuffer::MasterBuffer(int count)
-{
-	if(count != 0)
-	{
-		slaveBuffers_.Initialize(count);
-	}
 
-	Generate();
-}
-
-void MasterBuffer::Generate()
-{
-	glGenVertexArrays(1, &key_);
-}
-
-void MasterBuffer::AddStorageBuffer(int index, SlaveBuffer* buffer, const char* bufferName)
-{
-	if(!buffer)
-		return;
-
-	if(buffer->GetType() != GL_SHADER_STORAGE_BUFFER)
-	{
-		std::cout<<"Buffer is not of Storage type.\n";
-		return;
-	}
-
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(bufferName));
-	*bufferPointer = buffer;
-
-	Bind();
-	buffer->Bind();
-	glEnableVertexAttribArray(index);
-	Unbind();
-	buffer->Unbind();
-}
-
-void MasterBuffer::AddBuffer(int index, SlaveBuffer* buffer, const char* name)
-{
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(name));
-	if(bufferPointer == nullptr)
-		return;
-
-	*bufferPointer = buffer;
-
-	Bind();
-	buffer->Bind();
-	Unbind();
-	buffer->Unbind();
-}
-
-void MasterBuffer::AddBuffer(int index, SlaveBuffer* buffer, const char* bufferName, GLuint elementSize, bool isFloating)
-{
-
-	if(!buffer)
-		return;
-
-	if(buffer->GetType() == GL_SHADER_STORAGE_BUFFER)
-	{
-		std::cout<<"Buffer is of Storage type.\n";
-		return;
-	}
-
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(bufferName));
-	*bufferPointer = buffer;
-
-	Bind();
-	buffer->Bind();
-
-	glEnableVertexAttribArray(index);
-	if(isFloating)
-	{
-		glVertexAttribPointer(index, elementSize, GL_FLOAT, GL_FALSE, 0, NULL);
-	}
-	else
-	{
-		glVertexAttribIPointer(index, elementSize, GL_INT, 0, NULL);
-	}
-
-	Unbind();
-	buffer->Unbind();
-}
-
-void MasterBuffer::AddElementBuffer(SlaveBuffer* buffer)
-{
-
-	if(!buffer)
-		return;
-
-	if(buffer->GetType() != GL_ELEMENT_ARRAY_BUFFER)
-	{
-		std::cout<<"Buffer is not of Element type.\n";
-		return;
-	}
-
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord("element"));
-	*bufferPointer = buffer;
-
-	Bind();
-	buffer->Bind();
-	Unbind();
-	buffer->Unbind();
-}
-
-SlaveBuffer* MasterBuffer::GetBuffer(const char* bufferName)
-{
-	return *slaveBuffers_.Get(ShortWord(bufferName));
-}
-
-void MasterBuffer::UploadData(const char* bufferName, void* data, GLuint memorySize)
-{
-	auto buffer = GetBuffer(bufferName);
-	if(buffer != nullptr)
-	{
-		buffer->UploadData(data, memorySize);
-	}
-}
-
-void MasterBuffer::SetSlaveBindPoint(const char* bufferName, GLuint bindPoint)
-{
-	auto buffer = GetBuffer(bufferName);
-	buffer->Bind(bindPoint);
-}
-
-void MasterBuffer::Bind()
-{
-	glBindVertexArray(key_);
-}
-
-void MasterBuffer::Unbind()
-{
-	glBindVertexArray(0);
-}
 

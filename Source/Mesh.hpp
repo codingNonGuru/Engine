@@ -15,12 +15,18 @@ private:
 
 	AttributeType* type_;
 
+	Length size_;
+
 public:
 	Container*& GetData() {return data_;}
 
 	AttributeType* GetType() {return type_;}
 
+	Length GetSize() {return size_;}
+
 	void SetType(AttributeType* type) {type_ = type;}
+
+	void SetSize(Length size) {size_ = size;}
 };
 
 class Mesh
@@ -49,8 +55,9 @@ public:
 
 	Length GetAttributeMemoryCapacity(const char*);
 
-	/*template <class DataType>
-	DataType GetElement(const char*, int);*/
+	Length GetIndexCount() const {return indexCount_;}
+
+	Length GetVertexCount() const {return vertexCount_;}
 
 	virtual ~Mesh();
 };

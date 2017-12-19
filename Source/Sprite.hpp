@@ -1,7 +1,6 @@
-#ifndef SOURCE_ENGINE_SPRITE_HPP_
-#define SOURCE_ENGINE_SPRITE_HPP_
+#pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 #include "Memory.hpp"
 
@@ -16,22 +15,29 @@ class Model;
 
 class Sprite
 {
-public:
+private:
 	bool isActive_;
 
-	//Transform* transform;
 	float opacity_;
 
+	float depth_;
+
 	Texture* texture_;
+
 	Shader* shader_;
+
 	Element* parent_;
-	Model* model_;
 
+public:
 	Sprite();
-	Sprite(Texture*, Shader*, Model*, Element*);
-	void Initialize(Texture*, Shader*, Model*, Element*);
-	void Draw(Camera*);
-	void SetParent(Element* parent) {parent_ = parent;}
-};
 
-#endif
+	Sprite(Texture*, Shader*);
+
+	void Initialize(Texture*, Shader*);
+
+	void Draw(Camera*);
+
+	void SetParent(Element* parent) {parent_ = parent;}
+
+	float & GetOpacity();
+};

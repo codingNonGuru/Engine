@@ -31,3 +31,48 @@ enum class ShaderTypes
 	TESSELLATION_EVALUATION = GL_TESS_EVALUATION_SHADER,
 	COMPUTE = GL_COMPUTE_SHADER
 };
+
+enum class FrameBufferTypes
+{
+	SINGLE_SAMPLE,
+	MULTI_SAMPLE,
+};
+
+enum class FrameBufferAttachments
+{
+	COLOR,
+	DEPTH,
+	COLOR_AND_DEPTH
+};
+
+enum class TextureFormats
+{
+	FOUR_FLOAT,
+	FOUR_BYTE,
+	THREE_FLOAT,
+	THREE_BYTE,
+	ONE_FLOAT,
+	ONE_BYTE
+};
+
+enum class AnimationValueTypes
+{
+	FLOAT,
+	DOUBLE,
+	INTEGER,
+	LONG,
+	BOOLEAN,
+	NONE
+};
+
+enum class InterfaceElementParameters
+{
+	POSITION_X,
+	POSITION_Y,
+	SCALE_X,
+	SCALE_Y,
+	SIZE_X,
+	SIZE_Y,
+	DEPTH,
+	OPACITY
+};

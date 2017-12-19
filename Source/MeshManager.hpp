@@ -25,4 +25,6 @@ public:
 	static void Initialize();
 
 	static void LoadMeshes();
+
+	static Map <Mesh, LongWord> & GetMeshes();
 };

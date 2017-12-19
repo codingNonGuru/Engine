@@ -36,3 +36,8 @@ void MeshManager::LoadMeshes()
 		mesh->Initialize(file);
 	}
 }
+
+Map <Mesh, LongWord> & MeshManager::GetMeshes()
+{
+	return meshes_;
+}

@@ -10,6 +10,27 @@
 
 #include "Transform.hpp"
 
+Transform::Transform()
+{
+	position_ = Position3(0.0f);
+	rotation_ = 0.0f;
+	scale_ = 1.0f;
+}
+
+Transform::Transform(Position2 position)
+{
+	position_ = Position3(position.x, position.y, 0.0f);
+	rotation_ = 0.0f;
+	scale_ = 1.0f;
+}
+
+Transform::Transform(Position3 position)
+{
+	position_ = position;
+	rotation_ = 0.0f;
+	scale_ = 1.0f;
+}
+
 Transform::Transform(Position3 position, Rotation rotation, Scale scale)
 {
 	position_ = position;
@@ -22,6 +43,16 @@ void Transform::Initialize(Position3 position, Rotation rotation, Scale scale)
 	position_ = position;
 	rotation_ = rotation;
 	scale_ = scale;
+}
+
+Position3 & Transform::GetPosition()
+{
+	return position_;
+}
+
+Rotation & Transform::GetRotation()
+{
+	return rotation_;
 }
 
 Direction3 Transform::GetForward()

@@ -17,6 +17,8 @@ private:
 
 	static void LoadMeshes();
 
+	static void CountScripts();
+
 public:
 	static Delegate* OnAssetsLoaded_;
 

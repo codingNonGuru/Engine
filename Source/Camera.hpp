@@ -8,33 +8,46 @@ class Screen;
 
 class Camera
 {
-public:
 	CameraTypes type_;
 
 	float viewDistance_;
+
 	glm::vec3 from_;
+
 	glm::vec3 to_;
+
 	glm::vec3 up_;
+
 	glm::vec3 viewDirection_;
-	float viewAngle_;
-	float scrollImpulse_;
-	float spinImpulse_;
-	glm::vec3 driftImpulse_;
-	float azimuth_;
+
+	glm::vec3 pivot_;
+
 	float zenith_;
+
+	float azimuth_;
+
+	float scrollImpulse_;
+
+	float spinImpulse_;
+
+	glm::vec3 driftImpulse_;
+
 	glm::mat4x4 finalMatrix_;
 
+	Screen* screen_;
+
+public:
 	Camera();
 
-	Camera(Position3 to, float viewDistance);
+	Camera(Screen*, Position3, float, float, float);
 
-	Camera(CameraTypes);
+	Camera(Screen*, Position3, Position3);
 
-	glm::mat4x4 getViewMatrix();
+	Camera(Screen*);
 
-	glm::mat4x4 GetMatrix();
+	Matrix & GetMatrix();
 
-	void ComputeMatrix(Screen*);
+	void ComputeMatrix();
 
 	void SetTarget(glm::vec3);
 
@@ -43,6 +56,10 @@ public:
 	void Zoom(float impulse);
 
 	void Spin(float impulse);
+
+	void SetTargetAsPivot();
+
+	Position3 GetPosition() const {return from_;}
 
 	void Update();
 };

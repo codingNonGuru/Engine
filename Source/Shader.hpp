@@ -48,6 +48,8 @@ public:
 
 	void Update();
 
+	Length GetTextureCount() const;
+
 	GLuint GetTextureLocation(const char*);
 
 	Array <ShaderFile*> *GetShaderFiles() {return shaderFiles_;}

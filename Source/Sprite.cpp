@@ -6,48 +6,64 @@
 #include "Camera.hpp"
 #include "Element.hpp"
 #include "Model.hpp"
+#include "Shader.hpp"
 
 Sprite::Sprite()
 {
 	isActive_ = true;
+
 	parent_ = nullptr;
 }
 
-Sprite::Sprite(Texture* texture, Shader* shader, Model* model, Element* parent)
+Sprite::Sprite(Texture* texture, Shader* shader)
 {
-	Initialize(texture, shader, model, parent);
+	Initialize(texture, shader);
 }
 
-void Sprite::Initialize(Texture* texture, Shader* shader, Model* model, Element* parent)
+void Sprite::Initialize(Texture* texture, Shader* shader)
 {
 	isActive_ = true;
 
 	texture_ = texture;
-	shader_ = shader;
-	model_ = model;
 
-	parent_ = parent;
+	shader_ = shader;
+
+	parent_ = nullptr;
+
+	opacity_ = 1.0f;
 }
 
 void Sprite::Draw(Camera* camera)
 {
-	if(isActive_ == false)
-		return;
+	shader_->Bind();
 
-	if(!shader_ || !texture_ || !model_)
-		return;
+	Matrix& matrix = camera->GetMatrix();
+	shader_->SetConstant(&matrix, "viewMatrix");
 
-	texture_->Bind(0, shader_, "diffuse");
+	Position3 position = parent_->GetGlobalPosition();
+	shader_->SetConstant(&position, "spritePosition");
 
-	glm::vec2 position = parent_->GetPosition();
+	Scale2 scale;
+	if(texture_)
+	{
 
-	glm::vec2 size = texture_->GetSize();
-	glm::vec2 topLeftCorner = position - size * 0.5f;
-	glm::mat4x4 matrix = camera->GetMatrix();
-	glUniformMatrix4fv(0, 1, GL_FALSE, &matrix[0][0]);
-	glUniform2f(1, size.x, size.y);
-	glUniform2f(2, topLeftCorner.x, topLeftCorner.y);
-	glUniform1f(3, 0.5f);
-	glUniform1f(4, opacity_);
-	model_->Render(camera);
+	}
+	else
+	{
+		auto parentSize = parent_->GetSize();
+		scale = Scale2(parentSize.x, parentSize.y);
+	}
+	shader_->SetConstant(&scale, "spriteSize");
+
+	Opacity opacity = opacity_ * parent_->GetOpacity();
+	shader_->SetConstant(&opacity, "opacity");
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	shader_->Unbind();
+}
+
+float & Sprite::GetOpacity()
+{
+	return opacity_;
 }

@@ -3,101 +3,219 @@
 #include "Element.hpp"
 #include "Sprite.hpp"
 #include "Transform.hpp"
+#include "Animation.hpp"
+#include "Animator.hpp"
+#include "AnimationProperty.hpp"
+#include "InputHandler.hpp"
+#include "Delegate.hpp"
 
-Element::Element(Transform* transform, Sprite* sprite)
+Element::Element()
 {
-	Initialize(transform, sprite);
+	isActive_ = false;
+
+	parent_ = nullptr;
+
+	transform_ = nullptr;
+
+	animator_ = nullptr;
+
+	clickEvents_ = nullptr;
 }
 
-void Element::Initialize(Transform* transform, Sprite* sprite)
+Element::Element(Size size, Transform* transform, Sprite* sprite)
 {
+	Initialize(size, transform, sprite);
+}
+
+/*Element::Element(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite)
+{
+	Initialize(size, drawOrder, transform, sprite);
+}*/
+
+Element::Element(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
+{
+	Initialize(size, drawOrder, transform, sprite);
+}
+
+void Element::Initialize(Size size, Transform* transform, Sprite* sprite)
+{
+	isActive_ = false;
+
 	transform_ = transform;
 
 	parent_ = nullptr;
 
+	animator_ = new Animator();
+
 	sprite_ = sprite;
 	sprite_->SetParent(this);
+
+	size_ = size;
+
+	drawOrder_ = 0;
+
+	opacity_ = 1.0f;
+
+	clickEvents_ = new Delegate();
 }
 
-bool Element::IsActive()
+void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
 {
-	if(isActive_ == false)
+	isActive_ = false;
+
+	transform_ = transform;
+
+	parent_ = nullptr;
+
+	animator_ = new Animator();
+
+	sprite_ = sprite;
+	sprite_->SetParent(this);
+
+	size_ = size;
+
+	drawOrder_ = drawOrder;
+
+	opacity_ = opacity;
+
+	clickEvents_ = new Delegate();
+}
+
+bool Element::CheckHover()
+{
+	if(IsGloballyActive() == false)
+	{
+		isHovered_ = false;
 		return false;
-	else if(parent_ != nullptr)
-		return parent_->IsActive();
-	else
-		return true;
+	}
+
+	auto mousePosition = InputHandler::GetMousePosition();
+
+	bool isInsideHorizontally = mousePosition.x > transform_->GetPosition().x - size_.x / 2 && mousePosition.x < transform_->GetPosition().x + size_.x / 2;
+	bool isInsideVertically = mousePosition.y > transform_->GetPosition().y - size_.y / 2 && mousePosition.y < transform_->GetPosition().y + size_.y / 2;
+
+	isHovered_ = isInsideHorizontally && isInsideVertically;
+
+	return isHovered_;
 }
 
-void Element::Draw(Camera* camera)
+void Element::Update()
 {
-	if(IsActive() == false)
+	if(IsGloballyActive() == false)
 		return;
 
-	if(sprite_)
-		sprite_->Draw(camera);
-}
-
-Position2 Element::GetLocalPosition()
-{
-	return transform_->position_;
-}
-
-Position2 Element::GetPosition()
-{
-	Position2 position = transform_->position_;
-
-	if(parent_ == nullptr)
-		return position;
-
-	Element* parent = parent_;
-	while(true)
+	if(animator_)
 	{
-		if(parent)
-		{
-			Rotation rotation = parent->transform_->rotation_;
-			float s = sin(rotation);
-			float c = cos(rotation);
+		animator_->Update();
+	}
+}
 
-			float x = position.x * c - position.y * s;
-			float y = position.x * s + position.y * c;
+void Element::Render(Camera* camera)
+{
+	if(IsGloballyActive() == false)
+		return;
 
-			position.x = parent->transform_->position_.x + x;
-			position.y = parent->transform_->position_.y + y;
+	if(!sprite_)
+		return;
 
-			parent = parent->parent_;
-		}
-		else
-		{
-			break;
-		}
+	sprite_->Draw(camera);
+}
+
+AnimationProperty* Element::AddAnimationProperty(const char* animationName, InterfaceElementParameters parameter)
+{
+	auto animation = animator_->GetAnimation(animationName);
+	if(!animation)
+		return nullptr;
+
+	AnimationProperty * property = nullptr;
+	switch(parameter)
+	{
+	case InterfaceElementParameters::POSITION_X:
+		property = animation->AddProperty();
+		property->Initialize(&transform_->GetPosition().x);
+		return property;
+	case InterfaceElementParameters::POSITION_Y:
+		property = animation->AddProperty();
+		property->Initialize(&transform_->GetPosition().y);
+		return property;
+	case InterfaceElementParameters::OPACITY:
+		property = animation->AddProperty();
+		property->Initialize(&opacity_);
+		return property;
 	}
 
-	return position;
+	return nullptr;
 }
 
-Rotation Element::GetRotation()
+Size & Element::GetSize()
 {
-	Rotation rotation = transform_->rotation_;
+	return size_;
+}
 
-	if(parent_ == nullptr)
-		return rotation;
+DrawOrder & Element::GetDrawOrder()
+{
+	return drawOrder_;
+}
 
-	Element* parent = parent_;
-	while(true)
-	{
-		if(parent)
-		{
-			rotation += parent->transform_->rotation_;
+Opacity Element::GetOpacity()
+{
+	return opacity_;
+}
 
-			parent = parent->parent_;
-		}
-		else
-		{
-			break;
-		}
-	}
+Delegate & Element::GetClickEvents()
+{
+	return *clickEvents_;
+}
 
-	return rotation;
+Animator* Element::GetAnimator()
+{
+	return animator_;
+}
+
+void Element::Click()
+{
+	if(!clickEvents_)
+		return;
+
+	clickEvents_->Invoke();
+}
+
+void Element::Open()
+{
+	if(!animator_ || isActive_)
+		return;
+
+	isActive_ = true;
+
+	animator_->Play("Open");
+
+	HandleOpen();
+}
+
+void Element::Close()
+{
+	if(!animator_ || !isActive_)
+		return;
+
+	animator_->Play("Close");
+
+	HandleClose();
+}
+
+void Element::HandleOpen()
+{
+}
+
+void Element::HandleClose()
+{
+}
+
+void Element::HandleEnable()
+{
+}
+
+void Element::HandleDisable()
+{
+
 }
 

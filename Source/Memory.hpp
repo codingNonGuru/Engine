@@ -368,6 +368,15 @@ namespace container {
 			return (objects_ + size_);
 		}
 
+		O* GetNext(O* object)
+		{
+			auto index = object - objects_;
+			if(index >= size_ - 1)
+				return nullptr;
+
+			return object + 1;
+		}
+
 		I GetSize() const
 		{
 			return size_;
@@ -446,8 +455,11 @@ namespace container {
 	class StaticMap
 	{
 		Key* keys_;
+
 		Value* values_;
+
 		int size_;
+
 		int capacity_;
 
 	public:
@@ -467,6 +479,11 @@ namespace container {
 			values_ = new Value[capacity];
 		}
 
+		int GetSize() const
+		{
+			return size_;
+		}
+
 		Value* Get(Key key)
 		{
 			int index = 0;
@@ -474,6 +491,20 @@ namespace container {
 			{
 				if(strcmp(*currentKey, key) == 0)
 					return values_ + index;
+
+				index++;
+			}
+			return nullptr;
+		}
+
+		Value* Get(const char* key)
+		{
+			int index = 0;
+			for(auto currentKey = keys_; currentKey != keys_ + size_; ++currentKey)
+			{
+				if(strcmp(*currentKey, key) == 0)
+					return values_ + index;
+
 				index++;
 			}
 			return nullptr;

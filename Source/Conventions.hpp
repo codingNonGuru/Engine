@@ -16,8 +16,12 @@ typedef float Rotation;
 typedef glm::vec2 Direction2;
 typedef glm::vec3 Direction3;
 typedef float Scale;
-typedef glm::vec2 Size;
+typedef glm::vec2 Scale2;
+typedef glm::ivec2 Size;
 typedef glm::mat4 Matrix;
+typedef glm::vec4 Color;
+typedef int DrawOrder;
+typedef float Opacity;
 
 typedef unsigned int Index;
 typedef unsigned int Length;
@@ -39,6 +43,8 @@ using Map = container::StaticMap<ValueType, KeyType>;
 
 typedef fastdelegate::FastDelegate0<> Callback;
 
+void* AllocateMemory(unsigned int);
+
 void* CopyMemory(void *, const void *, size_t);
 
 int CompareMemory(const void *, const void *, size_t);
@@ -48,3 +54,9 @@ int CompareStrings(const char *, const char *);
 Length GetStringLength(const char *);
 
 const char* FindString(const char*, const char*);
+
+const char* FindLastOccurrence(const char*, char);
+
+#define DEBUG_OPENGL DebugGl(__FILE__, __LINE__);
+
+void DebugGl(const char*, int);

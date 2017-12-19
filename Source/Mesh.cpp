@@ -75,6 +75,9 @@ void Mesh::Initialize(File* file)
 	Length attributeCount;
 	fread(&attributeCount, 1, sizeof(attributeCount), fileStream);
 
+	std::cout<<"> Mesh name: "<<file->GetName()<<"\n";
+	std::cout<<"> Attribute count: "<<attributeCount<<"\n";
+
 	attributes_.Initialize(attributeCount);
 
 	MeshAttributeHeader *headers = new MeshAttributeHeader[attributeCount];
@@ -82,6 +85,11 @@ void Mesh::Initialize(File* file)
 
 	for(auto header = headers; header != headers + attributeCount; ++header)
 	{
+		std::cout<<"---> Mesh Attribute name: "<<header->Name_<<"\n";
+		std::cout<<"---> Mesh Attribute element count: "<<header->ElementCount_<<"\n";
+		std::cout<<"---> Mesh Attribute element size: "<<header->ElementSize_<<"\n";
+		std::cout<<"---> Mesh Attribute type: "<<header->Type_<<"\n";
+		std::cout<<"\n";
 		auto attribute = attributes_.Allocate(LongWord(header->Name_));
 		if(attribute == nullptr)
 			continue;
@@ -109,8 +117,14 @@ void Mesh::Initialize(File* file)
 		CopyMemory(attribute->GetData()->GetData(), attributeData, attributeMemorySize);
 		auto attributeType = AssetManager::GetAttributeTypes().Get(header->Type_);
 		attribute->SetType(attributeType);
+		attribute->SetSize(header->ElementCount_);
 	}
+	std::cout<<"\n";
 
+	indexCount_ = attributes_.Get(LongWord("index"))->GetSize();
+	vertexCount_ = attributes_.Get(LongWord("position"))->GetSize();
+
+	fclose(fileStream);
 	delete [] headers;
 }
 

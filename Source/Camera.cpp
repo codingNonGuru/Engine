@@ -1,51 +1,84 @@
 #include <stdlib.h>
-#include <gtx/transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include "Camera.hpp"
 #include "Screen.hpp"
 
 Camera::Camera() {}
 
-Camera::Camera(glm::vec3 to, float viewDistance)
+Camera::Camera(Screen* screen, Position3 to, float zenith, float azimuth, float viewDistance)
 {
+	screen_ = screen;
+
 	to_ = to;
+
+	zenith_ = zenith;
+
+	azimuth_ = azimuth;
+
 	viewDistance_ = viewDistance;
-	viewAngle_ = 0.3f;
-	viewDirection_ = glm::vec3(0.0f, cos(viewAngle_), sin(viewAngle_));
-	viewDirection_ = glm::normalize(viewDirection_);
+
+	viewDirection_ = glm::vec3(sin(zenith_) * cos(azimuth_), sin(zenith_) * sin(azimuth_), cos(zenith_));
+
 	from_ = to_ + (viewDirection_ * viewDistance_);
-	up_ = glm::vec3(0.0f, -sin(viewAngle_), cos(viewAngle_));
+
+	up_ = Direction3(0.0f, 0.0f, 1.0f);
+
 	scrollImpulse_ = 0.0f;
 	spinImpulse_ = 0.0f;
-	driftImpulse_ = glm::vec3(0.0f, 0.0f, 0.0f);
+	driftImpulse_ = Direction3(0.0f, 0.0f, 0.0f);
 
-	azimuth_ = 1.57079f;
-	zenith_ = 0.57f;
+	type_ = CameraTypes::PERSPECTIVE;
 }
 
-Camera::Camera(CameraTypes type)
+Camera::Camera(Screen* screen, Position3 from, Position3 to)
 {
-	type_ = type;
+	screen_ = screen;
+
+	from_ = from;
+
+	to_ = to;
+
+	up_ = Direction3(0.0f, 0.0f, 1.0f);
+
+	pivot_ = to_;
+
+	type_ = CameraTypes::PERSPECTIVE;
 }
 
-glm::mat4x4 Camera::getViewMatrix()
+Camera::Camera(Screen* screen)
 {
-	return glm::lookAt<float>(from_, to_, up_);
+	screen_ = screen;
+
+	type_ = CameraTypes::ORTHO;
 }
 
-glm::mat4x4 Camera::GetMatrix()
+Matrix & Camera::GetMatrix()
 {
 	return finalMatrix_;
 }
 
-void Camera::ComputeMatrix(Screen* screen)
+void Camera::ComputeMatrix()
 {
 	if(type_ == CameraTypes::ORTHO)
 	{
-		glm::vec3 screenCenter(-screen->getWidthFloating() * 0.5f, -screen->getHeightFloating() * 0.5f, 0.0f);
-		glm::mat4 projectionMatrix = glm::ortho<float> (0.0f, screen->getWidthFloating(), screen->getHeightFloating(), 0.0f, 0.1f, 10.0f);
-		glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 5.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 screenCenter(-screen_->getWidthFloating() * 0.5f, -screen_->getHeightFloating() * 0.5f, 0.0f);
+
+		glm::mat4 projectionMatrix = glm::ortho<float> (0.0f, screen_->getWidthFloating(), screen_->getHeightFloating(), 0.0f, 0.1f, 10.0f);
+
+		glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 1.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+
 		finalMatrix_ = projectionMatrix * viewMatrix;
+	}
+	else
+	{
+		Matrix viewMatrix = glm::lookAt<float>(from_, to_, up_);
+
+		float aspectRatio = screen_->getWidthFloating() / screen_->getHeightFloating();
+
+		Matrix projectionMatrix = glm::perspective<float>(60.0f / 57.297f, aspectRatio, 0.1f, 500.0f);
+
+		finalMatrix_ = projectionMatrix * viewMatrix * Matrix(1.0f);
 	}
 }
 
@@ -88,7 +121,7 @@ void Camera::Zoom(float impulse)
 
 void Camera::Spin(float impulse)
 {
-	spinImpulse_ -= impulse * 0.0001f;
+	spinImpulse_ -= impulse;
 
 	azimuth_ += spinImpulse_;
 	if(azimuth_ > 6.2831f)
@@ -100,13 +133,20 @@ void Camera::Spin(float impulse)
 void Camera::Update()
 {
 	viewDirection_ = glm::vec3(sin(zenith_) * cos(azimuth_), sin(zenith_) * sin(azimuth_), cos(zenith_));
+
 	from_ = to_ + (viewDirection_ * viewDistance_);
 
 	glm::vec2 horizontal(viewDirection_.x, viewDirection_.y);
+
 	float vertical = glm::length(horizontal);
+
 	horizontal = -glm::normalize(horizontal) * viewDirection_.z;
+
 	up_ = glm::vec3(horizontal.x, horizontal.y, vertical);
+
 	scrollImpulse_ *= 0.95f;
 	spinImpulse_ *= 0.95f;
 	driftImpulse_ *= 0.95f;
+
+	ComputeMatrix();
 }

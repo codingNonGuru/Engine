@@ -3,7 +3,7 @@
 #include "Conventions.hpp"
 
 class Mesh;
-class MasterBuffer;
+class HeaderBuffer;
 class Camera;
 class Texture;
 class Shader;
@@ -13,7 +13,7 @@ class Model
 private:
 	Mesh* mesh_;
 
-	MasterBuffer* buffer_;
+	HeaderBuffer* buffer_;
 
 	Shader* shader_;
 
@@ -22,7 +22,11 @@ private:
 	void SetupBuffer();
 
 public:
-	void Initialize(Mesh*, Shader*, Length);
+	Model();
+
+	Model(Mesh*, Shader*);
+
+	void Initialize(Mesh*, Shader*);
 
 	void AddTexture(Texture*, const char*);
 

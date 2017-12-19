@@ -1,24 +1,27 @@
 #pragma once
 
-#include <glm.hpp>
-
-#include "Memory.hpp"
+#include "Conventions.hpp"
+#include "Types.hpp"
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 
 class Shader;
 
-class Texture {
-	GLuint key_;
-	glm::vec2 size_;
+class Texture
+{
+	Index key_;
+
+	Size size_;
+
+	TextureFormats format_;
 
 public:
 	Texture();
 
-	virtual ~Texture();
+	Texture(Size, TextureFormats);
 
-	void Initialize(GLuint, glm::vec2);
+	~Texture();
 
 	void Bind();
 
@@ -30,7 +33,9 @@ public:
 
 	void Delete();
 
-	glm::vec2 GetSize() const {return size_;}
+	Index GetKey() const {return key_;}
+
+	Size GetSize() const {return size_;}
 };
 
 

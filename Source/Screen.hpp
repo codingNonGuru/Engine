@@ -2,7 +2,9 @@
 
 class Screen
 {
+private:
 	int widthInteger_, heightInteger_;
+
 	float widthFloating_, heightFloating_;
 
 public:
@@ -24,6 +26,13 @@ public:
 	float getHeightFloating() const
 	{
 		return heightFloating_;
+	}
+
+	Screen() {}
+
+	Screen(int width, int height)
+	{
+		Initialize(width, height);
 	}
 
 	void Initialize(int width, int height)

@@ -13,6 +13,7 @@ add_definitions(-DLINUX)
 
 include_directories(/home/andrei/Documents/Programming/Libraries/glm/glm)
 include_directories(/usr/local/include)
+include_directories(Source)
 
 project(Engine)
 
