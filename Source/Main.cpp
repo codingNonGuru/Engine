@@ -10,6 +10,8 @@
 #include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Game/InterfaceBuilder.hpp"
+#include "Game/FilterBuilder.hpp"
+#include "Utility/Perlin.hpp"
 
 int main()
 {
@@ -22,14 +24,18 @@ int main()
 	ModelManager::Initialize();
 
 	Model* cubeModel = nullptr;
-	auto cubeMesh = MeshManager::GetMeshes().Get(LongWord("Sphere"));
-	auto genericShader = ShaderManager::GetShaderMap().Get(LongWord("Generic"));
+	auto cubeMesh = MeshManager::GetMeshes().Get("Sphere");
+	auto genericShader = ShaderManager::GetShaderMap().Get("Generic");
 
 	if(cubeMesh != nullptr)
 	{
 		cubeModel = new Model(cubeMesh, genericShader);
 		ModelManager::AddModel(cubeModel, "Cube");
 	}
+
+	Perlin::Initialize();
+
+	FilterBuilder::GenerateFilters();
 
 	InterfaceBuilder::GenerateInterface();
 

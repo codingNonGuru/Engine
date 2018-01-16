@@ -22,7 +22,7 @@ public:
 template <class ClassType, class ObjectType>
 void Delegate::Add(ObjectType *object, void (ClassType::*function)())
 {
-	auto callback = callbacks_.allocate();
+	auto callback = callbacks_.Add();
 	if(callback == nullptr)
 		return;
 
@@ -34,7 +34,7 @@ void Delegate::Remove(ObjectType *object, void (ClassType::*function)())
 {
 	Callback externalCallback(object, function);
 
-	for(auto callback = callbacks_.getStart(); callback != callbacks_.getEnd(); ++callback)
+	for(auto callback = callbacks_.GetStart(); callback != callbacks_.GetEnd(); ++callback)
 	{
 		if(*callback == externalCallback)
 		{

@@ -29,7 +29,7 @@ void MeshManager::LoadMeshes()
 		LongWord meshName;
 		meshName.Add(file->GetName(), extensionPosition - file->GetName());
 
-		auto mesh = meshes_.Allocate(meshName);
+		auto mesh = meshes_.Add(meshName);
 		if(mesh == nullptr)
 			continue;
 

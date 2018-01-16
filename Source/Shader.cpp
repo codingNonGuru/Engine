@@ -144,7 +144,7 @@ void Shader::Link()
 
 void Shader::SetConstant(void* value, const char* identifier)
 {
-	auto binding = constantBindings_.Get(LongWord(identifier));
+	auto binding = constantBindings_.Get(identifier);
 	if(binding == nullptr)
 	{
 		std::cout<<"Constant identifier "<<identifier<<" is not valid.\n";
@@ -248,7 +248,7 @@ void Shader::Parse()
 	{
 		Index location = glGetUniformLocation(key_, expression->name_);
 
-		*textureBindings_.Allocate(expression->name_) = TextureBinding(index, location);
+		*textureBindings_.Add(expression->name_) = TextureBinding(index, location);
 	}
 
 	auto constantExpressions = parser->FetchConstants();
@@ -290,10 +290,18 @@ void Shader::Parse()
 		else if(CompareMemory(typeName, "mat4", 4) == 0)
 			type = AttributeElementTypes::MATRIX_4;
 
-		*constantBindings_.Allocate(expression->name_) = ConstantBinding(location, type);
+		*constantBindings_.Add(expression->name_) = ConstantBinding(location, type);
 	}
 
 	delete parser;
+}
+
+void Shader::DispatchCompute(Size computeSize)
+{
+	glDispatchCompute(computeSize.x, computeSize.y, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	DEBUG_OPENGL
 }
 
 Shader::~Shader(void) {}
@@ -328,7 +336,7 @@ bool ShaderMap::Add(const char* shaderName, const char* firstShaderPath, const c
 
 void ShaderMap::Use(const char* shaderName)
 {
-	auto shader = shaders_.Get(ShortWord(shaderName));
+	auto shader = shaders_.Get(shaderName);
 	if(shader == nullptr)
 		return;
 
@@ -337,7 +345,7 @@ void ShaderMap::Use(const char* shaderName)
 
 void ShaderMap::Unuse(const char* shaderName)
 {
-	auto shader = shaders_.Get(ShortWord(shaderName));
+	auto shader = shaders_.Get(shaderName);
 	if(shader == nullptr)
 		return;
 
@@ -346,7 +354,7 @@ void ShaderMap::Unuse(const char* shaderName)
 
 GLuint ShaderMap::GetTextureLocation(const char* shaderName, const char* textureName)
 {
-	auto shader = shaders_.Get(ShortWord(shaderName));
+	auto shader = shaders_.Get(shaderName);
 	if(shader == nullptr)
 		return 0;
 
@@ -355,12 +363,12 @@ GLuint ShaderMap::GetTextureLocation(const char* shaderName, const char* texture
 
 Shader& ShaderMap::Get(const char* shaderName)
 {
-	return *shaders_.Get(ShortWord(shaderName));
+	return *shaders_.Get(shaderName);
 }
 
 Shader& ShaderMap::operator [](const char* shaderName)
 {
-	return *shaders_.Get(ShortWord(shaderName));
+	return *shaders_.Get(shaderName);
 }
 
 #pragma endregion ShaderMap

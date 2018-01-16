@@ -8,14 +8,14 @@
 
 #include "Conventions.hpp"
 
-DataBuffer::DataBuffer(GLenum type, int memorySize, void* data = nullptr)
+DataBuffer::DataBuffer(int memorySize, void* data)
 {
-	Generate(type, memorySize, data);
+	Generate(memorySize, data);
 }
 
-void DataBuffer::Generate(GLenum type, int memorySize, void* data = nullptr)
+void DataBuffer::Generate(int memorySize, void* data)
 {
-	type_ = type;
+	type_ = GL_SHADER_STORAGE_BUFFER;
 
 	glGenBuffers(1, &key_);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
@@ -32,6 +32,15 @@ void DataBuffer::UploadData(void* data, GLuint size)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	DEBUG_OPENGL
+}
+
+void DataBuffer::Download(Container * container)
+{
+	Bind();
+
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, container->GetMemorySize(), container->GetData());
+
+	Unbind();
 }
 
 void DataBuffer::Bind()
@@ -56,6 +65,11 @@ void DataBuffer::Unbind()
 	DEBUG_OPENGL
 }
 
-
+void DataBuffer::Delete()
+{
+	Bind();
+	glDeleteBuffers(1, &key_);
+	Unbind();
+}
 
 

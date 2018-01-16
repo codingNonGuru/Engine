@@ -32,7 +32,7 @@ void HeaderBuffer::AddStorageBuffer(int index, DataBuffer* buffer, const char* b
 		return;
 	}
 
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(bufferName));
+	auto bufferPointer = slaveBuffers_.Add(bufferName);
 	*bufferPointer = buffer;
 
 	Bind();
@@ -44,7 +44,7 @@ void HeaderBuffer::AddStorageBuffer(int index, DataBuffer* buffer, const char* b
 
 void HeaderBuffer::AddBuffer(int index, DataBuffer* buffer, const char* name)
 {
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(name));
+	auto bufferPointer = slaveBuffers_.Add(name);
 	if(bufferPointer == nullptr)
 	{
 		std::cout<<"Allocating buffer "<<name<<" failed!\n";
@@ -71,7 +71,7 @@ void HeaderBuffer::AddBuffer(int index, DataBuffer* buffer, const char* bufferNa
 		return;
 	}
 
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord(bufferName));
+	auto bufferPointer = slaveBuffers_.Add(bufferName);
 	*bufferPointer = buffer;
 
 	Bind();
@@ -103,7 +103,7 @@ void HeaderBuffer::AddElementBuffer(DataBuffer* buffer)
 		return;
 	}
 
-	auto bufferPointer = slaveBuffers_.Allocate(ShortWord("element"));
+	auto bufferPointer = slaveBuffers_.Add("element");
 	*bufferPointer = buffer;
 
 	Bind();
@@ -114,7 +114,7 @@ void HeaderBuffer::AddElementBuffer(DataBuffer* buffer)
 
 DataBuffer* HeaderBuffer::GetBuffer(const char* bufferName)
 {
-	return *slaveBuffers_.Get(ShortWord(bufferName));
+	return *slaveBuffers_.Get(bufferName);
 }
 
 void HeaderBuffer::UploadData(const char* bufferName, void* data, GLuint memorySize)

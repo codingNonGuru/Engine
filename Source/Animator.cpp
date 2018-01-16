@@ -14,7 +14,7 @@ Animation* Animator::GetAnimation(const char* name)
 
 Animation* Animator::AddAnimation(Animation* animation, const char* name)
 {
-	auto animationPointer = animations_.Allocate(LongWord(name));
+	auto animationPointer = animations_.Add(name);
 	if(!animationPointer)
 		return nullptr;
 

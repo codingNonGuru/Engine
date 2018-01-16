@@ -18,6 +18,8 @@ public:
 
 	Transform(Position2);
 
+	Transform(Position2, Scale);
+
 	Transform(Position3);
 
 	Transform(Position3, Rotation, Scale);
@@ -27,6 +29,8 @@ public:
 	Position3 & GetPosition();
 
 	Rotation & GetRotation();
+
+	Scale & GetScale();
 
 	Direction3 GetForward();
 

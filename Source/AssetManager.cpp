@@ -7,6 +7,7 @@
 #include "File.hpp"
 #include "ShaderManager.hpp"
 #include "MeshManager.hpp"
+#include "TextureManager.hpp"
 
 Array <File>* AssetManager::files_ = nullptr;
 
@@ -18,23 +19,23 @@ void AssetManager::Initialize()
 {
 	attributeTypes_.Initialize(16);
 
-	*attributeTypes_.Allocate(LongWord("float")) = AttributeType(LongWord("float"), 4, 1, AttributeElementTypes::FLOAT_1);
-	*attributeTypes_.Allocate(LongWord("vec2")) = AttributeType(LongWord("vec2"), 8, 2, AttributeElementTypes::FLOAT_2);
-	*attributeTypes_.Allocate(LongWord("vec3")) = AttributeType(LongWord("vec3"), 12, 3, AttributeElementTypes::FLOAT_3);
-	*attributeTypes_.Allocate(LongWord("vec4")) = AttributeType(LongWord("vec4"), 16, 4, AttributeElementTypes::FLOAT_4);
+	*attributeTypes_.Add("float") = AttributeType("float", 4, 1, AttributeElementTypes::FLOAT_1);
+	*attributeTypes_.Add("vec2") = AttributeType("vec2", 8, 2, AttributeElementTypes::FLOAT_2);
+	*attributeTypes_.Add("vec3") = AttributeType("vec3", 12, 3, AttributeElementTypes::FLOAT_3);
+	*attributeTypes_.Add("vec4") = AttributeType("vec4", 16, 4, AttributeElementTypes::FLOAT_4);
 
-	*attributeTypes_.Allocate(LongWord("int")) = AttributeType(LongWord("int"), 4, 1, AttributeElementTypes::INTEGER_1);
-	*attributeTypes_.Allocate(LongWord("ivec2")) = AttributeType(LongWord("ivec2"), 8, 2, AttributeElementTypes::INTEGER_2);
-	*attributeTypes_.Allocate(LongWord("ivec3")) = AttributeType(LongWord("ivec3"), 12, 3, AttributeElementTypes::INTEGER_3);
-	*attributeTypes_.Allocate(LongWord("ivec4")) = AttributeType(LongWord("ivec4"), 16, 4, AttributeElementTypes::INTEGER_4);
+	*attributeTypes_.Add("int") = AttributeType("int", 4, 1, AttributeElementTypes::INTEGER_1);
+	*attributeTypes_.Add("ivec2") = AttributeType("ivec2", 8, 2, AttributeElementTypes::INTEGER_2);
+	*attributeTypes_.Add("ivec3") = AttributeType("ivec3", 12, 3, AttributeElementTypes::INTEGER_3);
+	*attributeTypes_.Add("ivec4") = AttributeType("ivec4", 16, 4, AttributeElementTypes::INTEGER_4);
 
-	*attributeTypes_.Allocate(LongWord("uint")) = AttributeType(LongWord("uint"), 4, 1, AttributeElementTypes::UINTEGER_1);
-	*attributeTypes_.Allocate(LongWord("uvec2")) = AttributeType(LongWord("uvec2"), 8, 2, AttributeElementTypes::UINTEGER_2);
-	*attributeTypes_.Allocate(LongWord("uvec3")) = AttributeType(LongWord("uvec3"), 12, 3, AttributeElementTypes::UINTEGER_3);
-	*attributeTypes_.Allocate(LongWord("uvec4")) = AttributeType(LongWord("uvec4"), 16, 4, AttributeElementTypes::UINTEGER_4);
+	*attributeTypes_.Add("uint") = AttributeType("uint", 4, 1, AttributeElementTypes::UINTEGER_1);
+	*attributeTypes_.Add("uvec2") = AttributeType("uvec2", 8, 2, AttributeElementTypes::UINTEGER_2);
+	*attributeTypes_.Add("uvec3") = AttributeType("uvec3", 12, 3, AttributeElementTypes::UINTEGER_3);
+	*attributeTypes_.Add("uvec4") = AttributeType("uvec4", 16, 4, AttributeElementTypes::UINTEGER_4);
 
-	*attributeTypes_.Allocate(LongWord("mat3")) = AttributeType(LongWord("mat3"), 36, 9, AttributeElementTypes::MATRIX_3);
-	*attributeTypes_.Allocate(LongWord("mat4")) = AttributeType(LongWord("mat4"), 64, 16, AttributeElementTypes::MATRIX_4);
+	*attributeTypes_.Add("mat3") = AttributeType("mat3", 36, 9, AttributeElementTypes::MATRIX_3);
+	*attributeTypes_.Add("mat4") = AttributeType("mat4", 64, 16, AttributeElementTypes::MATRIX_4);
 }
 
 char* code = new char[1024 * 1024];
@@ -48,6 +49,8 @@ void AssetManager::LoadAssets()
 	ShaderManager::LoadShaders();
 
 	MeshManager::LoadMeshes();
+
+	TextureManager::LoadTextures();
 
 	//CountScripts();
 

@@ -33,7 +33,7 @@ Map <FrameBuffer*, LongWord> & BufferManager::GetFrameBuffers()
 
 HeaderBuffer* BufferManager::GetHeaderBuffer(const char* name)
 {
-	auto buffer = headerBuffers_.Get(LongWord(name));
+	auto buffer = headerBuffers_.Get(name);
 	if(buffer == nullptr)
 		return nullptr;
 
@@ -42,7 +42,7 @@ HeaderBuffer* BufferManager::GetHeaderBuffer(const char* name)
 
 DataBuffer* BufferManager::GetDataBuffer(const char* name)
 {
-	auto buffer = dataBuffers_.Get(LongWord(name));
+	auto buffer = dataBuffers_.Get(name);
 	if(buffer == nullptr)
 		return nullptr;
 
@@ -51,7 +51,7 @@ DataBuffer* BufferManager::GetDataBuffer(const char* name)
 
 FrameBuffer* BufferManager::GetFrameBuffer(const char* name)
 {
-	auto buffer = frameBuffers_.Get(LongWord(name));
+	auto buffer = frameBuffers_.Get(name);
 	if(buffer == nullptr)
 		return nullptr;
 

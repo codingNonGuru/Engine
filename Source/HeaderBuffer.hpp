@@ -8,7 +8,7 @@ class HeaderBuffer
 {
 	Index key_;
 
-	container::StaticMap <DataBuffer*> slaveBuffers_;
+	Map <DataBuffer*, LongWord> slaveBuffers_;
 
 public:
 	HeaderBuffer() {}

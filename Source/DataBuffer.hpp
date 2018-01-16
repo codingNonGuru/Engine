@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory.hpp"
+#include "Container/Container.hpp"
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
@@ -16,13 +16,15 @@ class DataBuffer
 public:
 	DataBuffer() {}
 
-	DataBuffer(GLenum, int, void*);
+	DataBuffer(int, void* = nullptr);
 
 	GLenum GetType() const {return type_;}
 
-	void Generate(GLenum, int, void*);
+	void Generate(int, void*);
 
 	void UploadData(void*, GLuint);
+
+	void Download(container::Container *);
 
 	void Bind();
 
@@ -33,4 +35,6 @@ public:
 	void SetSize(unsigned int size) {size_ = size;}
 
 	unsigned int GetSize() const {return size_;}
+
+	void Delete();
 };

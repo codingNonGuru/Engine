@@ -6,8 +6,8 @@
 #include "RenderManager.hpp"
 #include "Window.hpp"
 #include "InputHandler.hpp"
-#include "Interface.hpp"
-#include "Element.hpp"
+#include "Interface/Interface.hpp"
+#include "Interface/Element.hpp"
 #include "Time.hpp"
 
 bool Engine::isRunning_ = false;
@@ -49,10 +49,10 @@ void Engine::StartGameLoop()
 			isRunning_ = false;
 
 		if(InputHandler::IsPressed(SDLK_a))
-			Interface::GetElements().Get("MainMenu")->Open();
-
-		if(InputHandler::IsPressed(SDLK_c))
-			Interface::GetElements().Get("MainMenu")->Close();
+		{
+			auto mainMenu = Interface::GetElements().Get("MainMenu");
+			(*mainMenu)->Open();
+		}
 
 		Interface::Update();
 

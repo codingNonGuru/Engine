@@ -7,6 +7,7 @@ typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 
 class Shader;
+class File;
 
 class Texture
 {
@@ -19,9 +20,13 @@ class Texture
 public:
 	Texture();
 
-	Texture(Size, TextureFormats);
+	Texture(Size, TextureFormats, container::Matrix* = nullptr);
 
-	~Texture();
+	Texture(File*);
+
+	void Initialize(File*);
+
+	void Upload(void*);
 
 	void Bind();
 
@@ -29,13 +34,15 @@ public:
 
 	void Unbind();
 
-	void Upload(container::Matrix<>*, GLenum, GLenum, GLenum);
+	void DownloadBackBuffer();
 
 	void Delete();
 
 	Index GetKey() const {return key_;}
 
 	Size GetSize() const {return size_;}
+
+	~Texture();
 };
 
 

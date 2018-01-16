@@ -90,7 +90,7 @@ void Mesh::Initialize(File* file)
 		std::cout<<"---> Mesh Attribute element size: "<<header->ElementSize_<<"\n";
 		std::cout<<"---> Mesh Attribute type: "<<header->Type_<<"\n";
 		std::cout<<"\n";
-		auto attribute = attributes_.Allocate(LongWord(header->Name_));
+		auto attribute = attributes_.Add(header->Name_);
 		if(attribute == nullptr)
 			continue;
 
@@ -121,8 +121,8 @@ void Mesh::Initialize(File* file)
 	}
 	std::cout<<"\n";
 
-	indexCount_ = attributes_.Get(LongWord("index"))->GetSize();
-	vertexCount_ = attributes_.Get(LongWord("position"))->GetSize();
+	indexCount_ = attributes_.Get("index")->GetSize();
+	vertexCount_ = attributes_.Get("position")->GetSize();
 
 	fclose(fileStream);
 	delete [] headers;
@@ -130,12 +130,12 @@ void Mesh::Initialize(File* file)
 
 MeshAttribute* Mesh::GetAttribute(const char* identifier)
 {
-	return attributes_.Get(LongWord(identifier));
+	return attributes_.Get(identifier);
 }
 
 void* Mesh::GetAttributeData(const char* identifier)
 {
-	auto attribute = attributes_.Get(LongWord(identifier));
+	auto attribute = attributes_.Get(identifier);
 	if(attribute == nullptr)
 		return nullptr;
 
@@ -144,7 +144,7 @@ void* Mesh::GetAttributeData(const char* identifier)
 
 Length Mesh::GetAttributeMemoryCapacity(const char* identifier)
 {
-	auto attribute = attributes_.Get(LongWord(identifier));
+	auto attribute = attributes_.Get(identifier);
 	if(attribute == nullptr)
 		return 0;
 

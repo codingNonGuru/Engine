@@ -3,50 +3,66 @@
 
 #include "Texture.hpp"
 #include "Shader.hpp"
+#include "File.hpp"
 
 Texture::Texture()
 {
 
 }
 
-Texture::Texture(Size size, TextureFormats format)
+Texture::Texture(Size size, TextureFormats format, container::Matrix* grid = nullptr)
 {
 	size_ = size;
 
 	format_ = format;
 
-	glGenTextures(1, &key_);
-	glBindTexture(GL_TEXTURE_2D, key_);
+	void* data = grid ? grid->GetData() : nullptr;
+	Upload(data);
+}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+Texture::Texture(File* file)
+{
+	Initialize(file);
+}
+
+void Texture::Initialize(File* file)
+{
+	FILE* fileStream = fopen(file->GetPath(), "rb");
+	if(fileStream == nullptr)
+		return;
+
+	fread(&size_, sizeof(size_), 1, fileStream);
+	fread(&format_, sizeof(format_), 1, fileStream);
+
+	container::Matrix * grid = nullptr;
 
 	switch(format_)
 	{
 	case TextureFormats::FOUR_BYTE:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		grid = new Grid <Byte4> (size_.x, size_.y);
 		break;
 	case TextureFormats::FOUR_FLOAT:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, 0);
+		grid = new Grid <Float4> (size_.x, size_.y);
 		break;
 	case TextureFormats::THREE_BYTE:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		grid = new Grid <Byte3> (size_.x, size_.y);
 		break;
 	case TextureFormats::THREE_FLOAT:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, size.x, size.y, 0, GL_RGB, GL_FLOAT, 0);
+		grid = new Grid <Float3> (size_.x, size_.y);
 		break;
 	case TextureFormats::ONE_BYTE:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, size.x, size.y, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+		grid = new Grid <Byte> (size_.x, size_.y);
 		break;
 	case TextureFormats::ONE_FLOAT:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, size.x, size.y, 0, GL_RED, GL_FLOAT, 0);
+		grid = new Grid <Float> (size_.x, size_.y);
 		break;
 	}
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	fread(grid->GetData(), grid->GetMemorySize(), 1, fileStream);
 
-	DEBUG_OPENGL
+	fclose(fileStream);
+
+	Upload(grid->GetData());
 }
 
 Texture::~Texture()
@@ -78,19 +94,50 @@ void Texture::Unbind()
 	DEBUG_OPENGL
 }
 
-void Texture::Upload(container::Matrix<> *buffer, GLenum internalFormat, GLenum format, GLenum type)
+void Texture::Upload(void* data)
 {
 	glGenTextures(1, &key_);
 	glBindTexture(GL_TEXTURE_2D, key_);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, buffer->getWidth(), buffer->getHeight(), 0, format, type, buffer->GetData());
+
+	switch(format_)
+	{
+	case TextureFormats::FOUR_BYTE:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size_.x, size_.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		break;
+	case TextureFormats::FOUR_FLOAT:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size_.x, size_.y, 0, GL_RGBA, GL_FLOAT, data);
+		break;
+	case TextureFormats::THREE_BYTE:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size_.x, size_.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		break;
+	case TextureFormats::THREE_FLOAT:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, size_.x, size_.y, 0, GL_RGB, GL_FLOAT, data);
+		break;
+	case TextureFormats::ONE_BYTE:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, size_.x, size_.y, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+		break;
+	case TextureFormats::ONE_FLOAT:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, size_.x, size_.y, 0, GL_RED, GL_FLOAT, data);
+		break;
+	}
+
+
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	size_ = Size(buffer->getWidth(), buffer->getHeight());
-
 	DEBUG_OPENGL
+}
+
+void Texture::DownloadBackBuffer()
+{
+	Bind();
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glReadBuffer(GL_BACK);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, size_.x, size_.y, 0);
+	Unbind();
 }
 
 void Texture::Delete()

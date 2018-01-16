@@ -13,6 +13,8 @@ Element::Element()
 {
 	isActive_ = false;
 
+	isInteractive_ = false;
+
 	parent_ = nullptr;
 
 	transform_ = nullptr;
@@ -20,6 +22,8 @@ Element::Element()
 	animator_ = nullptr;
 
 	clickEvents_ = nullptr;
+
+	HandleInitialize();
 }
 
 Element::Element(Size size, Transform* transform, Sprite* sprite)
@@ -34,12 +38,14 @@ Element::Element(Size size, Transform* transform, Sprite* sprite)
 
 Element::Element(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
 {
-	Initialize(size, drawOrder, transform, sprite);
+	Initialize(size, drawOrder, transform, sprite, opacity);
 }
 
 void Element::Initialize(Size size, Transform* transform, Sprite* sprite)
 {
 	isActive_ = false;
+
+	isInteractive_ = false;
 
 	transform_ = transform;
 
@@ -57,11 +63,15 @@ void Element::Initialize(Size size, Transform* transform, Sprite* sprite)
 	opacity_ = 1.0f;
 
 	clickEvents_ = new Delegate();
+
+	HandleInitialize();
 }
 
 void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
 {
 	isActive_ = false;
+
+	isInteractive_ = false;
 
 	transform_ = transform;
 
@@ -79,10 +89,15 @@ void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, S
 	opacity_ = opacity;
 
 	clickEvents_ = new Delegate();
+
+	HandleInitialize();
 }
 
 bool Element::CheckHover()
 {
+	if(!isInteractive_)
+		return false;
+
 	if(IsGloballyActive() == false)
 	{
 		isHovered_ = false;
@@ -108,6 +123,8 @@ void Element::Update()
 	{
 		animator_->Update();
 	}
+
+	HandleUpdate();
 }
 
 void Element::Render(Camera* camera)
@@ -167,12 +184,22 @@ Delegate & Element::GetClickEvents()
 	return *clickEvents_;
 }
 
+Delegate & Element::GetHoverEvents()
+{
+	return *hoverEvents_;
+}
+
 Animator* Element::GetAnimator()
 {
 	return animator_;
 }
 
-void Element::Click()
+void Element::SetInteractivity(bool isInteractive)
+{
+	isInteractive_ = isInteractive;
+}
+
+void Element::HandleClick()
 {
 	if(!clickEvents_)
 		return;

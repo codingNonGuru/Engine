@@ -68,6 +68,8 @@ void Camera::ComputeMatrix()
 
 		glm::mat4 viewMatrix = glm::lookAt<float> (screenCenter + glm::vec3(0.0f, 0.0f, 1.0f), screenCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		//viewMatrix = glm::translate(viewMatrix, glm::vec3(screen_->getWidthFloating() * 0.5f, -screen_->getHeightFloating() * 0.5f, 0.0f));
+
 		finalMatrix_ = projectionMatrix * viewMatrix;
 	}
 	else

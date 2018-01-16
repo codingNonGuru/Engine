@@ -27,7 +27,7 @@ void Model::Initialize(Mesh* mesh, Shader* shader)
 
 void Model::AddTexture(Texture* texture, const char* name)
 {
-	auto texturePointer = textures_.Allocate(LongWord(name));
+	auto texturePointer = textures_.Add(name);
 	*texturePointer = texture;
 }
 
@@ -70,7 +70,7 @@ void Model::SetupBuffer()
 		if(meshAttributeData == nullptr)
 			continue;
 
-		auto slaveBuffer = new DataBuffer(GL_SHADER_STORAGE_BUFFER, meshAttributeData->GetMemoryCapacity(), meshAttributeData->GetData());
+		auto slaveBuffer = new DataBuffer(meshAttributeData->GetMemoryCapacity(), meshAttributeData->GetData());
 		buffer_->AddBuffer(index, slaveBuffer, *meshAttributeKey);
 	}
 }

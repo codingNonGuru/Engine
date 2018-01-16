@@ -2,12 +2,12 @@
 
 Delegate::Delegate()
 {
-	callbacks_.initialize(4);
+	callbacks_.Initialize(4);
 }
 
 void Delegate::Invoke()
 {
-	for(auto callback = callbacks_.getStart(); callback != callbacks_.getEnd(); ++callback)
+	for(auto callback = callbacks_.GetStart(); callback != callbacks_.GetEnd(); ++callback)
 	{
 		if(callback->empty())
 			continue;
@@ -18,7 +18,7 @@ void Delegate::Invoke()
 
 void Delegate::Add(void (*function)())
 {
-	auto callback = callbacks_.allocate();
+	auto callback = callbacks_.Add();
 	if(callback == nullptr)
 		return;
 

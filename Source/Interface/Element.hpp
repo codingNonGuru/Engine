@@ -15,7 +15,7 @@ class Delegate;
 
 class Element : public GameObject
 {
-private:
+protected:
 	Sprite* sprite_;
 
 	Animator* animator_;
@@ -28,16 +28,20 @@ private:
 
 	Opacity opacity_;
 
+	bool isInteractive_;
+
 	bool isHovered_;
 
 	Delegate * clickEvents_;
+
+	Delegate * hoverEvents_;
 
 public:
 	Element();
 
 	Element(Size, Transform*, Sprite*);
 
-	Element(Size, DrawOrder, Transform*, Sprite*, Opacity);
+	Element(Size, DrawOrder, Transform*, Sprite*, Opacity = 1.0f);
 
 	void Initialize(Size, Transform*, Sprite*);
 
@@ -59,9 +63,15 @@ public:
 
 	Delegate & GetClickEvents();
 
+	Delegate & GetHoverEvents();
+
+	void SetInteractivity(bool);
+
 	AnimationProperty* AddAnimationProperty(const char*, InterfaceElementParameters);
 
-	void Click();
+	void HandleClick();
+
+	void HandleHover();
 
 	void Open();
 
@@ -74,4 +84,8 @@ public:
 	virtual void HandleEnable();
 
 	virtual void HandleDisable();
+
+	virtual void HandleInitialize() {}
+
+	virtual void HandleUpdate() {}
 };

@@ -18,7 +18,7 @@ Map <Model, LongWord> & ModelManager::GetModels()
 
 void ModelManager::AddModel(Model* model, const char* name)
 {
-	auto newModel = models_.Allocate(LongWord(name));
+	auto newModel = models_.Add(name);
 	if(newModel == nullptr)
 	{
 		std::cout<<"Maximum model count was reached.\n";

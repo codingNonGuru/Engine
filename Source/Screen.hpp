@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Conventions.hpp"
+
 class Screen
 {
 private:
@@ -41,5 +43,10 @@ public:
 		heightInteger_ = height;
 		widthFloating_ = (float)width;
 		heightFloating_ = (float)height;
+	}
+
+	Size GetSize()
+	{
+		return Size(widthInteger_, heightInteger_);
 	}
 };

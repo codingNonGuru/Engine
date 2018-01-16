@@ -56,6 +56,8 @@ public:
 
 	LongWord& GetName() {return name_;}
 
+	void DispatchCompute(Size);
+
 	~Shader(void);
 };
 

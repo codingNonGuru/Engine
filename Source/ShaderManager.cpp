@@ -65,7 +65,7 @@ void ShaderManager::LoadShaders()
 			auto shaderFileBatch = shaderFileBatches.Get(shaderName);
 			if(shaderFileBatch == nullptr)
 			{
-				shaderFileBatch = shaderFileBatches.Allocate(shaderName);
+				shaderFileBatch = shaderFileBatches.Add(shaderName);
 			}
 
 			auto shaderFile = shaderFiles_.Allocate();
@@ -89,7 +89,7 @@ void ShaderManager::LoadShaders()
 			std::cout<<"---> "<<(*file)->GetName()<<"\n";
 		}
 
-		auto shader = shaders_.Allocate(*fileBatchKey);
+		auto shader = shaders_.Add(*fileBatchKey);
 		shader->Initialize(*fileBatchKey, fileBatch->Files_);
 	}
 }

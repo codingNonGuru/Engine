@@ -22,7 +22,6 @@ private:
 	GLenum textureType_;
 
 public:
-
 	FrameBuffer();
 
     FrameBuffer(Size);

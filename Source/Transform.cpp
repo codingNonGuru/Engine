@@ -24,6 +24,13 @@ Transform::Transform(Position2 position)
 	scale_ = 1.0f;
 }
 
+Transform::Transform(Position2 position, Scale scale)
+{
+	position_ = Position3(position.x, position.y, 0.0f);
+	rotation_ = 0.0f;
+	scale_ = scale;
+}
+
 Transform::Transform(Position3 position)
 {
 	position_ = position;
@@ -53,6 +60,11 @@ Position3 & Transform::GetPosition()
 Rotation & Transform::GetRotation()
 {
 	return rotation_;
+}
+
+Scale & Transform::GetScale()
+{
+	return scale_;
 }
 
 Direction3 Transform::GetForward()

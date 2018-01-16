@@ -76,3 +76,10 @@ enum class InterfaceElementParameters
 	DEPTH,
 	OPACITY
 };
+
+enum class KernelTypes
+{
+	GAUSS,
+	CAUCHY,
+	LAPLACE
+};

@@ -10,11 +10,15 @@
 #include "Model.hpp"
 #include "BufferManager.hpp"
 #include "FrameBuffer.hpp"
-#include "Sprite.hpp"
+#include "Interface/Sprite.hpp"
 #include "Shader.hpp"
 #include "ShaderManager.hpp"
-#include "Interface.hpp"
-#include "Element.hpp"
+#include "Interface/Interface.hpp"
+#include "Interface/Element.hpp"
+#include "TextureManager.hpp"
+#include "Texture.hpp"
+#include "Render/FilterManager.hpp"
+#include "Render/Filter.hpp"
 
 RenderManager* RenderManager::instance_ = nullptr;
 
@@ -34,13 +38,19 @@ void RenderManager::Initialize()
 
 	cameras_.Initialize(16);
 
-	*cameras_.Allocate(LongWord("main")) = Camera(screen_, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
-	*cameras_.Allocate(LongWord("interface")) = Camera(screen_);
+	*cameras_.Add("main") = Camera(screen_, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
+	*cameras_.Add("interface") = Camera(screen_);
 
-	auto frameBuffer = BufferManager::GetFrameBuffers().Allocate(LongWord("default"));
+	auto frameBuffer = BufferManager::GetFrameBuffers().Add("default");
 	if(frameBuffer)
 	{
 		*frameBuffer = new FrameBuffer(Size(screen_->getWidthInteger(), screen_->getHeightInteger()));
+	}
+
+	auto screenTexture = TextureManager::GetTextures().Add("Screen");
+	if(screenTexture)
+	{
+		*screenTexture = Texture(RenderManager::Get()->screen_->GetSize(), TextureFormats::FOUR_BYTE);
 	}
 
 	glEnable(GL_MULTISAMPLE);
@@ -65,12 +75,14 @@ void RenderManager::Update()
 		defaultFrameBuffer->Clear(Color(0.0f, 0.3f, 0.5f, 1.0f));
 	}
 
-	auto cubeModel = ModelManager::GetModels().Get(LongWord("Cube"));
+	auto cubeModel = ModelManager::GetModels().Get("Cube");
 	cubeModel->Render(mainCamera);
 
 	DisableDepthTesting();
 
 	SetBlendMode();
+
+	FilterManager::GetFilter("Saturate")->Apply(interfaceCamera);
 
 	Interface::Render(interfaceCamera);
 
