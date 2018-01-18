@@ -31,6 +31,7 @@ struct Byte4
 	Byte4(Byte r, Byte g, Byte b, Byte a) : r_(r), g_(g), b_(b), a_(a) {}
 };
 
+typedef float Weight;
 typedef Float2 Range;
 typedef glm::vec2 Position2;
 typedef glm::vec3 Position3;
@@ -41,7 +42,6 @@ typedef float Scale;
 typedef glm::vec2 Scale2;
 typedef glm::ivec2 Size;
 typedef glm::mat4 Matrix;
-typedef glm::vec4 Color;
 typedef int DrawOrder;
 typedef float Opacity;
 

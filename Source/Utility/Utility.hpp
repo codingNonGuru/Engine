@@ -4,6 +4,7 @@
 #include <random>
 
 #include "Conventions.hpp"
+#include "Utility/Color.hpp"
 
 namespace utility
 {
@@ -18,4 +19,12 @@ namespace utility
 	{
 		return GetRandom(0.0f, 1.0f) < chance;
 	}
+
+	float GetSaturation(Color);
+
+	Color SetSaturation(Color, float);
+
+	Color AddSaturation(Color, float);
+
+	Color Lighten(Color, float);
 }

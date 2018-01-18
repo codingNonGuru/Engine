@@ -2,6 +2,7 @@
 
 #include "Conventions.hpp"
 #include "Types.hpp"
+#include "Utility/Color.hpp"
 
 class Shader;
 class Texture;

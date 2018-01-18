@@ -34,11 +34,12 @@ float* Kernel::operator() (int x, int y)
 	return values_(x + side_, y + side_);
 }
 
-void Kernel::Initialize(KernelTypes type, float variable, float contrastStrength, bool normalized)
+void Kernel::Initialize(KernelTypes type, float variable, float contrastStrength = 1.0f, bool normalized = true)
 {
 	sum_ = 0.0;
 	for(int y = -side_; y <= side_; ++y)
-		for(int x = -side_; x <= side_; ++x) {
+		for(int x = -side_; x <= side_; ++x)
+		{
 			float distance = (float)x * (float)x + (float)y * (float)y;
 			auto currentValue = values_(x + side_, y + side_);
 
@@ -54,7 +55,7 @@ void Kernel::Initialize(KernelTypes type, float variable, float contrastStrength
 			sum_ += *currentValue;
 		}
 
-	if(normalized == true)
+	if(normalized)
 	{
 		//sum /= pow(2.0 * (double)side_ + 1.0, 2);
 		for(int y = -side_; y <= side_; ++y)

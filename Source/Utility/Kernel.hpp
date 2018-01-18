@@ -29,7 +29,7 @@ public:
 
 	float* operator() (int x, int y);
 
-	void Initialize(KernelTypes type, float variable, float contrastStrength, bool normalized);
+	void Initialize(KernelTypes, float, float = 1.0f, bool = true);
 
 	void AddLayer(KernelTypes type, float variable, float contrastStrength, bool normalized, float weight);
 

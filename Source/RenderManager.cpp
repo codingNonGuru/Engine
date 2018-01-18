@@ -19,6 +19,7 @@
 #include "Texture.hpp"
 #include "Render/FilterManager.hpp"
 #include "Render/Filter.hpp"
+#include "Utility/Color.hpp"
 
 RenderManager* RenderManager::instance_ = nullptr;
 

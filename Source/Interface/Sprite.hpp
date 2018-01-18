@@ -12,6 +12,7 @@ class Element;
 class Shader;
 class Camera;
 class Model;
+class Color;
 
 class Sprite
 {
@@ -28,7 +29,7 @@ private:
 
 	Element* parent_;
 
-	Color color_;
+	Color* color_;
 
 public:
 	Sprite();
@@ -41,7 +42,7 @@ public:
 
 	void SetParent(Element* parent) {parent_ = parent;}
 
-	void SetColor(Color color) {color_ = color;}
+	void SetColor(Color* color) {color_ = color;}
 
 	float & GetOpacity();
 };
