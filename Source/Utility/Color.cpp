@@ -2,6 +2,14 @@
 
 #include "Utility/Color.hpp"
 
+Color Color::Black_ = Color(0.0f, 0.0f, 0.0f, 1.0f);
+
+Color Color::White_ = Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+Color Color::Red_ = Color(1.0f, 0.0f, 0.0f, 1.0f);
+
+Color Color::DarkRed_ = Color(0.5f, 0.0f, 0.0f, 1.0f);
+
 Color::Color() {}
 
 Color::Color(float value) : r_(value), g_(value), b_(value), a_(value)

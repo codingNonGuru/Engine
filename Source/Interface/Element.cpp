@@ -80,7 +80,10 @@ void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, S
 	animator_ = new Animator();
 
 	sprite_ = sprite;
-	sprite_->SetParent(this);
+	if(sprite_)
+	{
+		sprite_->SetParent(this);
+	}
 
 	size_ = size;
 

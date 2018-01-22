@@ -41,6 +41,8 @@ const char* FindLastOccurrence(const char* string, char character)
 
 void DebugGl(const char* file, int line)
 {
+	return;
+
 	unsigned int numMsgs = 32;
 
 	GLint maxMessageLength = 0;

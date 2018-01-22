@@ -55,7 +55,7 @@ Color Palette::GetColor()
 
 	Index index = 0;
 	float startWeight = 0.0f;
-	for(auto slot = slots_.GetStart(); slot != slots_.GetEnd(); ++slot)
+	for(auto slot = slots_.GetStart(); slot != slots_.GetEnd(); ++slot, ++index)
 	{
 		bool isInsideRange = (finalWeight >= startWeight) && (finalWeight <= startWeight + slot->GetWeight());
 
@@ -82,7 +82,7 @@ Color Palette::GetColor(int index, bool hasSaturation, bool hasValue)
 	{
 		float saturation = utility::GetRandom(slot.GetSaturationRange().x, slot.GetSaturationRange().y);
 
-		color = utility::SetSaturation(color, saturation);
+		color = utility::AddSaturation(color, saturation);
 	}
 
 	if(hasValue)

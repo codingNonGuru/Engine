@@ -8,6 +8,7 @@
 #include "ShaderManager.hpp"
 #include "MeshManager.hpp"
 #include "TextureManager.hpp"
+#include "Interface/FontManager.hpp"
 
 Array <File>* AssetManager::files_ = nullptr;
 
@@ -51,6 +52,8 @@ void AssetManager::LoadAssets()
 	MeshManager::LoadMeshes();
 
 	TextureManager::LoadTextures();
+
+	FontManager::LoadFonts();
 
 	//CountScripts();
 

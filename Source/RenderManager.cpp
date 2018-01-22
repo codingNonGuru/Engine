@@ -73,7 +73,7 @@ void RenderManager::Update()
 	if(defaultFrameBuffer)
 	{
 		defaultFrameBuffer->BindBuffer();
-		defaultFrameBuffer->Clear(Color(0.0f, 0.3f, 0.5f, 1.0f));
+		defaultFrameBuffer->Clear(Color(0.0f, 0.2f, 0.7f, 1.0f));
 	}
 
 	auto cubeModel = ModelManager::GetModels().Get("Cube");

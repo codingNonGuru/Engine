@@ -51,7 +51,7 @@ public:
 
 	void Update();
 
-	void Render(Camera*);
+	virtual void Render(Camera*);
 
 	Animator* GetAnimator();
 

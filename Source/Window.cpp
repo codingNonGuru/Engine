@@ -29,7 +29,7 @@ void Window::Initialize()
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 16 );
+	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
 
 	window_ = SDL_CreateWindow("Engine", 0, 0, screen_->getWidthInteger(), screen_->getHeightInteger(), SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
 	SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);

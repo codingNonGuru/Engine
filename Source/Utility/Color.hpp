@@ -18,4 +18,12 @@ public:
 	Color operator * (float) const;
 
 	Color operator - (Color&);
+
+	static Color Black_;
+
+	static Color White_;
+
+	static Color Red_;
+
+	static Color DarkRed_;
 };

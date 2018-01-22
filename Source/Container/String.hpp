@@ -55,6 +55,16 @@ namespace container
 			return values_;
 		}
 
+		char* GetEnd()
+		{
+			return values_ + size_;
+		}
+
+		int GetSize()
+		{
+			return size_;
+		}
+
 		operator char*()
 		{
 			return values_;
