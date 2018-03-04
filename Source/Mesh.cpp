@@ -66,6 +66,11 @@ struct MeshAttributeHeader
 
 void* attributeData = malloc(16 * MEGABYTE);
 
+#define RED_CODE "\033[1;31m"
+#define ORANGE_CODE "\033[0;91m"
+#define BOLD_WHITE_CODE "\033[1;97m"
+#define BLANK_CODE "\033[0m"
+
 void Mesh::Initialize(File* file)
 {
 	FILE* fileStream = fopen(file->GetPath(), "rb");
@@ -75,8 +80,8 @@ void Mesh::Initialize(File* file)
 	Length attributeCount;
 	fread(&attributeCount, 1, sizeof(attributeCount), fileStream);
 
-	std::cout<<"> Mesh name: "<<file->GetName()<<"\n";
-	std::cout<<"> Attribute count: "<<attributeCount<<"\n";
+	std::cout << "> Mesh name: " << RED_CODE << file->GetName() << BLANK_CODE << "\n";
+	std::cout << "> Attribute count: " << BOLD_WHITE_CODE << attributeCount << BLANK_CODE << "\n";
 
 	attributes_.Initialize(attributeCount);
 
@@ -85,11 +90,12 @@ void Mesh::Initialize(File* file)
 
 	for(auto header = headers; header != headers + attributeCount; ++header)
 	{
-		std::cout<<"---> Mesh Attribute name: "<<header->Name_<<"\n";
-		std::cout<<"---> Mesh Attribute element count: "<<header->ElementCount_<<"\n";
-		std::cout<<"---> Mesh Attribute element size: "<<header->ElementSize_<<"\n";
-		std::cout<<"---> Mesh Attribute type: "<<header->Type_<<"\n";
-		std::cout<<"\n";
+		std::cout << "---> Mesh Attribute name: " << ORANGE_CODE << header->Name_ << BLANK_CODE << "\n";
+		std::cout << "---> Mesh Attribute element count: " << BOLD_WHITE_CODE << header->ElementCount_ << BLANK_CODE << "\n";
+		std::cout << "---> Mesh Attribute element size: " << BOLD_WHITE_CODE << header->ElementSize_ << BLANK_CODE << "\n";
+		std::cout << "---> Mesh Attribute type: " << BOLD_WHITE_CODE << header->Type_ << BLANK_CODE << "\n";
+		std::cout << "\n";
+
 		auto attribute = attributes_.Add(header->Name_);
 		if(attribute == nullptr)
 			continue;
