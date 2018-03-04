@@ -11,6 +11,11 @@ typedef glm::vec2 Float2;
 typedef glm::vec3 Float3;
 typedef glm::vec4 Float4;
 
+typedef int Integer;
+typedef glm::ivec2 Integer2;
+typedef glm::ivec3 Integer3;
+typedef glm::ivec4 Integer4;
+
 typedef unsigned char Byte;
 
 struct Byte3
