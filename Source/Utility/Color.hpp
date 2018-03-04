@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Conventions.hpp"
+
 class Color
 {
 public:
@@ -19,11 +21,13 @@ public:
 
 	Color operator - (Color&);
 
-	static Color Black_;
+	operator Float4 ();
 
-	static Color White_;
+	static Color BLACK;
 
-	static Color Red_;
+	static Color WHITE;
 
-	static Color DarkRed_;
+	static Color RED;
+
+	static Color DARK_RED;
 };

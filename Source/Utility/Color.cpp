@@ -2,13 +2,13 @@
 
 #include "Utility/Color.hpp"
 
-Color Color::Black_ = Color(0.0f, 0.0f, 0.0f, 1.0f);
+Color Color::BLACK = Color(0.0f, 0.0f, 0.0f, 1.0f);
 
-Color Color::White_ = Color(1.0f, 1.0f, 1.0f, 1.0f);
+Color Color::WHITE = Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-Color Color::Red_ = Color(1.0f, 0.0f, 0.0f, 1.0f);
+Color Color::RED = Color(1.0f, 0.0f, 0.0f, 1.0f);
 
-Color Color::DarkRed_ = Color(0.5f, 0.0f, 0.0f, 1.0f);
+Color Color::DARK_RED = Color(0.5f, 0.0f, 0.0f, 1.0f);
 
 Color::Color() {}
 
@@ -56,6 +56,18 @@ Color Color::operator - (Color& other)
 	result.g_ = g_ - other.g_;
 	result.b_ = b_ - other.b_;
 	result.a_ = a_ - other.a_;
+
+	return result;
+}
+
+Color::operator Float4 ()
+{
+	Float4 result;
+
+	result.r = r_;
+	result.g = g_;
+	result.b = b_;
+	result.a = a_;
 
 	return result;
 }
