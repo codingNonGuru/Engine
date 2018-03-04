@@ -1,0 +1,16 @@
+#pragma once
+
+#include "Interface/Element.hpp"
+
+class CloseButton : public Element
+{
+	using Element::Element;
+
+private:
+	float opacityFactor_;
+
+public:
+	virtual void HandleInitialize();
+
+	virtual void HandleUpdate();
+};
