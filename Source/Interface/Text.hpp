@@ -21,7 +21,7 @@ class Text : public Element
 public:
 	Text();
 
-	Text(Font*, Color = Color::Black_);
+	Text(Font*, Color = Color::BLACK);
 
 	void Setup(const char*);
 

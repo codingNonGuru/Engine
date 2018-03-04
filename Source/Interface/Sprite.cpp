@@ -38,11 +38,9 @@ void Sprite::Draw(Camera* camera)
 {
 	shader_->Bind();
 
-	Matrix& matrix = camera->GetMatrix();
-	shader_->SetConstant(&matrix, "viewMatrix");
+	shader_->SetConstant(camera->GetMatrix(), "viewMatrix");
 
-	Position3 position = parent_->GetGlobalPosition();
-	shader_->SetConstant(&position, "spritePosition");
+	shader_->SetConstant(parent_->GetGlobalPosition(), "spritePosition");
 
 	Scale2 scale;
 	if(texture_)
@@ -56,13 +54,13 @@ void Sprite::Draw(Camera* camera)
 		scale = Scale2(parentSize.x, parentSize.y);
 	}
 	scale *= parent_->GetTransform()->GetScale();
-	shader_->SetConstant(&scale, "spriteSize");
+	shader_->SetConstant(scale, "spriteSize");
 
 	Opacity opacity = opacity_ * parent_->GetOpacity();
-	shader_->SetConstant(&opacity, "opacity");
+	shader_->SetConstant(opacity, "opacity");
 
 	auto drawOrder = (float)parent_->GetDrawOrder() * 0.1f;
-	shader_->SetConstant(&drawOrder, "depth");
+	shader_->SetConstant(drawOrder, "depth");
 
 	if(texture_)
 	{

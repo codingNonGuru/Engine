@@ -20,7 +20,7 @@ public:
 
 	GLenum GetType() const {return type_;}
 
-	void Generate(int, void*);
+	void Generate(int, void* = nullptr);
 
 	void UploadData(void*, GLuint);
 

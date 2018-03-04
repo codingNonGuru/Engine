@@ -10,7 +10,7 @@
 
 Text::Text() {}
 
-Text::Text(Font* font, Color color = Color::Black_)
+Text::Text(Font* font, Color color = Color::BLACK)
 {
 	font_ = font;
 
@@ -86,14 +86,13 @@ void Text::Render(Camera* camera)
 
 	buffer->Bind(0);
 
-	Matrix& matrix = camera->GetMatrix();
-	shader->SetConstant(&matrix, "viewMatrix");
+	shader->SetConstant(camera->GetMatrix(), "viewMatrix");
 
 	Opacity opacity = 1.0f;
-	shader->SetConstant(&opacity, "opacity");
+	shader->SetConstant(opacity, "opacity");
 
 	auto drawOrder = (float)drawOrder_ * 0.1f;
-	shader->SetConstant(&drawOrder, "depth");
+	shader->SetConstant(drawOrder, "depth");
 
 	if(texture && shader)
 	{

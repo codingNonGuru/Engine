@@ -120,10 +120,10 @@ void Voronoi::Generate(bool isDownload, container::Grid<float> &result, containe
 	Size computeSize = Size(size.x / blockSize, size.y / blockSize);
 
 	//Initialize
-	shader_->SetConstant(&glm::uvec2(size), "size");
-	shader_->SetConstant(&size, "sizeInt");
-	auto stage = Stages::INITIALIZE;
- 	shader_->SetConstant(&stage, "stage");
+	shader_->SetConstant(size, "size");
+	shader_->SetConstant(size, "sizeInt");
+	auto stage = (int)Stages::INITIALIZE;
+ 	shader_->SetConstant(stage, "stage");
  	shader_->DispatchCompute(computeSize);
 
 	floodTime = clock();
@@ -133,52 +133,52 @@ void Voronoi::Generate(bool isDownload, container::Grid<float> &result, containe
 		int step = pass < 18 ? pass / 2 : 0;
 		int stepLength = pow(2, step);
 
-		shader_->SetConstant(&stepLength, "stepLength");
+		shader_->SetConstant(stepLength, "stepLength");
 
 		//Flood
-		stage = Stages::FLOOD;
-		shader_->SetConstant(&stage, "stage");
+		stage = (int)Stages::FLOOD;
+		shader_->SetConstant(stage, "stage");
 		shader_->DispatchCompute(computeSize);
 
 		//Swap
-		stage = Stages::SWAP;
-		shader_->SetConstant(&stage, "stage");
+		stage = (int)Stages::SWAP;
+		shader_->SetConstant(stage, "stage");
 		shader_->DispatchCompute(computeSize);
 	}
 	glFinish();
 	floodTime = clock() - floodTime;
 
 	//Separate
-	stage = Stages::SEPARATE;
-	shader_->SetConstant(&stage, "stage");
+	stage = (int)Stages::SEPARATE;
+	shader_->SetConstant(stage, "stage");
 	shader_->DispatchCompute(computeSize);
 
 	buffers_.Get("kernel")->Bind(5);
-	stage = Stages::SWAP;
-	shader_->SetConstant(&stage, "stage");
+	stage = (int)Stages::SWAP;
+	shader_->SetConstant(stage, "stage");
 	unsigned int kernelSpread = kernel.GetSpread();
-	shader_->SetConstant(&kernelSpread, "kernelSpread");
+	shader_->SetConstant(kernelSpread, "kernelSpread");
 	unsigned int kernelSide = kernel.GetSide();
-	shader_->SetConstant(&kernelSide, "kernelSide");
+	shader_->SetConstant(kernelSide, "kernelSide");
 
 	relaxTime = clock();
 	for(unsigned int mode = 0; mode < 2; ++mode)
 	{
-		shader_->SetConstant(&mode, "kernelMode");
+		shader_->SetConstant(mode, "kernelMode");
 
 		//Relax
-		stage = Stages::RELAX;
-		shader_->SetConstant(&stage, "stage");
+		stage = (int)Stages::RELAX;
+		shader_->SetConstant(stage, "stage");
 		shader_->DispatchCompute(computeSize);
 
 		//Swap
-		stage = Stages::SWAP_RESULT;
-		shader_->SetConstant(&stage, "stage");
+		stage = (int)Stages::SWAP_RESULT;
+		shader_->SetConstant(stage, "stage");
 		shader_->DispatchCompute(computeSize);
 	}
 
-	stage = Stages::FLOOD;
-	shader_->SetConstant(&stage, "stage");
+	stage = (int)Stages::FLOOD;
+	shader_->SetConstant(stage, "stage");
 	shader_->DispatchCompute(computeSize);
 
 	shader_->Unbind();

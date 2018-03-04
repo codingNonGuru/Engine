@@ -35,17 +35,16 @@ void Model::Render(Camera* camera)
 {
 	shader_->Bind();
 
-	Matrix& matrix = camera->GetMatrix();
-	shader_->SetConstant(&matrix, "viewMatrix");
+	shader_->SetConstant(camera->GetMatrix(), "viewMatrix");
 
 	auto indexCount = mesh_->GetIndexCount();
-	shader_->SetConstant(&indexCount, "indexCount");
+	shader_->SetConstant(indexCount, "indexCount");
 
 	auto vertexCount = mesh_->GetVertexCount();
-	shader_->SetConstant(&vertexCount, "vertexCount");
+	shader_->SetConstant(vertexCount, "vertexCount");
 
 	auto cameraPosition = camera->GetPosition();
-	shader_->SetConstant(&cameraPosition, "cameraPosition");
+	shader_->SetConstant(cameraPosition, "cameraPosition");
 
 	buffer_->SetSlaveBindPoint("position", 0);
 	buffer_->SetSlaveBindPoint("normal", 1);

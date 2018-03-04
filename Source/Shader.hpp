@@ -44,7 +44,35 @@ public:
 
 	bool BindTexture(Texture*, const char*);
 
-	void SetConstant(void*, const char*);
+	ConstantBinding* GetConstant(const char*);
+
+	void SetConstant(int, const char*);
+
+	void SetConstant(unsigned int, const char*);
+
+	void SetConstant(float, const char*);
+
+	void SetConstant(glm::ivec2, const char*);
+
+	void SetConstant(glm::uvec2, const char*);
+
+	void SetConstant(glm::vec2, const char*);
+
+	void SetConstant(glm::ivec3, const char*);
+
+	void SetConstant(glm::uvec3, const char*);
+
+	void SetConstant(glm::vec3, const char*);
+
+	void SetConstant(glm::ivec4, const char*);
+
+	void SetConstant(glm::uvec4, const char*);
+
+	void SetConstant(glm::vec4, const char*);
+
+	void SetConstant(glm::mat3, const char*);
+
+	void SetConstant(glm::mat4, const char*);
 
 	void Update();
 

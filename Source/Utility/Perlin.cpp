@@ -75,39 +75,39 @@ void Perlin::Generate(Size size, Range range, float dominantOctave, float octave
 
 	//Set all pixels to zero
 
-	shader_->SetConstant(&size, "size");
-	auto stage = Stages::CLEAR;
-	shader_->SetConstant(&stage, "stage");
+	shader_->SetConstant(size, "size");
+	auto stage = (int)Stages::CLEAR;
+	shader_->SetConstant(stage, "stage");
 	shader_->DispatchCompute(computeSize);
 
 	//Generate layers and add them to result
 	unsigned int order = 512;
 	unsigned int octaveCount = 9;
-	shader_->SetConstant(&octaveCount, "octaveCount");
+	shader_->SetConstant(octaveCount, "octaveCount");
 
 	for(Index tier = octaveCount; tier >= 1; --tier, order /= 2)
 	{
-		shader_->SetConstant(&order, "order");
-		shader_->SetConstant(&tier, "octaveIndex");
+		shader_->SetConstant(order, "order");
+		shader_->SetConstant(tier, "octaveIndex");
 		unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
-		shader_->SetConstant(&timeSeed, "timeSeed");
-		shader_->SetConstant(&dominantOctave, "strongestOctave");
-		shader_->SetConstant(&octaveDecay, "decay");
+		shader_->SetConstant(timeSeed, "timeSeed");
+		shader_->SetConstant(dominantOctave, "strongestOctave");
+		shader_->SetConstant(octaveDecay, "decay");
 
 		for(Index stage = 0; stage < 3; ++stage)
 		{
-			shader_->SetConstant(&stage, "stage");
+			shader_->SetConstant(stage, "stage");
 			shader_->DispatchCompute(computeSize);
 		}
 	}
 
 	//Finish result
-	stage = Stages::ADD_OCTAVES;
-	shader_->SetConstant(&stage, "stage");
-	shader_->SetConstant(&octaveCount, "octaveCount");
-	shader_->SetConstant(&range, "range");
-	shader_->SetConstant(&contrast, "contrast");
-	shader_->SetConstant(&contrastStrength, "contrastStrength");
+	stage = (int)Stages::ADD_OCTAVES;
+	shader_->SetConstant(stage, "stage");
+	shader_->SetConstant(octaveCount, "octaveCount");
+	shader_->SetConstant(range, "range");
+	shader_->SetConstant(contrast, "contrast");
+	shader_->SetConstant(contrastStrength, "contrastStrength");
 
 	shader_->DispatchCompute(computeSize);
 

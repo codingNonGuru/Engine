@@ -29,11 +29,11 @@ void Filter::Apply(Camera* camera)
 	shader_->Bind();
 
 	Matrix& matrix = camera->GetMatrix();
-	shader_->SetConstant(&matrix, "viewMatrix");
+	shader_->SetConstant(matrix, "viewMatrix");
 
 	auto textureSize = screenTexture_->GetSize();
 	Scale2 scale = Scale2(textureSize.x, textureSize.y);
-	shader_->SetConstant(&scale, "screenSize");
+	shader_->SetConstant(scale, "screenSize");
 
 	screenTexture_->Bind(0, shader_, "diffuse");
 
