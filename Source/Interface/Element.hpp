@@ -2,9 +2,9 @@
 
 #include <glm/glm.hpp>
 
+#include "../Object.hpp"
 #include "Conventions.hpp"
 #include "Types.hpp"
-#include "GameObject.hpp"
 
 class Sprite;
 class Camera;
@@ -13,14 +13,14 @@ class Animator;
 class AnimationProperty;
 class Delegate;
 
-class Element : public GameObject
+class Element : public Object
 {
 protected:
 	Sprite* sprite_;
 
 	Animator* animator_;
 
-	Array <GameObject*> children_;
+	Array <Object*> children_;
 
 	Size size_;
 
@@ -35,6 +35,18 @@ protected:
 	Delegate * clickEvents_;
 
 	Delegate * hoverEvents_;
+
+	virtual void HandleOpen();
+
+	virtual void HandleClose();
+
+	virtual void HandleEnable();
+
+	virtual void HandleDisable();
+
+	virtual void HandleInitialize() {}
+
+	virtual void HandleUpdate() {}
 
 public:
 	Element();
@@ -76,16 +88,4 @@ public:
 	void Open();
 
 	void Close();
-
-	virtual void HandleOpen();
-
-	virtual void HandleClose();
-
-	virtual void HandleEnable();
-
-	virtual void HandleDisable();
-
-	virtual void HandleInitialize() {}
-
-	virtual void HandleUpdate() {}
 };

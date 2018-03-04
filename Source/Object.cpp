@@ -1,37 +1,37 @@
-#include "GameObject.hpp"
+#include "Object.hpp"
 
 #include "Transform.hpp"
 
-void GameObject::Enable()
+void Object::Enable()
 {
 	isActive_ = true;
 
 	HandleEnable();
 }
 
-void GameObject::Disable()
+void Object::Disable()
 {
 	isActive_ = false;
 
 	HandleDisable();
 }
 
-void GameObject::HandleEnable() {}
+void Object::HandleEnable() {}
 
-void GameObject::HandleDisable() {}
+void Object::HandleDisable() {}
 
-bool GameObject::IsLocallyActive()
+bool Object::IsLocallyActive()
 {
 	return isActive_;
 }
 
-bool GameObject::IsGloballyActive()
+bool Object::IsGloballyActive()
 {
 	bool isActive = isActive_;
 	if(isActive == false)
 		return false;
 
-	GameObject* parent = parent_;
+	Object* parent = parent_;
 
 	while(true)
 	{
@@ -49,17 +49,17 @@ bool GameObject::IsGloballyActive()
 	return true;
 }
 
-Position3 GameObject::GetLocalPosition()
+Position3 Object::GetLocalPosition()
 {
 	return transform_->GetPosition();
 }
 
-Position3 GameObject::GetGlobalPosition()
+Position3 Object::GetGlobalPosition()
 {
 	//if(!isAttached_)
 		//return transform_->position_;
 
-	GameObject* parent = parent_;
+	Object* parent = parent_;
 	Position3 position = transform_->GetPosition();
 
 	while(true)
@@ -87,19 +87,19 @@ Position3 GameObject::GetGlobalPosition()
 	return position;
 }
 
-Rotation GameObject::GetLocalRotation()
+Rotation Object::GetLocalRotation()
 {
 	return transform_->GetRotation();
 }
 
-Rotation GameObject::GetGlobalRotation()
+Rotation Object::GetGlobalRotation()
 {
 	Rotation rotation = transform_->GetRotation();
 
 	if(parent_ == nullptr)
 		return rotation;
 
-	GameObject* parent = parent_;
+	Object* parent = parent_;
 	while(true)
 	{
 		if(parent)
@@ -117,17 +117,26 @@ Rotation GameObject::GetGlobalRotation()
 	return rotation;
 }
 
-GameObject* GameObject::GetParent()
+Object* Object::GetParent()
 {
 	return parent_;
 }
 
-Transform* GameObject::GetTransform()
+Transform* Object::GetTransform()
 {
 	return transform_;
 }
 
-void GameObject::SetParent(GameObject* parent)
+void Object::SetParent(Object* parent)
 {
 	parent_ = parent;
+}
+
+void Object::Update()
+{
+
+}
+
+void Object::Render(Camera* camera)
+{
 }

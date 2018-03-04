@@ -3,24 +3,25 @@
 #include "Conventions.hpp"
 
 class Transform;
+class Camera;
 
-class GameObject
+class Object
 {
 protected:
 	bool isActive_;
 
 	Transform* transform_;
 
-	GameObject* parent_;
+	Object* parent_;
+
+	virtual void HandleEnable();
+
+	virtual void HandleDisable();
 
 public:
 	void Enable();
 
 	void Disable();
-
-	virtual void HandleEnable();
-
-	virtual void HandleDisable();
 
 	bool IsGloballyActive();
 
@@ -34,9 +35,13 @@ public:
 
 	Rotation GetGlobalRotation();
 
-	GameObject* GetParent();
+	Object* GetParent();
 
 	Transform* GetTransform();
 
-	void SetParent(GameObject*);
+	void SetParent(Object*);
+
+	virtual void Update();
+
+	virtual void Render(Camera*);
 };
