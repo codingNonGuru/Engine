@@ -1,5 +1,8 @@
 #include <stdlib.h>
+#include <regex>
+
 #include "GL/glew.h"
+#include "SDL2/SDL_image.h"
 
 #include "Texture.hpp"
 #include "Shader.hpp"
@@ -27,7 +30,33 @@ Texture::Texture(File* file)
 
 void Texture::Initialize(File* file)
 {
-	FILE* fileStream = fopen(file->GetPath(), "rb");
+	file_ = file;
+
+	const char* fileName = file->GetName();
+	std::regex expression(".*\.png");
+	std::cmatch match;
+	bool isMatched = std::regex_match(fileName, match, expression);
+
+	if(isMatched)
+	{
+		std::cout<<"Texture "<<fileName<<" is of PNG (external) format.\n";
+		ProcessPngFormat();
+	}
+	else
+	{
+		std::cout<<"Texture "<<fileName<<" is of TEX (internal) format.\n";
+		ProcessInternalFormat();
+	}
+}
+
+Texture::~Texture()
+{
+
+}
+
+void Texture::ProcessInternalFormat()
+{
+	FILE* fileStream = fopen(file_->GetPath(), "rb");
 	if(fileStream == nullptr)
 		return;
 
@@ -65,9 +94,28 @@ void Texture::Initialize(File* file)
 	Upload(grid->GetData());
 }
 
-Texture::~Texture()
+void Texture::ProcessPngFormat()
 {
+	SDL_Surface* swordImage = IMG_Load(file_->GetPath());
 
+	size_.x = swordImage->w;
+	size_.y = swordImage->h;
+
+	format_ = TextureFormats::FOUR_BYTE;
+
+	Grid<Byte4> texture (swordImage->w, swordImage->h);
+
+	for(int x = 0; x < swordImage->w; ++x)
+		for(int y = 0; y < swordImage->h; ++y)
+		{
+			auto pixel = texture(x, y);
+			auto rawPixel = (Byte4*)swordImage->pixels + swordImage->w * y + x;
+			*pixel = *rawPixel;
+		}
+
+	SDL_FreeSurface(swordImage);
+
+	Upload(texture.GetData());
 }
 
 void Texture::Bind()

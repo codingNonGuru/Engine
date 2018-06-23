@@ -17,6 +17,12 @@ class Texture
 
 	TextureFormats format_;
 
+	File* file_;
+
+	void ProcessInternalFormat();
+
+	void ProcessPngFormat();
+
 public:
 	Texture();
 
