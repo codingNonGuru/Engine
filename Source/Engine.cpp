@@ -50,8 +50,8 @@ void Engine::StartGameLoop()
 
 		if(InputHandler::IsPressed(SDLK_a))
 		{
-			auto mainMenu = Interface::GetElements().Get("MainMenu");
-			(*mainMenu)->Open();
+			auto mainMenu = Interface::GetElement("MainMenu");
+			mainMenu->Open();
 		}
 
 		Interface::Update();

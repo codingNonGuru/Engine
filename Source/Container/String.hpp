@@ -32,8 +32,7 @@ namespace container
 
 		void Add(const char* string)
 		{
-			strcpy(values_, string);
-			size_ = strlen(string);
+			Add(string, strlen(string));
 		}
 
 		void Add(char* string, int length)

@@ -4,6 +4,7 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "Camera.hpp"
+#include "Time.hpp"
 
 Filter::Filter() {}
 
@@ -14,32 +15,71 @@ Filter::Filter(Shader* shader, Texture* screenTexture)
 
 void Filter::Initialize(Shader* shader, Texture* screenTexture)
 {
+	isActive_ = false;
+
+	timer_ = 0.0f;
+
+	transition_ = Transitions::NONE;
+
 	shader_ = shader;
 
 	screenTexture_ = screenTexture;
+
+	HandleInitialize();
 }
 
-void Filter::Apply(Camera* camera)
+void Filter::Open()
 {
+	isActive_ = true;
+
+	transition_ = Transitions::OPEN;
+
+	timer_ = 0.0f;
+}
+
+void Filter::Close()
+{
+	transition_ = Transitions::CLOSE;
+
+	timer_ = 1.0f;
+}
+
+void Filter::Update(Camera* camera)
+{
+	if(!isActive_)
+		return;
+
+	float transitionSpeed = 2.0f;
+	if(transition_ == Transitions::OPEN)
+	{
+		timer_ += Time::GetDelta() * transitionSpeed;
+		if(timer_ > 1.0f)
+		{
+			timer_ = 1.0f;
+			transition_ = Transitions::NONE;
+		}
+	}
+	else if(transition_ == Transitions::CLOSE)
+	{
+		timer_ -= Time::GetDelta() * transitionSpeed;
+		if(timer_ < 0.0f)
+		{
+			timer_ = 0.0f;
+			transition_ = Transitions::NONE;
+
+			isActive_ = false;
+		}
+	}
+
 	if(!screenTexture_)
 		return;
 
 	screenTexture_->DownloadBackBuffer();
 
-	shader_->Bind();
+	HandleUpdate(camera);
+}
 
-	Matrix& matrix = camera->GetMatrix();
-	shader_->SetConstant(matrix, "viewMatrix");
-
-	auto textureSize = screenTexture_->GetSize();
-	Scale2 scale = Scale2(textureSize.x, textureSize.y);
-	shader_->SetConstant(scale, "screenSize");
-
-	screenTexture_->Bind(0, shader_, "diffuse");
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	shader_->Unbind();
-
-	screenTexture_->Unbind();
+float Filter::GetTimeFactor()
+{
+	return 3.0f * timer_ * timer_ - 2.0f * timer_ * timer_ * timer_;
 }

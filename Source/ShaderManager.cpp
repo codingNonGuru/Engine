@@ -93,3 +93,8 @@ void ShaderManager::LoadShaders()
 		shader->Initialize(*fileBatchKey, fileBatch->Files_);
 	}
 }
+
+Shader* ShaderManager::GetShader(const char* identifier)
+{
+	return shaders_.Get(identifier);
+}

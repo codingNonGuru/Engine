@@ -20,6 +20,8 @@ void Object::HandleEnable() {}
 
 void Object::HandleDisable() {}
 
+void Object::HandleSetParent(Object* parent) {}
+
 bool Object::IsLocallyActive()
 {
 	return isActive_;
@@ -130,6 +132,8 @@ Transform* Object::GetTransform()
 void Object::SetParent(Object* parent)
 {
 	parent_ = parent;
+
+	HandleSetParent(parent);
 }
 
 void Object::Update()

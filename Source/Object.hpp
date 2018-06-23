@@ -18,6 +18,8 @@ protected:
 
 	virtual void HandleDisable();
 
+	virtual void HandleSetParent(Object*);
+
 public:
 	void Enable();
 

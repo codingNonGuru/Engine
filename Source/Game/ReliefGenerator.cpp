@@ -21,7 +21,7 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 {
 	SetupBuffers(world, parameterSet);
 
-	shader = ShaderManager::GetShaderMap().Get("GenerateRelief");
+	shader = ShaderManager::GetShader("GenerateRelief");
 	if(!shader)
 		return;
 
@@ -34,6 +34,19 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 	buffers.Get(Buffers::KERNEL)->Bind(10);
 	buffers.Get(Buffers::PARTICLE)->Bind(11);
 	buffers.Get(Buffers::PARTICLE_VELOCITY)->Bind(12);
+
+	auto computeSize = parameterSet.Size_ / 4;
+
+	shader->SetConstant(parameterSet.Size_, "size");
+
+	shader->SetConstant(0, "mode");
+	shader->DispatchCompute(computeSize);
+
+	auto position = (Float2)parameterSet.Size_ / Float2(4.0f, 2.5f);
+	LiftTerrain(position, 80.0f, computeSize);
+
+	position = (Float2)parameterSet.Size_ / Float2(1.33f, 1.66f);
+	LiftTerrain(position, 80.0f, computeSize);
 
 	/*glUniform2i(1, width_, height_);
 	int workGroupSize = 1;
@@ -95,6 +108,9 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 	}*/
 
 	shader->Unbind();
+
+	Grid<float> terrain(parameterSet.Size_.x, parameterSet.Size_.y);
+	buffers.Get(Buffers::FINAL)->Download(&terrain);
 
 	/*container::Grid<float> heightMap(width_, height_);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, finalBuffer);
@@ -214,4 +230,13 @@ void ReliefGenerator::SetupBuffers(World& world, const WorldParameterSet& parame
 
 	container::Grid <float> perlinDetail(size.x, size.y);
 	Perlin::Generate(size, Range(0.0f, 1.0f), 2.0f, 2.0f, 0.5f, 2.0f);
+}
+
+void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)
+{
+	shader->SetConstant(position, "target");
+	shader->SetConstant(decay, "decay");
+
+	shader->SetConstant(1, "mode");
+	shader->DispatchCompute(computeSize);
 }

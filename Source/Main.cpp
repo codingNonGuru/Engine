@@ -9,9 +9,11 @@
 #include "MeshManager.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
-#include "Game/InterfaceBuilder.hpp"
-#include "Game/FilterBuilder.hpp"
 #include "Utility/Perlin.hpp"
+
+#include "Game/InterfaceBuilder.hpp"
+#include "Game/SceneBuilder.hpp"
+#include "Game/Filter/FilterBuilder.hpp"
 
 int main()
 {
@@ -34,6 +36,8 @@ int main()
 	}
 
 	Perlin::Initialize();
+
+	SceneBuilder::GenerateScenes();
 
 	FilterBuilder::GenerateFilters();
 

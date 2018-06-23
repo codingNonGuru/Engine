@@ -16,4 +16,6 @@ public:
 	static void LoadShaders();
 
 	static Map <Shader, LongWord> &GetShaderMap() {return shaders_;}
+
+	static Shader* GetShader(const char*);
 };

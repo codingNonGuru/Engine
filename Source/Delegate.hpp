@@ -34,13 +34,20 @@ void Delegate::Remove(ObjectType *object, void (ClassType::*function)())
 {
 	Callback externalCallback(object, function);
 
+	Callback* targetCallback = nullptr;
 	for(auto callback = callbacks_.GetStart(); callback != callbacks_.GetEnd(); ++callback)
 	{
 		if(*callback == externalCallback)
 		{
+			targetCallback = callback;
 			callback->clear();
 			break;
 		}
+	}
+
+	if(targetCallback != nullptr)
+	{
+		callbacks_.Remove(targetCallback);
 	}
 }
 

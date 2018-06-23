@@ -83,7 +83,15 @@ void RenderManager::Update()
 
 	SetBlendMode();
 
-	FilterManager::GetFilter("Saturate")->Apply(interfaceCamera);
+	auto filters = FilterManager::GetFilters();
+	for(auto filterIterator = filters.GetStart(); filterIterator != filters.GetEnd(); ++filterIterator)
+	{
+		auto filter = *filterIterator;
+		if(!filter)
+			continue;
+
+		filter->Update(interfaceCamera);
+	}
 
 	Interface::Render(interfaceCamera);
 

@@ -33,14 +33,12 @@ void FileManager::GetFilesInSubfolder(const char* path, bool isRecursive)
 	{
 		while (file = readdir(directory))
 		{
-			char filePath[256];
-			strcpy(filePath, path);
-			strcat(filePath, "/");
-			strcat(filePath, file->d_name);
+			FilePath filePath(path);
+			filePath.Add("/");
+			filePath.Add(file->d_name);
+
 			if(file->d_type != DT_DIR)
 			{
-				//std::cout<<"Filename: "<<file->d_name<<"\n";
-				//std::cout<<"Filepath: "<<filePath<<"\n\n";
 				*files_.Allocate() = File(file->d_name, filePath);
 			}
 
@@ -49,8 +47,6 @@ void FileManager::GetFilesInSubfolder(const char* path, bool isRecursive)
 
 			if(file->d_type == DT_DIR && file->d_name[0] != '.')
 			{
-
-
 				GetFilesInSubfolder(filePath, true);
 			}
 		}

@@ -36,9 +36,16 @@ void DataBuffer::UploadData(void* data, GLuint size)
 
 void DataBuffer::Download(Container * container)
 {
+	auto data = container->GetData();
+	if(data == nullptr)
+	{
+		std::cout<<"Container Data is not initialized.\n";
+		return;
+	}
+
 	Bind();
 
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, container->GetMemorySize(), container->GetData());
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, container->GetMemorySize(), data);
 
 	Unbind();
 }
