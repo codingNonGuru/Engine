@@ -97,6 +97,15 @@ void Interface::Sort()
 	isSorted_ = true;
 }
 
+Element* Interface::GetElement(const char* name)
+{
+	auto elementPointer = elements_.Get(name);
+	if(!elementPointer)
+		return nullptr;
+
+	return *elementPointer;
+}
+
 Map <Element*, LongWord> & Interface::GetElements()
 {
 	return elements_;
@@ -109,6 +118,8 @@ Element* Interface::AddElement(const char* name, Element* element)
 		return nullptr;
 
 	*elementPointer = element;
+
+	element->SetIdentifier(name);
 
 	isSorted_ = false;
 

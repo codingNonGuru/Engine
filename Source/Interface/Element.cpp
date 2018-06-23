@@ -9,6 +9,8 @@
 #include "InputHandler.hpp"
 #include "Delegate.hpp"
 
+#define DEFAULT_CHILDREN_COUNT 8
+
 Element::Element()
 {
 	isActive_ = false;
@@ -23,12 +25,12 @@ Element::Element()
 
 	clickEvents_ = nullptr;
 
-	HandleInitialize();
+	HandleConfigure();
 }
 
 Element::Element(Size size, Transform* transform, Sprite* sprite)
 {
-	Initialize(size, transform, sprite);
+	Configure(size, transform, sprite);
 }
 
 /*Element::Element(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite)
@@ -38,10 +40,10 @@ Element::Element(Size size, Transform* transform, Sprite* sprite)
 
 Element::Element(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
 {
-	Initialize(size, drawOrder, transform, sprite, opacity);
+	Configure(size, drawOrder, transform, sprite, opacity);
 }
 
-void Element::Initialize(Size size, Transform* transform, Sprite* sprite)
+void Element::Configure(Size size, Transform* transform, Sprite* sprite)
 {
 	isActive_ = false;
 
@@ -64,10 +66,12 @@ void Element::Initialize(Size size, Transform* transform, Sprite* sprite)
 
 	clickEvents_ = new Delegate();
 
-	HandleInitialize();
+	children_.Initialize(DEFAULT_CHILDREN_COUNT);
+
+	HandleConfigure();
 }
 
-void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
+void Element::Configure(Size size, DrawOrder drawOrder, Transform* transform, Sprite* sprite, Opacity opacity)
 {
 	isActive_ = false;
 
@@ -93,6 +97,23 @@ void Element::Initialize(Size size, DrawOrder drawOrder, Transform* transform, S
 
 	clickEvents_ = new Delegate();
 
+	children_.Initialize(DEFAULT_CHILDREN_COUNT);
+
+	HandleConfigure();
+}
+
+LongWord Element::GetIdentifier()
+{
+	return identifier_;
+}
+
+void Element::SetIdentifier(LongWord identifier)
+{
+	identifier_ = identifier;
+}
+
+void Element::Initialize()
+{
 	HandleInitialize();
 }
 
@@ -109,8 +130,10 @@ bool Element::CheckHover()
 
 	auto mousePosition = InputHandler::GetMousePosition();
 
-	bool isInsideHorizontally = mousePosition.x > transform_->GetPosition().x - size_.x / 2 && mousePosition.x < transform_->GetPosition().x + size_.x / 2;
-	bool isInsideVertically = mousePosition.y > transform_->GetPosition().y - size_.y / 2 && mousePosition.y < transform_->GetPosition().y + size_.y / 2;
+	auto position = GetGlobalPosition();
+
+	bool isInsideHorizontally = mousePosition.x > position.x - size_.x / 2 && mousePosition.x < position.x + size_.x / 2;
+	bool isInsideVertically = mousePosition.y > position.y - size_.y / 2 && mousePosition.y < position.y + size_.y / 2;
 
 	isHovered_ = isInsideHorizontally && isInsideVertically;
 
@@ -232,6 +255,30 @@ void Element::Close()
 	HandleClose();
 }
 
+void Element::AddChild(Element* child)
+{
+	auto childPointer = children_.Allocate();
+	if(childPointer == nullptr)
+		return;
+
+	*childPointer = child;
+}
+
+Element* Element::GetChild(LongWord identifier)
+{
+	for(auto childIterator = children_.GetStart(); childIterator != children_.GetEnd(); ++childIterator)
+	{
+		auto child = *childIterator;
+		if(child == nullptr)
+			continue;
+
+		if(child->GetIdentifier() == identifier)
+			return child;
+	}
+
+	return nullptr;
+}
+
 void Element::HandleOpen()
 {
 }
@@ -249,3 +296,14 @@ void Element::HandleDisable()
 
 }
 
+void Element::HandleSetParent(Object* parent)
+{
+	auto parentAsElement = (Element*)parent;
+	parentAsElement->AddChild(this);
+}
+
+void Element::HandleConfigure() {}
+
+void Element::HandleInitialize() {}
+
+void Element::HandleUpdate() {}

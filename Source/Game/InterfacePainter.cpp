@@ -46,7 +46,7 @@ void InterfacePainter::Initialize()
 {
 	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(1.0f));
 	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.5f));
-	basePalette.Add(Color(0.0f, 0.0f, 1.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.1f));
+	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.2f));
 
 	//lightPalette.Add(Color(1.0f, 0.8f, 0.5f), Range(0.5f, 1.0f), Range(0.0f, 1.0f), Weight(1.0f));
 
@@ -151,7 +151,7 @@ void InterfacePainter::GenerateStencils()
 	shader->Unbind();
 }
 
-void InterfacePainter::GeneratePaper(Size size)
+void InterfacePainter::GeneratePaper(Size size, Shapes shape)
 {
 	Perlin::Generate(size, Range(0.0f, 1.0f), 3.0f, 2.0f, 0.5f, 4.0f);
 
@@ -159,7 +159,7 @@ void InterfacePainter::GeneratePaper(Size size)
 
 	SetupPaperGenerator(size);
 
-	Clear(paperGenerationShader, computeSize);
+	Clear(paperGenerationShader, computeSize, shape);
 
 	currentKernel = kernelBuffers.Get("small");
 
@@ -202,12 +202,14 @@ void InterfacePainter::SetupPaperGenerator(Size size)
 	paperGenerationShader->SetConstant(size, "size");
 }
 
-void InterfacePainter::Clear(Shader* shader, Size computeSize)
+void InterfacePainter::Clear(Shader* shader, Size computeSize, Shapes shape)
 {
 	SetStage(Stages::CLEAR);
 
 	Float4 baseColor = Color(0.95f, 0.81f, 0.72f, 1.0f);
 	shader->SetConstant(baseColor, "baseColor");
+
+	shader->SetConstant((int)shape, "shape");
 
 	shader->DispatchCompute(computeSize);
 }
@@ -296,7 +298,7 @@ void InterfacePainter::SetStage(Stages stage)
 
 void InterfacePainter::GenerateTextures(Shapes shape, Size size, Texture*& baseTexture, Texture*& shadowTexture)
 {
-	GeneratePaper(size);
+	GeneratePaper(size, shape);
 
 	ApplyBrushes(size);
 
@@ -328,11 +330,47 @@ void InterfacePainter::PaintInterface()
 	Texture* baseTexture = nullptr;
 	Texture* shadowTexture = nullptr;
 
-	GenerateTextures(Shapes::ROUND, Size(1024, 1024), baseTexture, shadowTexture);
+	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
 	*TextureManager::GetTextures().Add("MainMenu") = *baseTexture;
 	*TextureManager::GetTextures().Add("MainMenuShadow") = *shadowTexture;
 
-	GenerateTextures(Shapes::ROUND, Size(512, 256), baseTexture, shadowTexture);
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
 	*TextureManager::GetTextures().Add("MainMenuCloseButton") = *baseTexture;
 	*TextureManager::GetTextures().Add("MainMenuCloseButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewGameMenu") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewGameMenuShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewGameMenuNewWorldButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewGameMenuNewWorldButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenu") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenuSetSizeButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuSetSizeButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenuLeftScrollButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuLeftScrollButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenuRightScrollButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuRightScrollButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewGameMenuBackButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewGameMenuBackButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenuGenerateButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuGenerateButtonShadow") = *shadowTexture;
+
+	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	*TextureManager::GetTextures().Add("NewWorldMenuBackButton") = *baseTexture;
+	*TextureManager::GetTextures().Add("NewWorldMenuBackButtonShadow") = *shadowTexture;
 }

@@ -4,7 +4,7 @@
 #include "Transform.hpp"
 #include "Time.hpp"
 
-void CloseButton::HandleInitialize()
+void CloseButton::HandleConfigure()
 {
 	opacityFactor_ = 0.0f;
 }

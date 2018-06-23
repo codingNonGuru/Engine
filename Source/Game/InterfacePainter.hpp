@@ -15,7 +15,7 @@ class InterfacePainter
 
 	enum class Shapes
 	{
-		ROUND, SQUARE
+		SQUARE, ROUND
 	};
 
 	static Map <DataBuffer, LongWord> buffers_;
@@ -26,7 +26,7 @@ class InterfacePainter
 
 	static void SetupPaperGenerator(Size);
 
-	static void Clear(Shader*, Size);
+	static void Clear(Shader*, Size, Shapes);
 
 	static void Blur(Shader*, Size);
 
@@ -40,7 +40,7 @@ class InterfacePainter
 
 	static void GenerateShadow(Size, Size);
 
-	static void GeneratePaper(Size);
+	static void GeneratePaper(Size, Shapes);
 
 	static Texture* GenerateBaseTexture(Size);
 

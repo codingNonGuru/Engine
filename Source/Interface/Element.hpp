@@ -16,11 +16,13 @@ class Delegate;
 class Element : public Object
 {
 protected:
+	LongWord identifier_;
+
 	Sprite* sprite_;
 
 	Animator* animator_;
 
-	Array <Object*> children_;
+	Array <Element*> children_;
 
 	Size size_;
 
@@ -40,13 +42,17 @@ protected:
 
 	virtual void HandleClose();
 
-	virtual void HandleEnable();
+	virtual void HandleConfigure();
 
-	virtual void HandleDisable();
+	virtual void HandleInitialize();
 
-	virtual void HandleInitialize() {}
+	virtual void HandleUpdate();
 
-	virtual void HandleUpdate() {}
+	virtual void HandleEnable() override;
+
+	virtual void HandleDisable() override;
+
+	virtual void HandleSetParent(Object*) override;
 
 public:
 	Element();
@@ -55,9 +61,15 @@ public:
 
 	Element(Size, DrawOrder, Transform*, Sprite*, Opacity = 1.0f);
 
-	void Initialize(Size, Transform*, Sprite*);
+	void Configure(Size, Transform*, Sprite*);
 
-	void Initialize(Size, DrawOrder, Transform*, Sprite*, Opacity = 1.0f);
+	void Configure(Size, DrawOrder, Transform*, Sprite*, Opacity = 1.0f);
+
+	LongWord GetIdentifier();
+
+	void SetIdentifier(LongWord);
+
+	void Initialize();
 
 	bool CheckHover();
 
@@ -80,6 +92,10 @@ public:
 	void SetInteractivity(bool);
 
 	AnimationProperty* AddAnimationProperty(const char*, InterfaceElementParameters);
+
+	void AddChild(Element*);
+
+	Element* GetChild(LongWord);
 
 	void HandleClick();
 

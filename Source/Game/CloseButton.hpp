@@ -10,7 +10,7 @@ private:
 	float opacityFactor_;
 
 public:
-	virtual void HandleInitialize();
+	virtual void HandleConfigure();
 
 	virtual void HandleUpdate();
 };
