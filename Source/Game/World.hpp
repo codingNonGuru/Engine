@@ -8,6 +8,8 @@ class Tile;
 
 class World
 {
+	Size size_;
+
 	Grid <Tile> tiles_;
 
 public:
@@ -18,4 +20,8 @@ public:
 	World(const WorldParameterSet&);
 
 	Grid <Tile> & GetTiles();
+
+	Size GetSize();
+
+	void SetSize(Size);
 };

@@ -4,6 +4,8 @@
 #include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
 #include "Game/ReliefGenerator.hpp"
+#include "Game/BiomeGenerator.hpp"
+#include "Game/World.hpp"
 
 Map <Texture*, WorldSizeOptions> WorldGenerator::reliefTextures_ = Map <Texture*, WorldSizeOptions>((int)WorldSizeOptions::COUNT);
 
@@ -35,7 +37,11 @@ void WorldGenerator::Generate(World& world, const WorldParameterSet& parameterSe
 		break;
 	}
 
-	ReliefGenerator::Generate(world, size);
+	world.SetSize(size);
+
+	ReliefGenerator::Generate(world);
+
+	BiomeGenerator::Generate(world);
 
 	OnWorldGenerated_.Invoke();
 }

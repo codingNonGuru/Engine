@@ -17,3 +17,13 @@ Grid <Tile> & World::GetTiles()
 {
 	return tiles_;
 }
+
+Size World::GetSize()
+{
+	return size_;
+}
+
+void World::SetSize(Size size)
+{
+	size_ = size;
+}
