@@ -23,7 +23,7 @@ void FilterBuilder::GenerateFilters()
 	auto filter = FilterManager::AddFilter("Saturate", new SaturateFilter());
 	filter->Initialize(saturateEffectShader, screenTexture);
 
-	auto blurEffectShader = ShaderManager::GetShaderMap().Get("Blur");
+	auto blurEffectShader = ShaderManager::GetShader("BlurEffect");
 
 	filter = FilterManager::AddFilter("Blur", new BlurFilter());
 	filter->Initialize(blurEffectShader, screenTexture);

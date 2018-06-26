@@ -10,6 +10,7 @@
 #include "Game/ReliefGenerator.hpp"
 #include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
+#include "Game/World.hpp"
 
 enum class Buffers
 {
@@ -20,9 +21,11 @@ Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
 
 Shader* shader = nullptr;
 
-void ReliefGenerator::Generate(World& world, Size size)
+void ReliefGenerator::Generate(World& world)
 {
-	SetupBuffers(world, size);
+	Size size = world.GetSize();
+
+	SetupBuffers(world);
 
 	shader = ShaderManager::GetShader("GenerateRelief");
 	if(!shader)
@@ -112,6 +115,9 @@ void ReliefGenerator::Generate(World& world, Size size)
 
 	for(auto buffer = buffers.GetStart(); buffer != buffers.GetEnd(); ++buffer)
 	{
+		if(buffer == buffers.Get(Buffers::FINAL))
+			continue;
+
 		buffer->Delete();
 	}
 
@@ -164,8 +170,14 @@ void ReliefGenerator::Generate(World& world, Size size)
 	computeHeights();*/
 }
 
-void ReliefGenerator::SetupBuffers(World& world, Size size)
+DataBuffer* ReliefGenerator::GetFinalBuffer()
 {
+	return buffers.Get(Buffers::FINAL);
+}
+
+void ReliefGenerator::SetupBuffers(World& world)
+{
+	auto size = world.GetSize();
 	auto area = size.x * size.y;
 
 	DataBuffer* buffer = nullptr;
