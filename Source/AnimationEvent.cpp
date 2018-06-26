@@ -4,7 +4,7 @@
 
 AnimationEvent::AnimationEvent()
 {
-	events_ = nullptr;
+	actions_ = nullptr;
 }
 
 AnimationEvent::AnimationEvent(float time)
@@ -16,7 +16,7 @@ void AnimationEvent::Initialize(float time)
 {
 	time_ = time;
 
-	events_ = new Delegate();
+	actions_ = new Delegate();
 }
 
 float AnimationEvent::GetTime()
@@ -24,9 +24,9 @@ float AnimationEvent::GetTime()
 	return time_;
 }
 
-Delegate & AnimationEvent::GetEvents()
+Delegate & AnimationEvent::GetActions()
 {
-	return *events_;
+	return *actions_;
 }
 
 void AnimationEvent::Invoke()
@@ -34,7 +34,7 @@ void AnimationEvent::Invoke()
 	if(isInvoked_)
 		return;
 
-	events_->Invoke();
+	actions_->Invoke();
 
 	isInvoked_ = true;
 }

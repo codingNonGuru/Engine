@@ -19,6 +19,8 @@
 
 Map <DataBuffer, LongWord> InterfacePainter::buffers_ = Map <DataBuffer, LongWord> (16);
 
+Map <Array <ElementTextureSet>, InterfacePainter::ElementTextureClass> InterfacePainter::textureSets_ = Map <Array <ElementTextureSet>, ElementTextureClass> (16);
+
 Palette basePalette = Palette(16);
 
 Palette lightPalette = Palette(16);
@@ -44,9 +46,9 @@ KernelBuffer* currentKernel = nullptr;
 
 void InterfacePainter::Initialize()
 {
-	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(1.0f));
-	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.5f));
-	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.2f));
+	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.5f));
+	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.5f, 0.0f), Range(0.6f, 1.0f), Weight(1.0f));
+	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.1f));
 
 	//lightPalette.Add(Color(1.0f, 0.8f, 0.5f), Range(0.5f, 1.0f), Range(0.0f, 1.0f), Weight(1.0f));
 
@@ -151,7 +153,7 @@ void InterfacePainter::GenerateStencils()
 	shader->Unbind();
 }
 
-void InterfacePainter::GeneratePaper(Size size, Shapes shape)
+void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 {
 	Perlin::Generate(size, Range(0.0f, 1.0f), 3.0f, 2.0f, 0.5f, 4.0f);
 
@@ -202,7 +204,7 @@ void InterfacePainter::SetupPaperGenerator(Size size)
 	paperGenerationShader->SetConstant(size, "size");
 }
 
-void InterfacePainter::Clear(Shader* shader, Size computeSize, Shapes shape)
+void InterfacePainter::Clear(Shader* shader, Size computeSize, ElementShapes shape)
 {
 	SetStage(Stages::CLEAR);
 
@@ -296,7 +298,7 @@ void InterfacePainter::SetStage(Stages stage)
 	paperGenerationShader->SetConstant((int)stage, "stage");
 }
 
-void InterfacePainter::GenerateTextures(Shapes shape, Size size, Texture*& baseTexture, Texture*& shadowTexture)
+void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*& baseTexture, Texture*& shadowTexture)
 {
 	GeneratePaper(size, shape);
 
@@ -323,6 +325,15 @@ void InterfacePainter::GenerateTextures(Shapes shape, Size size, Texture*& baseT
 	shadowTexture = new Texture(Size(shadowMap.GetWidth(), shadowMap.GetHeight()), TextureFormats::ONE_FLOAT, &shadowMap);
 }
 
+ElementTextureSet* InterfacePainter::GetTextureSet(ElementShapes shape, ElementSizes size, Index index)
+{
+	auto textureSetArray = textureSets_.Get(ElementTextureClass(shape, size));
+	if(textureSetArray == nullptr)
+		return nullptr;
+
+	return textureSetArray->Get(index);
+}
+
 void InterfacePainter::PaintInterface()
 {
 	Initialize();
@@ -330,47 +341,52 @@ void InterfacePainter::PaintInterface()
 	Texture* baseTexture = nullptr;
 	Texture* shadowTexture = nullptr;
 
-	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("MainMenu") = *baseTexture;
-	*TextureManager::GetTextures().Add("MainMenuShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "MainMenu");
+	TextureManager::AddTexture(shadowTexture, "MainMenuShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("MainMenuCloseButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("MainMenuCloseButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "MainMenuCloseButton");
+	TextureManager::AddTexture(shadowTexture, "MainMenuCloseButtonShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewGameMenu") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewGameMenuShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewGameMenu");
+	TextureManager::AddTexture(shadowTexture, "NewGameMenuShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewGameMenuNewWorldButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewGameMenuNewWorldButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewGameMenuNewWorldButton");
+	TextureManager::AddTexture(shadowTexture, "NewGameMenuNewWorldButtonShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenu") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewWorldMenu");
+	TextureManager::AddTexture(shadowTexture, "NewWorldMenuShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenuSetSizeButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuSetSizeButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewWorldMenuSetSizeButton");
+	TextureManager::AddTexture(shadowTexture, "NewWorldMenuSetSizeButtonShadow");
 
-	GenerateTextures(Shapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenuLeftScrollButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuLeftScrollButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewGameMenuBackButton");
+	TextureManager::AddTexture(shadowTexture, "NewGameMenuBackButtonShadow");
 
-	GenerateTextures(Shapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenuRightScrollButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuRightScrollButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewWorldMenuGenerateButton");
+	TextureManager::AddTexture(shadowTexture, "NewWorldMenuGenerateButtonShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewGameMenuBackButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewGameMenuBackButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "NewWorldMenuBackButton");
+	TextureManager::AddTexture(shadowTexture, "NewWorldMenuBackButtonShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenuGenerateButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuGenerateButtonShadow") = *shadowTexture;
+	GenerateTextures(ElementShapes::SQUARE, Size(768, 768), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "WorldPreviewPanel");
+	TextureManager::AddTexture(shadowTexture, "WorldPreviewPanelShadow");
 
-	GenerateTextures(Shapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	*TextureManager::GetTextures().Add("NewWorldMenuBackButton") = *baseTexture;
-	*TextureManager::GetTextures().Add("NewWorldMenuBackButtonShadow") = *shadowTexture;
+	auto textureSetArray = textureSets_.Add(ElementTextureClass(ElementShapes::ROUND, ElementSizes::SMALL));
+	textureSetArray->Initialize(4);
+
+	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
+	{
+		GenerateTextures(ElementShapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
+		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
+	}
 }

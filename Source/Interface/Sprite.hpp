@@ -40,6 +40,8 @@ public:
 
 	void Draw(Camera*);
 
+	void SetTexture(Texture* texture) {texture_ = texture;}
+
 	void SetParent(Element* parent) {parent_ = parent;}
 
 	void SetColor(Color* color) {color_ = color;}

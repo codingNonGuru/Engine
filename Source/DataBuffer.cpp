@@ -75,7 +75,9 @@ void DataBuffer::Unbind()
 void DataBuffer::Delete()
 {
 	Bind();
+
 	glDeleteBuffers(1, &key_);
+
 	Unbind();
 }
 

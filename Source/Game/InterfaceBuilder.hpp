@@ -26,6 +26,10 @@ class InterfaceBuilder
 
 	static void GenerateNewWorldMenuBackButton();
 
+	static void GenerateWorldPreview();
+
+	static void GenerateWorldPreviewViewModeButtons();
+
 	static void AddOpenAnimation(Element*, float, float);
 
 	static void AddCloseAnimation(Element*, float, float);

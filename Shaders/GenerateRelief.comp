@@ -85,7 +85,7 @@ void addDetail()
 	
 	uint index = y * size.x + x;
 	
-	vertices[index] = (vertices[index] * 0.4f + detail[index] * 0.8f) / 1.2f;
+	vertices[index] = vertices[index] * 0.55f + detail[index] * 0.45f;
 	/*if(vertices[index] > 0.5f)
 		vertices[index] = 1.0f;
 	else

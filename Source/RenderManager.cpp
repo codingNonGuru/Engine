@@ -48,11 +48,8 @@ void RenderManager::Initialize()
 		*frameBuffer = new FrameBuffer(Size(screen_->getWidthInteger(), screen_->getHeightInteger()));
 	}
 
-	auto screenTexture = TextureManager::GetTextures().Add("Screen");
-	if(screenTexture)
-	{
-		*screenTexture = Texture(RenderManager::Get()->screen_->GetSize(), TextureFormats::FOUR_BYTE);
-	}
+	auto screenTexture = new Texture(RenderManager::Get()->screen_->GetSize(), TextureFormats::FOUR_BYTE);
+	TextureManager::AddTexture(screenTexture, "Screen");
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_SAMPLE_SHADING);

@@ -21,12 +21,12 @@ void NewGameMenu::HandleInitialize()
 		return;
 
 	closeEvent_->Initialize(0.5f);
-	closeEvent_->GetEvents().Add(this, &NewGameMenu::Disable);
+	closeEvent_->GetActions().Add(this, &NewGameMenu::Disable);
 }
 
 void NewGameMenu::OpenNewWorldMenu()
 {
-	closeEvent_->GetEvents().Add(this, &NewGameMenu::HandleNewWorldOpen);
+	closeEvent_->GetActions().Add(this, &NewGameMenu::HandleNewWorldOpen);
 
 	Close();
 }
@@ -38,12 +38,12 @@ void NewGameMenu::HandleNewWorldOpen()
     	newWorldMenu_->Open();
     }
 
-    closeEvent_->GetEvents().Remove(this, &NewGameMenu::HandleNewWorldOpen);
+    closeEvent_->GetActions().Remove(this, &NewGameMenu::HandleNewWorldOpen);
 }
 
 void NewGameMenu::OpenMainMenu()
 {
-	closeEvent_->GetEvents().Add(this, &NewGameMenu::HandleMainMenuOpen);
+	closeEvent_->GetActions().Add(this, &NewGameMenu::HandleMainMenuOpen);
 
 	Close();
 }
@@ -55,5 +55,5 @@ void NewGameMenu::HandleMainMenuOpen()
     	mainMenu_->Open();
     }
 
-    closeEvent_->GetEvents().Remove(this, &NewGameMenu::HandleMainMenuOpen);
+    closeEvent_->GetActions().Remove(this, &NewGameMenu::HandleMainMenuOpen);
 }

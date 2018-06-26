@@ -2,7 +2,9 @@
 
 #include "Conventions.hpp"
 
+#include "Game/Types.hpp"
+
 struct WorldParameterSet
 {
-	Size Size_;
+	WorldSizeOptions SizeOption_;
 };

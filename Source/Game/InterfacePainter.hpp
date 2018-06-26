@@ -2,9 +2,22 @@
 
 #include "Conventions.hpp"
 
+#include "Game/Types.hpp"
+
 class Texture;
 class DataBuffer;
 class Shader;
+
+struct ElementTextureSet
+{
+	Texture* Base_;
+
+	Texture* Shadow_;
+
+	ElementTextureSet() {}
+
+	ElementTextureSet(Texture* Base, Texture* Shadow) : Base_(Base), Shadow_(Shadow) {}
+};
 
 class InterfacePainter
 {
@@ -13,12 +26,31 @@ class InterfacePainter
 		CLEAR, BLUR_HORIZONTALLY, BLUR_VERTICALLY, CONVERT_BLUR_TO_ALPHA, CONVERT_BLUR_TO_COLOR
 	};
 
-	enum class Shapes
+	struct ElementTextureClass
 	{
-		SQUARE, ROUND
+		ElementShapes Shape_;
+
+		ElementSizes Size_;
+
+		ElementTextureClass() {}
+
+		ElementTextureClass(ElementShapes Shape, ElementSizes Size) : Shape_(Shape), Size_(Size) {}
+
+		bool operator == (ElementTextureClass& other)
+		{
+			if(this->Shape_ != other.Shape_)
+				return false;
+
+			if(this->Size_ != other.Size_)
+				return false;
+
+			return true;
+		}
 	};
 
 	static Map <DataBuffer, LongWord> buffers_;
+
+	static Map <Array <ElementTextureSet>, ElementTextureClass> textureSets_;
 
 	static Shader * shader_;
 
@@ -26,7 +58,7 @@ class InterfacePainter
 
 	static void SetupPaperGenerator(Size);
 
-	static void Clear(Shader*, Size, Shapes);
+	static void Clear(Shader*, Size, ElementShapes);
 
 	static void Blur(Shader*, Size);
 
@@ -40,7 +72,7 @@ class InterfacePainter
 
 	static void GenerateShadow(Size, Size);
 
-	static void GeneratePaper(Size, Shapes);
+	static void GeneratePaper(Size, ElementShapes);
 
 	static Texture* GenerateBaseTexture(Size);
 
@@ -53,7 +85,9 @@ public:
 
 	static void PaintInterface();
 
-	static void GenerateTextures(Shapes, Size, Texture*&, Texture*&);
+	static void GenerateTextures(ElementShapes, Size, Texture*&, Texture*&);
 
 	static void GenerateStencils();
+
+	static ElementTextureSet* GetTextureSet(ElementShapes, ElementSizes, Index);
 };

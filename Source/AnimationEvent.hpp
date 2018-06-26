@@ -9,7 +9,7 @@ private:
 
 	bool isInvoked_;
 
-	Delegate * events_;
+	Delegate * actions_;
 
 public:
 	AnimationEvent();
@@ -18,7 +18,7 @@ public:
 
 	void Initialize(float);
 
-	Delegate & GetEvents();
+	Delegate & GetActions();
 
 	float GetTime();
 

@@ -24,6 +24,12 @@ Animation::Animation(float length)
 	properties_.Initialize(8);
 
 	events_.Initialize(8);
+
+	startEvent_ = AddEvent();
+	startEvent_->Initialize(0.0f);
+
+	finishEvent_ = AddEvent();
+	finishEvent_->Initialize(length);
 }
 
 AnimationProperty* Animation::AddProperty()

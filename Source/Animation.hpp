@@ -22,6 +22,10 @@ private:
 
 	Array <AnimationEvent> events_;
 
+	AnimationEvent* startEvent_;
+
+	AnimationEvent* finishEvent_;
+
 public:
 	Animation();
 
@@ -36,6 +40,10 @@ public:
 	AnimationEvent* AddEvent();
 
 	void AddProperty(AnimationProperty);
+
+	AnimationEvent* GetStartEvent() {return startEvent_;}
+
+	AnimationEvent* GetFinishEvent() {return finishEvent_;}
 
 	float GetTime();
 

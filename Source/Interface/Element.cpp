@@ -112,6 +112,11 @@ void Element::SetIdentifier(LongWord identifier)
 	identifier_ = identifier;
 }
 
+Sprite* Element::GetSprite()
+{
+	return sprite_;
+}
+
 void Element::Initialize()
 {
 	HandleInitialize();

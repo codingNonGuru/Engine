@@ -18,13 +18,9 @@ void MainMenu::HandleInitialize()
 	if(!animation)
 		return;
 
-	auto event = animation->AddEvent();
-	if(!event)
-		return;
-
-	event->Initialize(0.5f);
-	event->GetEvents().Add(this, &MainMenu::Disable);
-	event->GetEvents().Add(this, &MainMenu::OpenNewGameMenu);
+	auto event = animation->GetFinishEvent();
+	event->GetActions().Add(this, &MainMenu::Disable);
+	event->GetActions().Add(this, &MainMenu::OpenNewGameMenu);
 }
 
 void MainMenu::HandleOpen()

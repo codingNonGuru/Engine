@@ -9,6 +9,7 @@
 #include "NewWorldMenu.hpp"
 #include "Game/MainScene.hpp"
 #include "Game/WorldParameterSet.hpp"
+#include "Game/WorldGenerator.hpp"
 
 void NewWorldMenu::HandleInitialize()
 {
@@ -17,6 +18,8 @@ void NewWorldMenu::HandleInitialize()
 	leftScrollButton_ = GetChild("LeftScrollButton");
 
 	rightScrollButton_ = GetChild("RightScrollButton");
+
+	worldPreview_ = Interface::GetElement("WorldPreview");
 
 	auto sizeButton = GetChild("SizeButton");
 	if(sizeButton != nullptr)
@@ -30,26 +33,24 @@ void NewWorldMenu::HandleInitialize()
 	if(animation == nullptr)
 		return;
 
-	closeEvent_ = animation->AddEvent();
-	if(closeEvent_ == nullptr)
-		return;
+	closeEvent_ = animation->GetFinishEvent();
+	closeEvent_->GetActions().Add(this, &NewWorldMenu::Disable);
 
-	closeEvent_->Initialize(0.5f);
-	closeEvent_->GetEvents().Add(this, &NewWorldMenu::Disable);
+	sizeOption_ = WorldSizeOptions::SMALL;
 
-	sizeOption_ = SizeOptions::TINY;
-
-	if(leftScrollButton_ != nullptr)
+	if(sizeOption_ == WorldSizeOptions::TINY && leftScrollButton_ != nullptr)
 	{
 		leftScrollButton_->Disable();
 	}
 
 	UpdateSizeLabel();
+
+	WorldGenerator::OnWorldGenerated_.Add(this, &NewWorldMenu::FinishGeneration);
 }
 
 void NewWorldMenu::OpenNewGameMenu()
 {
-	closeEvent_->GetEvents().Add(this, &NewWorldMenu::HandleNewGameMenuOpen);
+	closeEvent_->GetActions().Add(this, &NewWorldMenu::HandleNewGameMenuOpen);
 
 	Close();
 }
@@ -61,39 +62,39 @@ void NewWorldMenu::HandleNewGameMenuOpen()
     	newGameMenu_->Open();
     }
 
-    closeEvent_->GetEvents().Remove(this, &NewWorldMenu::HandleNewGameMenuOpen);
+    closeEvent_->GetActions().Remove(this, &NewWorldMenu::HandleNewGameMenuOpen);
 }
 
 void NewWorldMenu::ScrollLeftwards()
 {
-	if(sizeOption_ == SizeOptions::SMALL)
+	if(sizeOption_ == WorldSizeOptions::SMALL)
 	{
 		leftScrollButton_->Disable();
 	}
 
-	if(sizeOption_ == SizeOptions::IMMENSE)
+	if(sizeOption_ == WorldSizeOptions::IMMENSE)
 	{
 		rightScrollButton_->Enable();
 	}
 
-	sizeOption_ = SizeOptions((int)sizeOption_ - 1);
+	sizeOption_ = WorldSizeOptions((int)sizeOption_ - 1);
 
 	UpdateSizeLabel();
 }
 
 void NewWorldMenu::ScrollRightwards()
 {
-	if(sizeOption_ == SizeOptions::LARGE)
+	if(sizeOption_ == WorldSizeOptions::LARGE)
 	{
 		rightScrollButton_->Disable();
 	}
 
-	if(sizeOption_ == SizeOptions::TINY)
+	if(sizeOption_ == WorldSizeOptions::TINY)
 	{
 		leftScrollButton_->Enable();
 	}
 
-	sizeOption_ = SizeOptions((int)sizeOption_ + 1);
+	sizeOption_ = WorldSizeOptions((int)sizeOption_ + 1);
 
 	UpdateSizeLabel();
 }
@@ -105,19 +106,19 @@ void NewWorldMenu::UpdateSizeLabel()
 
 	switch(sizeOption_)
 	{
-	case SizeOptions::TINY:
+	case WorldSizeOptions::TINY:
 		sizeLabel_->Setup("256 x 256");
 		break;
-	case SizeOptions::SMALL:
+	case WorldSizeOptions::SMALL:
 		sizeLabel_->Setup("512 x 512");
 		break;
-	case SizeOptions::MEDIUM:
+	case WorldSizeOptions::MEDIUM:
 		sizeLabel_->Setup("768 x 768");
 		break;
-	case SizeOptions::LARGE:
+	case WorldSizeOptions::LARGE:
 		sizeLabel_->Setup("1024 x 1024");
 		break;
-	case SizeOptions::IMMENSE:
+	case WorldSizeOptions::IMMENSE:
 		sizeLabel_->Setup("1536 x 1536");
 		break;
 	}
@@ -141,6 +142,11 @@ void NewWorldMenu::GenerateWorld()
 		rightScrollButton_->Disable();
 	}
 
+	if(worldPreview_ != nullptr)
+	{
+		worldPreview_->Open();
+	}
+
 	auto backButton = GetChild("BackButton");
 	if(backButton != nullptr)
 	{
@@ -150,26 +156,18 @@ void NewWorldMenu::GenerateWorld()
 	if(mainScene_ != nullptr)
 	{
 		WorldParameterSet parameterSet;
-		switch(sizeOption_)
-		{
-		case SizeOptions::TINY:
-			parameterSet.Size_ = Size(256, 256);
-			break;
-		case SizeOptions::SMALL:
-			parameterSet.Size_ = Size(512, 512);
-			break;
-		case SizeOptions::MEDIUM:
-			parameterSet.Size_ = Size(768, 768);
-			break;
-		case SizeOptions::LARGE:
-			parameterSet.Size_ = Size(1024, 1024);
-			break;
-		case SizeOptions::IMMENSE:
-			parameterSet.Size_ = Size(1536, 1536);
-			break;
-		}
+		parameterSet.SizeOption_ = sizeOption_;
 
 		mainScene_->Initialize(parameterSet);
+	}
+}
+
+void NewWorldMenu::FinishGeneration()
+{
+	auto backButton = GetChild("BackButton");
+	if(backButton != nullptr)
+	{
+		backButton->Enable();
 	}
 }
 

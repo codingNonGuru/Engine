@@ -69,6 +69,8 @@ public:
 
 	void SetIdentifier(LongWord);
 
+	Sprite* GetSprite();
+
 	void Initialize();
 
 	bool CheckHover();

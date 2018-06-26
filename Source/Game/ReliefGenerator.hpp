@@ -7,10 +7,10 @@ struct WorldParameterSet;
 
 class ReliefGenerator
 {
-	static void SetupBuffers(World&, const WorldParameterSet&);
+	static void SetupBuffers(World&, Size);
 
 	static void LiftTerrain(Float2, Float, Size);
 
 public:
-	static void Generate(World&, const WorldParameterSet&);
+	static void Generate(World&, Size);
 };

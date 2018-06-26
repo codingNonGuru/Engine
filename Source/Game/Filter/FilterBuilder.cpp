@@ -18,7 +18,7 @@
 void FilterBuilder::GenerateFilters()
 {
 	auto saturateEffectShader = ShaderManager::GetShaderMap().Get("SaturateEffect");
-	auto screenTexture = TextureManager::GetTextures().Get("Screen");
+	auto screenTexture = TextureManager::GetTexture("Screen");
 
 	auto filter = FilterManager::AddFilter("Saturate", new SaturateFilter());
 	filter->Initialize(saturateEffectShader, screenTexture);

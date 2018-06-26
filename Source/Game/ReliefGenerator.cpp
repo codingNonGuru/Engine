@@ -1,11 +1,14 @@
 #include "Shader.hpp"
 #include "ShaderManager.hpp"
 #include "DataBuffer.hpp"
+#include "Texture.hpp"
+#include "TextureManager.hpp"
 #include "Utility/Utility.hpp"
 #include "Utility/Perlin.hpp"
 #include "Utility/Kernel.hpp"
 
 #include "Game/ReliefGenerator.hpp"
+#include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
 
 enum class Buffers
@@ -17,9 +20,9 @@ Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
 
 Shader* shader = nullptr;
 
-void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterSet)
+void ReliefGenerator::Generate(World& world, Size size)
 {
-	SetupBuffers(world, parameterSet);
+	SetupBuffers(world, size);
 
 	shader = ShaderManager::GetShader("GenerateRelief");
 	if(!shader)
@@ -35,44 +38,25 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 	buffers.Get(Buffers::PARTICLE)->Bind(11);
 	buffers.Get(Buffers::PARTICLE_VELOCITY)->Bind(12);
 
-	auto computeSize = parameterSet.Size_ / 4;
+	auto computeSize = size / 4;
 
-	shader->SetConstant(parameterSet.Size_, "size");
+	shader->SetConstant(size, "size");
 
 	shader->SetConstant(0, "mode");
 	shader->DispatchCompute(computeSize);
 
-	auto position = (Float2)parameterSet.Size_ / Float2(4.0f, 2.5f);
-	LiftTerrain(position, 80.0f, computeSize);
+	float liftStrength = 50.0f;
 
-	position = (Float2)parameterSet.Size_ / Float2(1.33f, 1.66f);
-	LiftTerrain(position, 80.0f, computeSize);
+	auto position = (Float2)size / Float2(4.0f, 2.5f);
+	LiftTerrain(position, liftStrength, computeSize);
 
-	/*glUniform2i(1, width_, height_);
-	int workGroupSize = 1;
+	position = (Float2)size / Float2(1.33f, 1.66f);
+	LiftTerrain(position, liftStrength, computeSize);
 
-	glUniform1ui(0, 0);
-	glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	shader->SetConstant(2, "mode");
+	shader->DispatchCompute(computeSize);
 
-	glUniform2f(2, float(width_) / 4.0f, float(height_) / 2.5f);
-	glUniform1f(3, 80.0f);
-
-	glUniform1ui(0, 1);
-	glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-	glUniform2f(2, float(width_) / 1.333f, float(height_) / 1.6666f);
-	glUniform1f(3, 80.0f);
-
-	glUniform1ui(0, 1);
-	glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-	glUniform1ui(0, 2);
-	glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
+	/*
 	for(int erodePass = 0; erodePass < 1; ++erodePass) {
 		glUniform1ui(0, 4);
 		glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
@@ -109,8 +93,27 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 
 	shader->Unbind();
 
-	Grid<float> terrain(parameterSet.Size_.x, parameterSet.Size_.y);
+	Grid<float> terrain(size.x, size.y);
 	buffers.Get(Buffers::FINAL)->Download(&terrain);
+
+	Grid<Byte4> previewData(size.x, size.y);
+	for(int x = 0; x < previewData.GetWidth(); ++x)
+	{
+		for(int y = 0; y < previewData.GetHeight(); ++y)
+		{
+			auto previewPixel = previewData(x, y);
+			auto height = *terrain(x, y) > 0.35f ? Byte(255) : Byte(0);
+			*previewPixel = Byte4(128, 0, 0, height);
+		}
+	}
+
+	auto previewTexture = WorldGenerator::GetReliefPreview();
+	previewTexture->Upload(previewData.GetData());
+
+	for(auto buffer = buffers.GetStart(); buffer != buffers.GetEnd(); ++buffer)
+	{
+		buffer->Delete();
+	}
 
 	/*container::Grid<float> heightMap(width_, height_);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, finalBuffer);
@@ -161,9 +164,8 @@ void ReliefGenerator::Generate(World& world, const WorldParameterSet& parameterS
 	computeHeights();*/
 }
 
-void ReliefGenerator::SetupBuffers(World& world, const WorldParameterSet& parameterSet)
+void ReliefGenerator::SetupBuffers(World& world, Size size)
 {
-	auto size = parameterSet.Size_;
 	auto area = size.x * size.y;
 
 	DataBuffer* buffer = nullptr;
@@ -229,7 +231,7 @@ void ReliefGenerator::SetupBuffers(World& world, const WorldParameterSet& parame
 	}
 
 	container::Grid <float> perlinDetail(size.x, size.y);
-	Perlin::Generate(size, Range(0.0f, 1.0f), 2.0f, 2.0f, 0.5f, 2.0f);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 0.0f, 2.5f, 0.5f, 2.0f);
 }
 
 void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)

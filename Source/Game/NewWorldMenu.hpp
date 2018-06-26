@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Interface/Element.hpp"
+#include "Game/Types.hpp"
 
 class AnimationEvent;
 class Text;
@@ -8,8 +9,6 @@ class MainScene;
 
 class NewWorldMenu : public Element
 {
-	enum class SizeOptions {TINY, SMALL, MEDIUM, LARGE, IMMENSE};
-
 	Element* newGameMenu_;
 
 	Element* leftScrollButton_;
@@ -18,11 +17,13 @@ class NewWorldMenu : public Element
 
 	Text* sizeLabel_;
 
+	Element* worldPreview_;
+
 	AnimationEvent* closeEvent_;
 
 	MainScene* mainScene_;
 
-	SizeOptions sizeOption_;
+	WorldSizeOptions sizeOption_;
 
 	void HandleNewGameMenuOpen();
 
@@ -38,4 +39,6 @@ public:
 	void ScrollRightwards();
 
 	void GenerateWorld();
+
+	void FinishGeneration();
 };
