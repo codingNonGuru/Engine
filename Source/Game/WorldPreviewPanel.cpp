@@ -13,8 +13,26 @@ void WorldPreviewPanel::HandleInitialize()
 
 void WorldPreviewPanel::RefreshImage()
 {
+	SetViewMode(WorldPreviewModes::RELIEF);
+}
+
+void WorldPreviewPanel::SetViewMode(WorldPreviewModes mode)
+{
 	auto sprite = previewImage_->GetSprite();
-	auto texture = WorldGenerator::GetReliefPreview();
+	Texture* texture = nullptr;
+
+	switch(mode)
+	{
+	case WorldPreviewModes::RELIEF:
+		texture = WorldGenerator::GetReliefPreview();
+		break;
+	case WorldPreviewModes::BIOME:
+		texture = WorldGenerator::GetBiomePreview();
+		break;
+	case WorldPreviewModes::POLITY:
+		//texture = WorldGenerator::GetReliefPreview();
+		break;
+	}
 
 	sprite->SetTexture(texture);
 }

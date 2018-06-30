@@ -77,6 +77,8 @@ using Pool = container::Pool<Type>;
 template <class ValueType, class KeyType = ShortWord>
 using Map = container::StaticMap<ValueType, KeyType>;
 
+#define ITERATE(grid) for(auto cell = grid.GetStart(); cell != grid.GetEnd(); ++cell)
+
 #include "FastDelegate.hpp"
 
 typedef fastdelegate::FastDelegate0<> Callback;

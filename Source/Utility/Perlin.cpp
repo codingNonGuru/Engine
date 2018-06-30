@@ -59,7 +59,7 @@ void Perlin::Destroy()
 	}
 }
 
-void Perlin::Generate(Size size, Range range, float dominantOctave, float octaveDecay, float contrast, float contrastStrength)
+DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float octaveDecay, float contrast, float contrastStrength)
 {
 	clock_t start = clock();
 
@@ -114,6 +114,8 @@ void Perlin::Generate(Size size, Range range, float dominantOctave, float octave
 	shader_->Unbind();
 
 	std::cout<<"Finished generating Perlin texture on the GPU of size "<<size.x<<"x"<<size.y<<" in time "<<clock() - start<<" nanosecs.\n";
+
+	return GetResultBuffer();
 }
 
 void Perlin::Download(container::Matrix* container)

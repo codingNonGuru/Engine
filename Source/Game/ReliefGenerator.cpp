@@ -11,10 +11,11 @@
 #include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
 #include "Game/World.hpp"
+#include "Game/Tile.hpp"
 
 enum class Buffers
 {
-	FINAL, CARVE, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY
+	TERRAIN, CARVE, RELIEF, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY
 };
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
@@ -33,9 +34,10 @@ void ReliefGenerator::Generate(World& world)
 
 	shader->Bind();
 
-	buffers.Get(Buffers::FINAL)->Bind(0);
+	buffers.Get(Buffers::TERRAIN)->Bind(0);
 	Perlin::GetResultBuffer()->Bind(1);
 	buffers.Get(Buffers::CARVE)->Bind(2);
+	buffers.Get(Buffers::RELIEF)->Bind(3);
 	buffers.Get(Buffers::GRADIENT)->Bind(9);
 	buffers.Get(Buffers::KERNEL)->Bind(10);
 	buffers.Get(Buffers::PARTICLE)->Bind(11);
@@ -50,13 +52,31 @@ void ReliefGenerator::Generate(World& world)
 
 	float liftStrength = 50.0f;
 
-	auto position = (Float2)size / Float2(4.0f, 2.5f);
+	Float2 position;
+
+	position = (Float2)size * Float2(0.25f, 0.4f);
+	LiftTerrain(position, liftStrength, computeSize);
+	position = (Float2)size * Float2(0.25f, 0.25f);
 	LiftTerrain(position, liftStrength, computeSize);
 
-	position = (Float2)size / Float2(1.33f, 1.66f);
+	position = (Float2)size * Float2(0.75f, 0.6f);
+	LiftTerrain(position, liftStrength, computeSize);
+	position = (Float2)size * Float2(0.75f, 0.75f);
 	LiftTerrain(position, liftStrength, computeSize);
 
-	shader->SetConstant(2, "mode");
+	position = (Float2)size * Float2(0.6f, 0.25f);
+	LiftTerrain(position, 30.0f, computeSize);
+
+	position = (Float2)size * Float2(0.4f, 0.75f);
+	LiftTerrain(position, 30.0f, computeSize);
+
+	for(int i = 0; i < 30; ++i)
+	{
+		shader->SetConstant(2, "mode");
+		shader->DispatchCompute(computeSize);
+	}
+
+	shader->SetConstant(3, "mode");
 	shader->DispatchCompute(computeSize);
 
 	/*
@@ -96,17 +116,22 @@ void ReliefGenerator::Generate(World& world)
 
 	shader->Unbind();
 
-	Grid<float> terrain(size.x, size.y);
-	buffers.Get(Buffers::FINAL)->Download(&terrain);
+	Grid <Float> terrain(size.x, size.y);
+	buffers.Get(Buffers::TERRAIN)->Download(&terrain);
+
+	Grid <Integer> reliefs(size.x, size.y);
+	buffers.Get(Buffers::RELIEF)->Download(&reliefs);
 
 	Grid<Byte4> previewData(size.x, size.y);
 	for(int x = 0; x < previewData.GetWidth(); ++x)
 	{
+		int sum = 0;
 		for(int y = 0; y < previewData.GetHeight(); ++y)
 		{
 			auto previewPixel = previewData(x, y);
-			auto height = *terrain(x, y) > 0.35f ? Byte(255) : Byte(0);
+			auto height = *reliefs(x, y) == 1 ? Byte(255) : Byte(0);
 			*previewPixel = Byte4(128, 0, 0, height);
+			//*previewPixel = Byte4(128, 0, 0, *terrain(x, y) * 100.0f);
 		}
 	}
 
@@ -115,64 +140,33 @@ void ReliefGenerator::Generate(World& world)
 
 	for(auto buffer = buffers.GetStart(); buffer != buffers.GetEnd(); ++buffer)
 	{
-		if(buffer == buffers.Get(Buffers::FINAL))
+		if(buffer == buffers.Get(Buffers::TERRAIN))
 			continue;
 
 		buffer->Delete();
 	}
 
-	/*container::Grid<float> heightMap(width_, height_);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, finalBuffer);
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, width_ * height_ * sizeof(float), heightMap.getStart());
-	GLuint textureKey;
-	Generator::uploadTexture(&heightMap, width_, height_, GL_R32F, GL_RED, GL_FLOAT, textureKey, true);
-	engine_->renderer_->addTextureToReals(TextureMaps::RELIEF_BASE_HEIGHT, textureKey);*/
+	auto& tiles = world.GetTiles();
+	tiles.Initialize(size.x, size.y);
 
-	//glClearColor(0.5f, 0.1f, 0.0f, 1.0f);
-	//glClearDepth(1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	for(int x = 0; x < tiles.GetWidth(); ++x)
+	{
+		for(int y = 0; y < tiles.GetHeight(); ++y)
+		{
+			auto& position = tiles(x, y)->GetPosition();
+			position.x = (float)x;
+			position.y = (float)y;
+			position.z = *terrain(x, y);
 
-	/*engine_->getShader(Shaders::MENU_PAPER).use();
-	engine_->renderer_->bindTexture(Shaders::MENU_PAPER, "diffuse", 0, TextureMaps::RELIEF_BASE_HEIGHT);
-	glm::vec2 scale = glm::vec2(float(width_), float(height_));
-	glm::vec2 topLeftCorner = glm::vec2(0.0f, 0.0f);
-	glUniformMatrix4fv(0, 1, GL_FALSE, &finalMatrix[0][0]);
-	glUniform2f(1, scale.x, scale.y);
-	glUniform2f(2, topLeftCorner.x, topLeftCorner.y);
-	glUniform1f(3, 0.5f);
-	glUniform1f(4, 1.0f);
-	geometry::Geometry::models_[Models::MENU]->Render();
-	engine_->getShader(Shaders::MENU_PAPER).unuse();*/
-
-	//SDL_GL_SwapWindow(engine_->getWindow());
-
-	/*averageHeight_ = 0.65f;
-	for(int x = 0; x < vertices_.getWidth(); ++x)
-		for(int y = 0; y < vertices_.getHeight(); ++y) {
-			vertices_(x, y)->position_.x = float(x);
-			vertices_(x, y)->position_.y = float(y);
-			vertices_(x, y)->position_.z = *heightMap(x, y);
-
-			tiles_(x, y)->position_.x = float(x) + 0.5f;
-			tiles_(y, y)->position_.y = float(y) + 0.5f;
-			tiles_(x, y)->position_.z = *heightMap(x, y) * 0.25f + *heightMap(x + 1, y) * 0.25f + *heightMap(x, y + 1) * 0.25f + *heightMap(x + 1, y + 1) * 0.25f;
-
-			if(tiles_(x, y)->position_.z > averageHeight_)
-				tiles_(x, y)->type_ = Reliefs::LAND;
-			else
-				tiles_(x, y)->type_ = Reliefs::OCEAN;
-
-			tiles_(x, y)->vertices_[0] = vertices_(x, y);
-			tiles_(x, y)->vertices_[1] = vertices_(x + 1, y);
-			tiles_(x, y)->vertices_[2] = vertices_(x, y + 1);
-			tiles_(x, y)->vertices_[3] = vertices_(x + 1, y + 1);
+			auto& relief = tiles(x, y)->GetRelief();
+			relief = (ReliefTypes)*reliefs(x, y);
 		}
-	computeHeights();*/
+	}
 }
 
 DataBuffer* ReliefGenerator::GetFinalBuffer()
 {
-	return buffers.Get(Buffers::FINAL);
+	return buffers.Get(Buffers::TERRAIN);
 }
 
 void ReliefGenerator::SetupBuffers(World& world)
@@ -182,22 +176,28 @@ void ReliefGenerator::SetupBuffers(World& world)
 
 	DataBuffer* buffer = nullptr;
 
-	buffer = buffers.Add(Buffers::FINAL);
+	buffer = buffers.Add(Buffers::TERRAIN);
 	if(buffer)
 	{
-		buffer->Generate(area * sizeof(float));
+		buffer->Generate(area * sizeof(Float));
 	}
 
 	buffer = buffers.Add(Buffers::CARVE);
 	if(buffer)
 	{
-		buffer->Generate(area * sizeof(float));
+		buffer->Generate(area * sizeof(Float));
+	}
+
+	buffer = buffers.Add(Buffers::RELIEF);
+	if(buffer)
+	{
+		buffer->Generate(area * sizeof(Integer));
 	}
 
 	buffer = buffers.Add(Buffers::GRADIENT);
 	if(buffer)
 	{
-		buffer->Generate(area * sizeof(float) * 2);
+		buffer->Generate(area * sizeof(Float) * 2);
 	}
 
 	auto kernel = new Kernel(7);
@@ -243,7 +243,7 @@ void ReliefGenerator::SetupBuffers(World& world)
 	}
 
 	container::Grid <float> perlinDetail(size.x, size.y);
-	Perlin::Generate(size, Range(0.0f, 1.0f), 0.0f, 2.5f, 0.5f, 2.0f);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 3.5f, 1.5f, 0.5f, 2.0f);
 }
 
 void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)

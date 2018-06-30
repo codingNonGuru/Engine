@@ -2,6 +2,8 @@
 
 #include "Interface/Element.hpp"
 
+#include "Game/Types.hpp"
+
 class WorldPreviewPanel : public Element
 {
 	Element* previewImage_;
@@ -10,4 +12,6 @@ class WorldPreviewPanel : public Element
 
 public:
 	void RefreshImage();
+
+	void SetViewMode(WorldPreviewModes);
 };

@@ -8,7 +8,7 @@ layout (location = 3) uniform int hasBorder;
 
 layout (std430, binding = 0) buffer INPUT 
 {
-	float input[];
+	float inputs[];
 };
 
 layout (std430, binding = 1) buffer SWAP 
@@ -18,7 +18,7 @@ layout (std430, binding = 1) buffer SWAP
 
 layout (std430, binding = 2) buffer OUTPUT 
 {
-	float output[];
+	float outputs[];
 };
 
 layout (std430, binding = 3) buffer FILTER 
@@ -42,18 +42,27 @@ void horizontalPass()
 	float sum = 0.0f;
 	for(int i = -filterSize; i <= filterSize; ++i) 
 	{
-		uint otherX = int(gl_GlobalInvocationID.x) + i;
+		int otherX = int(gl_GlobalInvocationID.x) + i;
 		uint otherY = gl_GlobalInvocationID.y;
 		uint otherIndex = otherY * size.x + otherX;
 
-		float finalValue = input[otherIndex];
-
-		if(hasBorder == 1)
+		bool isOut = otherX < 0 || otherX >= size.x;
+		if(isOut)
 		{
-			if(otherX < 0 || otherX >= size.x)
-				finalValue = 0.0f;
+			if(hasBorder == 1)
+				continue;
+			else
+			{
+				if(otherX < 0)
+					otherX += size.x;
+				else
+					otherX -= size.x;
+
+				otherIndex = otherY * size.x + otherX;
+			}
 		}
 
+		float finalValue = inputs[otherIndex];
 		sum += weights[i + filterSize] * finalValue; 	
 	}
 	swap[thisIndex] = sum;
@@ -67,20 +76,29 @@ void verticalPass()
 	for(int i = -filterSize; i <= filterSize; ++i) 
 	{
 		uint otherX = gl_GlobalInvocationID.x;
-		uint otherY = int(gl_GlobalInvocationID.y) + i;
+		int otherY = int(gl_GlobalInvocationID.y) + i;
 		uint otherIndex = otherY * size.x + otherX;
+
+		bool isOut = otherY < 0 || otherY >= size.y;
+		if(isOut)
+		{
+			if(hasBorder == 1)
+				continue;
+			else
+			{
+				if(otherY < 0)
+					otherY += size.y;
+				else
+					otherY -= size.y;
+
+				otherIndex = otherY * size.x + otherX;
+			}
+		}
 		
 		float finalValue = swap[otherIndex];
-
-		if(hasBorder == 1)
-		{
-			if(otherY < 0 || otherY >= size.y)
-				finalValue = 0.0f;
-		}
-			
 		sum += weights[i + filterSize] * finalValue; 	
 	}
-	output[thisIndex] = sum;
+	outputs[thisIndex] = sum;
 }
 
 void main()

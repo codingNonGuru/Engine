@@ -9,16 +9,22 @@
 
 Map <Texture*, WorldSizeOptions> WorldGenerator::reliefTextures_ = Map <Texture*, WorldSizeOptions>((int)WorldSizeOptions::COUNT);
 
-WorldParameterSet* WorldGenerator::parameterSet_ = nullptr;
+Map <Texture*, WorldSizeOptions> WorldGenerator::biomeTextures_ = Map <Texture*, WorldSizeOptions>((int)WorldSizeOptions::COUNT);
+
+const WorldParameterSet* WorldGenerator::parameterSet_ = nullptr;
 
 Delegate WorldGenerator::OnWorldGenerated_ = Delegate();
+
+Delegate WorldGenerator::OnReliefGenerated_ = Delegate();
+
+Delegate WorldGenerator::OnBiomeGenerated_ = Delegate();
 
 void WorldGenerator::Generate(World& world, const WorldParameterSet& parameterSet)
 {
 	parameterSet_ = &parameterSet;
 
 	Size size;
-	switch(parameterSet.SizeOption_)
+	switch(parameterSet_->SizeOption_)
 	{
 	case WorldSizeOptions::TINY:
 		size = Size(256, 256);
@@ -41,7 +47,11 @@ void WorldGenerator::Generate(World& world, const WorldParameterSet& parameterSe
 
 	ReliefGenerator::Generate(world);
 
+	OnReliefGenerated_.Invoke();
+
 	BiomeGenerator::Generate(world);
+
+	OnBiomeGenerated_.Invoke();
 
 	OnWorldGenerated_.Invoke();
 }
@@ -75,6 +85,39 @@ Texture* WorldGenerator::GetReliefPreview()
 
 	TextureManager::AddTexture(previewTexture, "WorldPreview");
 	*reliefTextures_.Add(parameterSet_->SizeOption_) = previewTexture;
+
+	return previewTexture;
+}
+
+Texture* WorldGenerator::GetBiomePreview()
+{
+	auto texturePointer = biomeTextures_.Get(parameterSet_->SizeOption_);
+	if(texturePointer != nullptr)
+		return *texturePointer;
+
+	Texture* previewTexture = nullptr;
+
+	switch(parameterSet_->SizeOption_)
+	{
+	case WorldSizeOptions::TINY:
+		previewTexture = new Texture(Size(256, 256), TextureFormats::FOUR_BYTE, nullptr);
+		break;
+	case WorldSizeOptions::SMALL:
+		previewTexture = new Texture(Size(512, 512), TextureFormats::FOUR_BYTE, nullptr);
+		break;
+	case WorldSizeOptions::MEDIUM:
+		previewTexture = new Texture(Size(768, 768), TextureFormats::FOUR_BYTE, nullptr);
+		break;
+	case WorldSizeOptions::LARGE:
+		previewTexture = new Texture(Size(1024, 1024), TextureFormats::FOUR_BYTE, nullptr);
+		break;
+	case WorldSizeOptions::IMMENSE:
+		previewTexture = new Texture(Size(1536, 1536), TextureFormats::FOUR_BYTE, nullptr);
+		break;
+	}
+
+	TextureManager::AddTexture(previewTexture, "WorldPreview");
+	*biomeTextures_.Add(parameterSet_->SizeOption_) = previewTexture;
 
 	return previewTexture;
 }

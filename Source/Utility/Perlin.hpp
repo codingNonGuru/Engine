@@ -18,7 +18,7 @@ public:
 
 	static void Destroy();
 
-	static void Generate(Size, Range, float, float, float, float);
+	static DataBuffer* Generate(Size, Range, float, float, float, float);
 
 	static void Download(container::Matrix*);
 

@@ -23,6 +23,7 @@
 #include "Game/NewGameMenu.hpp"
 #include "Game/NewWorldMenu.hpp"
 #include "Game/WorldPreviewPanel.hpp"
+#include "Game/WorldPreviewButton.hpp"
 #include "Game/CloseButton.hpp"
 #include "Game/InterfacePainter.hpp"
 
@@ -451,6 +452,7 @@ void InterfaceBuilder::GenerateWorldPreview()
 void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 {
 	LongWord buttonNames[] = {"ReliefModeButton", "BiomeModeButton", "PolityModeButton"};
+	WorldPreviewModes previewModes[] = {WorldPreviewModes::RELIEF, WorldPreviewModes::BIOME, WorldPreviewModes::POLITY};
 
 	for(int index = 0; index < 3; ++index)
 	{
@@ -459,13 +461,16 @@ void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 		auto texture = textureSet->Base_;
 		auto sprite = new Sprite(texture, spriteShader);
 
-		auto button = Interface::AddElement(buttonNames[index], new Element());
+		auto button = new WorldPreviewButton();
+		Interface::AddElement(buttonNames[index], button);
 		float x = float(index - 1) * 200.0f;
 		button->Configure(Size(256, 256), DrawOrder(4), new Transform(Position2(x, 330.0f)), sprite, Opacity(1.0f));
 
 		button->Enable();
 		auto menu = Interface::GetElement("WorldPreview");
 		button->SetParent(menu);
+
+		button->SetMode(previewModes[index]);
 
 		texture = textureSet->Shadow_;
 		sprite = new Sprite(texture, shadowShader);
@@ -475,6 +480,14 @@ void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 
 		shadow->Enable();
 		shadow->SetParent(button);
+
+		sprite = new Sprite(nullptr, spriteShader);
+
+		auto image = Interface::AddElement("Icon", new Element());
+		image->Configure(Size(100, 100), DrawOrder(5), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
+
+		image->Enable();
+		image->SetParent(button);
 	}
 }
 

@@ -11,3 +11,13 @@ enum class ElementSizes
 {
 	SMALL, MEDIUM, LARGE
 };
+
+enum class ReliefTypes
+{
+	OCEAN, LAND
+};
+
+enum class WorldPreviewModes
+{
+	RELIEF, BIOME, POLITY, COUNT
+};

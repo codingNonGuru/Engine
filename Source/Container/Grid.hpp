@@ -84,6 +84,18 @@ namespace container
 			return memorySize_;
 		}
 
+		void TransferData(Grid<ObjectType> &other)
+		{
+			other.objects_ = objects_;
+
+			other.width_ = width_;
+			other.height_ = height_;
+			other.memorySize_ = memorySize_;
+			other.objectCount_ = objectCount_;
+
+			objects_ = nullptr;
+		}
+
 		Grid()
 		{
 			objectCount_ = 0;
@@ -103,6 +115,11 @@ namespace container
 
 			memorySize_ = objectCount_ * sizeof(ObjectType);
 			//MemoryLog::accrue(memorySize_);
+		}
+
+		Grid(Grid<ObjectType> *other)
+		{
+			other->TransferData(*this);
 		}
 
 		void Initialize(int columnCount, int rowCount)

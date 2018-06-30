@@ -63,9 +63,9 @@ DataBuffer* ImageProcessor::GetOutputBuffer()
 
 void ImageProcessor::InitializeBlurModule()
 {
-	outputBuffer = new DataBuffer(capacity.x * capacity.y, nullptr);
+	outputBuffer = new DataBuffer(capacity.x * capacity.y * 4, nullptr);
 
-	blurSwapBuffer = new DataBuffer(capacity.x * capacity.y, nullptr);
+	blurSwapBuffer = new DataBuffer(capacity.x * capacity.y * 4, nullptr);
 
 	blurFilterBuffer = new DataBuffer(4096, nullptr);
 

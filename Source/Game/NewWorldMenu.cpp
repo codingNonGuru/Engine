@@ -124,6 +124,8 @@ void NewWorldMenu::UpdateSizeLabel()
 	}
 }
 
+WorldParameterSet parameterSet;
+
 void NewWorldMenu::GenerateWorld()
 {
 	auto generateButton = GetChild("GenerateButton");
@@ -155,7 +157,6 @@ void NewWorldMenu::GenerateWorld()
 
 	if(mainScene_ != nullptr)
 	{
-		WorldParameterSet parameterSet;
 		parameterSet.SizeOption_ = sizeOption_;
 
 		mainScene_->Initialize(parameterSet);

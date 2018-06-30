@@ -11,14 +11,22 @@ class Texture;
 
 class WorldGenerator
 {
-	static WorldParameterSet* parameterSet_;
+	static const WorldParameterSet* parameterSet_;
 
 	static Map <Texture*, WorldSizeOptions> reliefTextures_;
+
+	static Map <Texture*, WorldSizeOptions> biomeTextures_;
 
 public:
 	static Delegate OnWorldGenerated_;
 
+	static Delegate OnReliefGenerated_;
+
+	static Delegate OnBiomeGenerated_;
+
 	static void Generate(World&, const WorldParameterSet&);
 
 	static Texture* GetReliefPreview();
+
+	static Texture* GetBiomePreview();
 };
