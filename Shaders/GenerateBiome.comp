@@ -4,9 +4,9 @@
 layout (location = 0) uniform int stage;
 layout (location = 1) uniform uvec2 size;
 
-layout (std430, binding = 0) buffer RAIN_MAP 
+layout (std430, binding = 0) buffer RAINFALL 
 {
-	float rainMap[];
+	float rainfall[];
 };
 
 layout (std430, binding = 1) buffer VARIATION 
@@ -23,10 +23,12 @@ void addTemperature()
 	uint index = y * size.x + x;
 
     int latitude = int(y) - int(size.y) / 2;
-    float c = float(size.y / 4);
+    float c = float(size.y) / 3.5f;
     float temperature = exp(-pow(float(latitude), 2.0f) / (2.0f * c * c));
+
+    c = float(size.y) / 4.0f;
     int desertLatitude = int(size.y) / 6;
-    float desertStrength = 0.6f;
+    float desertStrength = 0.3f;
     if(latitude > 0)
     {
         temperature *= 1.0f - desertStrength * exp(-pow(float(latitude - desertLatitude), 2.0f) / (0.0625f * c * c));
@@ -36,7 +38,7 @@ void addTemperature()
         temperature *= 1.0f - desertStrength * exp(-pow(float(latitude + desertLatitude), 2.0f) / (0.0625f * c * c));
     }
 
-    rainMap[index] *= temperature;
+    rainfall[index] *= temperature;
 }
 
 void addVariation()
@@ -45,7 +47,10 @@ void addVariation()
 	uint y = gl_GlobalInvocationID.y;
 	uint index = y * size.x + x;
 
-    rainMap[index] = variation[index] * 0.3f + rainMap[index] * 0.6f;
+    //rainfall[index] = variation[index] * 0.4f + rainfall[index] * 0.7f;
+    rainfall[index] += (variation[index] - 0.5f) * 0.5f;
+    if(rainfall[index] < 0.0f)
+        rainfall[index] = 0.0f;
 }
 
 void main()

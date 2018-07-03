@@ -5,12 +5,15 @@
 class File;
 struct WorldParameterSet;
 class Tile;
+class Settlement;
 
 class World
 {
 	Size size_;
 
 	Grid <Tile> tiles_;
+
+	Array <Settlement> settlements_;
 
 public:
 	World();
@@ -24,4 +27,6 @@ public:
 	Size GetSize();
 
 	void SetSize(Size);
+
+	Array <Settlement> & GetSettlements();
 };

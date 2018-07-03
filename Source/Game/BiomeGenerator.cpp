@@ -45,9 +45,10 @@ void BiomeGenerator::Generate(World& world)
 		reliefBuffer->UploadData(reliefs.GetStart(), reliefs.GetMemoryCapacity());
 	}
 
-	auto output = ImageProcessor::Blur(reliefBuffer, size, 128);
+	auto blurStrength = size.x / 4;
+	auto output = ImageProcessor::Blur(reliefBuffer, size, blurStrength);
 
-	auto variation = Perlin::Generate(size, Range(0.0f, 1.0f), 2.0f, 2.0f, 0.5f, 2.0f);
+	auto variation = Perlin::Generate(size, Range(0.0f, 1.0f), 4.0f, 2.0f, 0.5f, 2.0f);
 
 	auto shader = ShaderManager::GetShader("GenerateBiome");
 	if(shader == nullptr)
@@ -93,6 +94,17 @@ void BiomeGenerator::Generate(World& world)
 
 	auto texture = WorldGenerator::GetBiomePreview();
 	texture->Upload(textureData.GetStart());
+
+	for(int x = 0; x < size.x; ++x)
+	{
+		for(int y = 0; y < size.y; ++y)
+		{
+			auto tile = tiles(x, y);
+			auto& biome = tile->GetBiome();
+
+			biome.Productivity_ = *biomes(x, y);
+		}
+	}
 }
 
 void BiomeGenerator::SetupBuffers(World& world)

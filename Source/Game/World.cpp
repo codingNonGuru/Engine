@@ -1,6 +1,7 @@
 #include "Game/World.hpp"
 #include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
+#include "Game/Settlement.hpp"
 
 World::World() {}
 
@@ -26,4 +27,9 @@ Size World::GetSize()
 void World::SetSize(Size size)
 {
 	size_ = size;
+}
+
+Array <Settlement> & World::GetSettlements()
+{
+	return settlements_;
 }

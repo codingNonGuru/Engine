@@ -50,27 +50,28 @@ void ReliefGenerator::Generate(World& world)
 	shader->SetConstant(0, "mode");
 	shader->DispatchCompute(computeSize);
 
-	float liftStrength = 50.0f;
+	float continentLift = size.x / 10;
+	float islandLift = size.y / 20;
 
 	Float2 position;
 
 	position = (Float2)size * Float2(0.25f, 0.4f);
-	LiftTerrain(position, liftStrength, computeSize);
+	LiftTerrain(position, continentLift, computeSize);
 	position = (Float2)size * Float2(0.25f, 0.25f);
-	LiftTerrain(position, liftStrength, computeSize);
+	LiftTerrain(position, continentLift, computeSize);
 
 	position = (Float2)size * Float2(0.75f, 0.6f);
-	LiftTerrain(position, liftStrength, computeSize);
+	LiftTerrain(position, continentLift, computeSize);
 	position = (Float2)size * Float2(0.75f, 0.75f);
-	LiftTerrain(position, liftStrength, computeSize);
+	LiftTerrain(position, continentLift, computeSize);
 
 	position = (Float2)size * Float2(0.6f, 0.25f);
-	LiftTerrain(position, 30.0f, computeSize);
+	LiftTerrain(position, islandLift, computeSize);
 
 	position = (Float2)size * Float2(0.4f, 0.75f);
-	LiftTerrain(position, 30.0f, computeSize);
+	LiftTerrain(position, islandLift, computeSize);
 
-	for(int i = 0; i < 30; ++i)
+	for(int i = 0; i < 24; ++i)
 	{
 		shader->SetConstant(2, "mode");
 		shader->DispatchCompute(computeSize);
