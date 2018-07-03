@@ -16,7 +16,20 @@ void WorldPreviewButton::HandleInitialize()
 	auto icon = GetChild("Icon");
 	if(icon != nullptr)
 	{
-		auto texture = TextureManager::GetTexture("ReliefIcon");
+		Texture* texture = nullptr;
+
+		switch(mode_)
+		{
+		case WorldPreviewModes::RELIEF:
+			texture = TextureManager::GetTexture("ReliefIcon");
+			break;
+		case WorldPreviewModes::BIOME:
+			texture = TextureManager::GetTexture("BiomeIcon");
+			break;
+		case WorldPreviewModes::POLITY:
+			texture = TextureManager::GetTexture("ReliefIcon");
+			break;
+		}
 		auto iconSprite = icon->GetSprite();
 
 		iconSprite->SetTexture(texture);
