@@ -40,7 +40,7 @@ struct KernelBuffer
 	KernelBuffer(Kernel* kernel, DataBuffer* buffer) {Kernel_ = kernel; Buffer_ = buffer;}
 };
 
-Map <KernelBuffer> kernelBuffers = Map <KernelBuffer> (4);
+Map <KernelBuffer> kernelBuffers = Map <KernelBuffer> (8);
 
 KernelBuffer* currentKernel = nullptr;
 
@@ -72,7 +72,19 @@ void InterfacePainter::SetupKernels()
 	kernel->Initialize(KernelTypes::GAUSS, 50.0f);
 	auto weights = kernel->GetWeights();
 
-	auto buffer = buffers_.Add("smallKernel");
+	auto buffer = buffers_.Add("tinyKernel");
+	if(buffer)
+	{
+		*buffer = DataBuffer(weights.GetMemorySize(), weights.GetStart());
+	}
+
+	*kernelBuffers.Add("tiny") = KernelBuffer(kernel, buffer);
+
+	kernel = new Kernel(20);
+	kernel->Initialize(KernelTypes::GAUSS, 200.0f);
+	weights = kernel->GetWeights();
+
+	buffer = buffers_.Add("smallKernel");
 	if(buffer)
 	{
 		*buffer = DataBuffer(weights.GetMemorySize(), weights.GetStart());
@@ -155,7 +167,7 @@ void InterfacePainter::GenerateStencils()
 
 void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 {
-	Perlin::Generate(size, Range(0.0f, 1.0f), 3.0f, 2.0f, 0.5f, 4.0f);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 4.0f, 2.0f, 0.5f, 4.0f);
 
 	Size computeSize(size.x / 16, size.y / 16);
 
@@ -163,7 +175,7 @@ void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 
 	Clear(paperGenerationShader, computeSize, shape);
 
-	currentKernel = kernelBuffers.Get("small");
+	currentKernel = kernelBuffers.Get("tiny");
 
 	Blur(paperGenerationShader, computeSize);
 
@@ -174,7 +186,7 @@ void InterfacePainter::GenerateShadow(Size size, Size computeSize)
 {
 	SetupPaperGenerator(size);
 
-	currentKernel = kernelBuffers.Get("medium");
+	currentKernel = kernelBuffers.Get("small");
 
 	Blur(paperGenerationShader, computeSize);
 }
@@ -304,11 +316,11 @@ void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*
 
 	ApplyBrushes(size);
 
-	HighlightEdges(size, size / 16, "large");
+	//HighlightEdges(size, size / 16, "large");
 
 	HighlightEdges(size, size / 16, "medium");
 
-	HighlightEdges(size, size / 16, "small");
+	//HighlightEdges(size, size / 16, "tiny");
 
 	GenerateShadow(size, size / 16);
 
