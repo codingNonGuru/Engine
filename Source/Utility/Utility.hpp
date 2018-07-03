@@ -27,4 +27,6 @@ namespace utility
 	Color AddSaturation(Color, float);
 
 	Color Lighten(Color, float);
+
+	float Interpolate(float);
 }

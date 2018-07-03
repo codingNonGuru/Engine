@@ -164,4 +164,9 @@ namespace utility
 
 		return result;
 	}
+
+	float Interpolate(float t)
+	{
+		return 3.0f * t * t - 2.0f * t * t * t;
+	}
 }
