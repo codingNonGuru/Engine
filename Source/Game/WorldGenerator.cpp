@@ -12,6 +12,8 @@ Map <Texture*, WorldSizeOptions> WorldGenerator::reliefTextures_ = Map <Texture*
 
 Map <Texture*, WorldSizeOptions> WorldGenerator::biomeTextures_ = Map <Texture*, WorldSizeOptions>((int)WorldSizeOptions::COUNT);
 
+Map <Texture*, WorldSizeOptions> WorldGenerator::cultureTextures_ = Map <Texture*, WorldSizeOptions>((int)WorldSizeOptions::COUNT);
+
 const WorldParameterSet* WorldGenerator::parameterSet_ = nullptr;
 
 Delegate WorldGenerator::OnWorldGenerated_ = Delegate();
@@ -24,26 +26,7 @@ void WorldGenerator::Generate(World& world, const WorldParameterSet& parameterSe
 {
 	parameterSet_ = &parameterSet;
 
-	Size size;
-	switch(parameterSet_->SizeOption_)
-	{
-	case WorldSizeOptions::TINY:
-		size = Size(256, 256);
-		break;
-	case WorldSizeOptions::SMALL:
-		size = Size(512, 512);
-		break;
-	case WorldSizeOptions::MEDIUM:
-		size = Size(768, 768);
-		break;
-	case WorldSizeOptions::LARGE:
-		size = Size(1024, 1024);
-		break;
-	case WorldSizeOptions::IMMENSE:
-		size = Size(1536, 1536);
-		break;
-	}
-
+	auto size = GetSize(parameterSet_->SizeOption_);
 	world.SetSize(size);
 
 	ReliefGenerator::Generate(world);
@@ -65,26 +48,8 @@ Texture* WorldGenerator::GetReliefPreview()
 	if(texturePointer != nullptr)
 		return *texturePointer;
 
-	Texture* previewTexture = nullptr;
-
-	switch(parameterSet_->SizeOption_)
-	{
-	case WorldSizeOptions::TINY:
-		previewTexture = new Texture(Size(256, 256), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::SMALL:
-		previewTexture = new Texture(Size(512, 512), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::MEDIUM:
-		previewTexture = new Texture(Size(768, 768), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::LARGE:
-		previewTexture = new Texture(Size(1024, 1024), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::IMMENSE:
-		previewTexture = new Texture(Size(1536, 1536), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	}
+	auto size = GetSize(parameterSet_->SizeOption_);
+	Texture* previewTexture = new Texture(size, TextureFormats::FOUR_BYTE, nullptr);
 
 	TextureManager::AddTexture(previewTexture, "WorldPreview");
 	*reliefTextures_.Add(parameterSet_->SizeOption_) = previewTexture;
@@ -98,29 +63,45 @@ Texture* WorldGenerator::GetBiomePreview()
 	if(texturePointer != nullptr)
 		return *texturePointer;
 
-	Texture* previewTexture = nullptr;
-
-	switch(parameterSet_->SizeOption_)
-	{
-	case WorldSizeOptions::TINY:
-		previewTexture = new Texture(Size(256, 256), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::SMALL:
-		previewTexture = new Texture(Size(512, 512), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::MEDIUM:
-		previewTexture = new Texture(Size(768, 768), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::LARGE:
-		previewTexture = new Texture(Size(1024, 1024), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	case WorldSizeOptions::IMMENSE:
-		previewTexture = new Texture(Size(1536, 1536), TextureFormats::FOUR_BYTE, nullptr);
-		break;
-	}
+	auto size = GetSize(parameterSet_->SizeOption_);
+	Texture* previewTexture = new Texture(size, TextureFormats::FOUR_BYTE, nullptr);
 
 	TextureManager::AddTexture(previewTexture, "WorldPreview");
 	*biomeTextures_.Add(parameterSet_->SizeOption_) = previewTexture;
 
 	return previewTexture;
+}
+
+Texture* WorldGenerator::GetCulturePreview()
+{
+	auto texturePointer = cultureTextures_.Get(parameterSet_->SizeOption_);
+	if(texturePointer != nullptr)
+		return *texturePointer;
+
+	auto size = GetSize(parameterSet_->SizeOption_);
+	Texture* previewTexture = new Texture(size, TextureFormats::FOUR_BYTE, nullptr);;
+
+	TextureManager::AddTexture(previewTexture, "WorldPreview");
+	*cultureTextures_.Add(parameterSet_->SizeOption_) = previewTexture;
+
+	return previewTexture;
+}
+
+Size WorldGenerator::GetSize(WorldSizeOptions sizeOption)
+{
+	switch(sizeOption)
+	{
+	case WorldSizeOptions::TINY:
+		return Size(256, 256);
+	case WorldSizeOptions::SMALL:
+		return Size(512, 512);
+	case WorldSizeOptions::MEDIUM:
+		return Size(768, 768);
+	case WorldSizeOptions::LARGE:
+		return Size(1024, 1024);
+	case WorldSizeOptions::IMMENSE:
+		return Size(1536, 1536);
+	}
+
+	return Size();
 }

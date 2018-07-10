@@ -17,6 +17,8 @@ class WorldGenerator
 
 	static Map <Texture*, WorldSizeOptions> biomeTextures_;
 
+	static Map <Texture*, WorldSizeOptions> cultureTextures_;
+
 public:
 	static Delegate OnWorldGenerated_;
 
@@ -29,4 +31,8 @@ public:
 	static Texture* GetReliefPreview();
 
 	static Texture* GetBiomePreview();
+
+	static Texture* GetCulturePreview();
+
+	static Size GetSize(WorldSizeOptions);
 };
