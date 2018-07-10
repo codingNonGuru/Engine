@@ -89,6 +89,9 @@ void Texture::ProcessInternalFormat()
 	case TextureFormats::ONE_FLOAT:
 		grid = new Grid <Float> (size_.x, size_.y);
 		break;
+	case TextureFormats::ONE_INTEGER:
+		grid = new Grid <Integer> (size_.x, size_.y);
+		break;
 	}
 
 	fread(grid->GetData(), grid->GetMemorySize(), 1, fileStream);
@@ -176,6 +179,10 @@ void Texture::Upload(void* data)
 		case TextureFormats::ONE_FLOAT:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, size_.x, size_.y, 0, GL_RED, GL_FLOAT, data);
 			break;
+		case TextureFormats::ONE_INTEGER:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, size_.x, size_.y, 0, GL_RED_INTEGER, GL_INT, data);
+			break;
+
 		}
 
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -204,6 +211,9 @@ void Texture::Upload(void* data)
 			break;
 		case TextureFormats::ONE_FLOAT:
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_RED, GL_FLOAT, data);
+			break;
+		case TextureFormats::ONE_INTEGER:
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_RED_INTEGER, GL_INT, data);
 			break;
 		}
 
