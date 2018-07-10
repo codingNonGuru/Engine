@@ -7,6 +7,7 @@ namespace container
 	{
 		ObjectType objects_[Capacity];
 
+public:
 		Block() {}
 
 		ObjectType* Find(int index)

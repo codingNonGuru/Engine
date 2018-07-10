@@ -66,6 +66,11 @@ namespace container
 			return newObject;
 		}
 
+		void AllocateFully()
+		{
+			size_ = capacity_;
+		}
+
 		template<class DerivedType>
 		O *const Allocate()
 		{
