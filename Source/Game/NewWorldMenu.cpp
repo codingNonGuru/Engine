@@ -15,16 +15,23 @@ void NewWorldMenu::HandleInitialize()
 {
 	newGameMenu_ = Interface::GetElement("NewGameMenu");
 
+	sizeOptionButton_ = GetChild("SizeButton");
+
 	leftScrollButton_ = GetChild("LeftScrollButton");
 
 	rightScrollButton_ = GetChild("RightScrollButton");
 
+	startGameButton_ = GetChild("StartGameButton");
+
+	saveWorldButton_ = GetChild("SaveWorldButton");
+
+	discardButton_ = GetChild("DiscardButton");
+
 	worldPreview_ = Interface::GetElement("WorldPreview");
 
-	auto sizeButton = GetChild("SizeButton");
-	if(sizeButton != nullptr)
+	if(sizeOptionButton_ != nullptr)
 	{
-		sizeLabel_ = sizeButton->GetChild("SizeLabel");
+		sizeLabel_ = sizeOptionButton_->GetChild("SizeLabel");
 	}
 
 	mainScene_ = SceneManager::GetScene("MainScene");
@@ -36,7 +43,7 @@ void NewWorldMenu::HandleInitialize()
 	closeEvent_ = animation->GetFinishEvent();
 	closeEvent_->GetActions().Add(this, &NewWorldMenu::Disable);
 
-	sizeOption_ = WorldSizeOptions::SMALL;
+	sizeOption_ = WorldSizeOptions::MEDIUM;
 
 	if(sizeOption_ == WorldSizeOptions::TINY && leftScrollButton_ != nullptr)
 	{
@@ -134,6 +141,11 @@ void NewWorldMenu::GenerateWorld()
 		generateButton->Disable();
 	}
 
+	if(sizeOptionButton_ != nullptr)
+	{
+		sizeOptionButton_->Disable();
+	}
+
 	if(leftScrollButton_ != nullptr)
 	{
 		leftScrollButton_->Disable();
@@ -169,6 +181,21 @@ void NewWorldMenu::FinishGeneration()
 	if(backButton != nullptr)
 	{
 		backButton->Enable();
+	}
+
+	if(startGameButton_ != nullptr)
+	{
+		startGameButton_->Enable();
+	}
+
+	if(saveWorldButton_ != nullptr)
+	{
+		saveWorldButton_->Enable();
+	}
+
+	if(discardButton_ != nullptr)
+	{
+		discardButton_->Enable();
 	}
 }
 

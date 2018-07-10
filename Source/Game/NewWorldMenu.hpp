@@ -11,11 +11,19 @@ class NewWorldMenu : public Element
 {
 	Element* newGameMenu_;
 
+	Element* sizeOptionButton_;
+
 	Element* leftScrollButton_;
 
 	Element* rightScrollButton_;
 
 	Text* sizeLabel_;
+
+	Element* startGameButton_;
+
+	Element* saveWorldButton_;
+
+	Element* discardButton_;
 
 	Element* worldPreview_;
 

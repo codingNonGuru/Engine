@@ -88,8 +88,9 @@ void InterfaceBuilder::GenerateMainMenu()
 
 void InterfaceBuilder::GenerateMainMenuNewGameButton()
 {
-	auto texture = TextureManager::GetTexture("MainMenuCloseButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 0);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("CloseButton", new CloseButton());
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
@@ -101,8 +102,7 @@ void InterfaceBuilder::GenerateMainMenuNewGameButton()
 	button->SetInteractivity(true);
 	button->GetClickEvents().Add(mainMenu, &Element::Close);
 
-	texture = TextureManager::GetTexture("MainMenuCloseButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
@@ -149,8 +149,9 @@ void InterfaceBuilder::GenerateNewGameMenu()
 
 void InterfaceBuilder::GenerateNewWorldButton()
 {
-	auto texture = TextureManager::GetTexture("NewGameMenuNewWorldButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 0);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("NewWorldButton", new CloseButton());
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
@@ -162,8 +163,7 @@ void InterfaceBuilder::GenerateNewWorldButton()
 	button->SetInteractivity(true);
 	button->GetClickEvents().Add(parent, &NewGameMenu::OpenNewWorldMenu);
 
-	texture = TextureManager::GetTexture("NewGameMenuNewWorldButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
@@ -182,8 +182,9 @@ void InterfaceBuilder::GenerateNewWorldButton()
 
 void InterfaceBuilder::GenerateNewGameMenuBackButton()
 {
-	auto texture = TextureManager::GetTexture("NewGameMenuBackButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 1);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("BackButton", new Element());
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, 300.0f)), sprite, Opacity(1.0f));
@@ -195,8 +196,7 @@ void InterfaceBuilder::GenerateNewGameMenuBackButton()
 	button->SetInteractivity(true);
 	button->GetClickEvents().Add(parent, &NewGameMenu::OpenMainMenu);
 
-	texture = TextureManager::GetTexture("NewGameMenuBackButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
@@ -242,13 +242,16 @@ void InterfaceBuilder::GenerateNewWorldMenu()
 
 	GenerateNewWorldMenuGenerateButton();
 
+	GenerateNewWorldMenuStartGameButton();
+
 	GenerateNewWorldMenuBackButton();
 }
 
 void InterfaceBuilder::GenerateNewWorldMenuSizeButton()
 {
-	auto texture = TextureManager::GetTexture("NewWorldMenuSetSizeButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 3);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("SizeButton", new Element());
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
@@ -268,8 +271,7 @@ void InterfaceBuilder::GenerateNewWorldMenuSizeButton()
 	text->Enable();
 	text->SetParent(button);
 
-	texture = TextureManager::GetTexture("NewWorldMenuSetSizeButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
@@ -352,8 +354,9 @@ void InterfaceBuilder::GenerateNewWorldMenuRightScrollButton()
 
 void InterfaceBuilder::GenerateNewWorldMenuGenerateButton()
 {
-	auto texture = TextureManager::GetTexture("NewWorldMenuGenerateButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 4);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("GenerateButton", new Element());
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, -100.0f)), sprite, Opacity(1.0f));
@@ -365,8 +368,7 @@ void InterfaceBuilder::GenerateNewWorldMenuGenerateButton()
 	button->SetInteractivity(true);
 	button->GetClickEvents().Add(parent, &NewWorldMenu::GenerateWorld);
 
-	texture = TextureManager::GetTexture("NewWorldMenuGenerateButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
@@ -383,10 +385,43 @@ void InterfaceBuilder::GenerateNewWorldMenuGenerateButton()
 	text->SetParent(button);
 }
 
+void InterfaceBuilder::GenerateNewWorldMenuStartGameButton()
+{
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 5);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
+
+	auto button = Interface::AddElement("StartGameButton", new Element());
+	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
+
+	auto parent = Interface::GetElement("NewWorldMenu");
+	button->SetParent(parent);
+
+	button->SetInteractivity(true);
+	//button->GetClickEvents().Add(parent, &NewWorldMenu::GenerateWorld);
+
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
+
+	auto shadow = Interface::AddElement("Shadow", new Element());
+	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
+
+	shadow->Enable();
+	shadow->SetParent(button);
+
+	auto font = FontManager::GetFont("Dominican");
+	auto text = Interface::AddElement("Text", new Text(font, Color(0.5f, 0.1f, 0.05f)));
+	text->Configure(Size(100, 100), DrawOrder(4), new Transform(Position2(0.0f, 0.0f)), nullptr);
+	((Text*)text)->Setup("Start Game");
+
+	text->Enable();
+	text->SetParent(button);
+}
+
 void InterfaceBuilder::GenerateNewWorldMenuBackButton()
 {
-	auto texture = TextureManager::GetTexture("NewWorldMenuBackButton");
-	auto sprite = new Sprite(texture, spriteShader);
+	auto textureSet = InterfacePainter::GetTextureSet(ElementShapes::SQUARE, ElementSizes::SMALL, 7);
+
+	auto sprite = new Sprite(textureSet->Base_, spriteShader);
 
 	auto button = Interface::AddElement("BackButton", new Element());
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, 300.0f)), sprite, Opacity(1.0f));
@@ -398,8 +433,7 @@ void InterfaceBuilder::GenerateNewWorldMenuBackButton()
 	button->SetInteractivity(true);
 	button->GetClickEvents().Add(parent, &NewWorldMenu::OpenNewGameMenu);
 
-	texture = TextureManager::GetTexture("NewWorldMenuBackButtonShadow");
-	sprite = new Sprite(texture, shadowShader);
+	sprite = new Sprite(textureSet->Shadow_, shadowShader);
 
 	auto shadow = Interface::AddElement("Shadow", new Element());
 	shadow->Configure(Size(150, 150), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));

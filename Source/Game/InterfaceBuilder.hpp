@@ -24,6 +24,8 @@ class InterfaceBuilder
 
 	static void GenerateNewWorldMenuGenerateButton();
 
+	static void GenerateNewWorldMenuStartGameButton();
+
 	static void GenerateNewWorldMenuBackButton();
 
 	static void GenerateWorldPreview();

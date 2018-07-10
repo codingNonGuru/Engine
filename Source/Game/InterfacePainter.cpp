@@ -46,9 +46,9 @@ KernelBuffer* currentKernel = nullptr;
 
 void InterfacePainter::Initialize()
 {
-	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.5f));
-	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.5f, 0.0f), Range(0.6f, 1.0f), Weight(1.0f));
-	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.5f, 0.0f), Range(0.3f, 1.0f), Weight(0.1f));
+	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.7f, -0.2f), Range(0.3f, 1.0f), Weight(0.5f));
+	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.8f, -0.2f), Range(0.0f, 1.0f), Weight(1.0f));
+	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.7f, -0.2f), Range(0.3f, 1.0f), Weight(0.1f));
 
 	//lightPalette.Add(Color(1.0f, 0.8f, 0.5f), Range(0.5f, 1.0f), Range(0.0f, 1.0f), Weight(1.0f));
 
@@ -332,7 +332,7 @@ void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*
 	Grid <float> shadowMap(size.x, size.y);
 	buffers_.Get("edgeBlurSwap")->Download(&shadowMap);
 
-	shadowMap *= 0.6f;
+	shadowMap *= 0.7f;
 
 	shadowTexture = new Texture(Size(shadowMap.GetWidth(), shadowMap.GetHeight()), TextureFormats::ONE_FLOAT, &shadowMap);
 }
@@ -357,37 +357,13 @@ void InterfacePainter::PaintInterface()
 	TextureManager::AddTexture(baseTexture, "MainMenu");
 	TextureManager::AddTexture(shadowTexture, "MainMenuShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "MainMenuCloseButton");
-	TextureManager::AddTexture(shadowTexture, "MainMenuCloseButtonShadow");
-
 	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "NewGameMenu");
 	TextureManager::AddTexture(shadowTexture, "NewGameMenuShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "NewGameMenuNewWorldButton");
-	TextureManager::AddTexture(shadowTexture, "NewGameMenuNewWorldButtonShadow");
-
 	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "NewWorldMenu");
 	TextureManager::AddTexture(shadowTexture, "NewWorldMenuShadow");
-
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "NewWorldMenuSetSizeButton");
-	TextureManager::AddTexture(shadowTexture, "NewWorldMenuSetSizeButtonShadow");
-
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "NewGameMenuBackButton");
-	TextureManager::AddTexture(shadowTexture, "NewGameMenuBackButtonShadow");
-
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "NewWorldMenuGenerateButton");
-	TextureManager::AddTexture(shadowTexture, "NewWorldMenuGenerateButtonShadow");
-
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
-	TextureManager::AddTexture(baseTexture, "NewWorldMenuBackButton");
-	TextureManager::AddTexture(shadowTexture, "NewWorldMenuBackButtonShadow");
 
 	GenerateTextures(ElementShapes::SQUARE, Size(768, 768), baseTexture, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "WorldPreviewPanel");
@@ -399,6 +375,15 @@ void InterfacePainter::PaintInterface()
 	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
 	{
 		GenerateTextures(ElementShapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
+		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
+	}
+
+	textureSetArray = textureSets_.Add(ElementTextureClass(ElementShapes::SQUARE, ElementSizes::SMALL));
+	textureSetArray->Initialize(8);
+
+	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
+	{
+		GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
 		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
 	}
 }
