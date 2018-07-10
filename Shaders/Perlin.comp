@@ -28,7 +28,8 @@ layout (std430, binding = 2) buffer STREAM {
 
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-uint shuffle(uint seed) {
+uint shuffle(uint seed) 
+{
 	seed = (seed ^ 61) ^ (seed >> 16);
     seed *= 9;
     seed = seed ^ (seed >> 4);
@@ -37,22 +38,19 @@ uint shuffle(uint seed) {
     return seed;
 }
 
-float getRandomValue(uint seed_x, float min, float max) {
+uint GetIndex()
+{
+	uint x = gl_GlobalInvocationID.x;
+	uint y = gl_GlobalInvocationID.y; 
+	return y * size.x + x;
+}
+
+float getRandomValue(uint seed_x, float min, float max) 
+{
 	uint seed = shuffle(seed_x);
 	
 	float value = randomNumberStream[seed / 256] * (max - min) + min;
 	return value;
-	//return (randomNumberStream[seed_1 + timeSeed.x] + randomNumberStream[seed_2 + timeSeed.y]) * 0.5f;
-}
-
-float getRandomField(uint x, uint y, float min, float max) {
-    uint seed = x * 1087;
-    seed ^= 0xE56FAA12;
-    seed += y * 2749;
-    seed ^= 0x69628a2d;
-
-	float value = float(int(seed % 2001) - 1000) / 1000.0f; 
-    return value * (max - min) + min;
 }
 
 void setLatticeCore() {
@@ -63,63 +61,74 @@ void setLatticeCore() {
 	
 	uint highestXOrder = size.x;
 	uint highestYOrder = size.y;
-	//float variation = 1.0f / (1.0f + float(abs(octaveCount - octaveIndex)));
+	
 	float variation = 0.5f * exp(-pow(float(octaveCount - octaveIndex) - strongestOctave, 2.0f) / (2.0f * pow(decay, 2.0f)));
 	bool isCorner = x % highestXOrder == 0 && y % highestYOrder == 0;
 	bool isLowerOrRightEdge = x == highestXOrder || y == highestYOrder;
-	if(x % order == 0 && y % order == 0) {
-		if(isCorner == false && isLowerOrRightEdge == false) {
+	if(x % order == 0 && y % order == 0) 
+	{
+		if(isCorner == false && isLowerOrRightEdge == false) 
+		{
 			octaves[index] = getRandomValue(timeSeed + shrinkedIndex, -variation, variation);
 		}
-		else if(isCorner == true){
+		else if(isCorner == true)
+		{
 			//octaves[index] = 0.0f;
 		}
-	} else {
+	} 
+	else 
+	{
 		octaves[index] = 0.0f;
 	}
 }
 
-void setLatticeEdges() {
+void setLatticeEdges() 
+{
 	uint x = gl_GlobalInvocationID.x;
-	uint y = gl_GlobalInvocationID.y; 
-	uint index = y * size.x + x;
+	uint y = gl_GlobalInvocationID.y;
+	uint index = GetIndex();
 	
 	uint highestXOrder = size.x - 1;
 	uint highestYOrder = size.y - 1;
-	if(x % order == 0 && y % order == 0) {
+	if(x % order == 0 && y % order == 0) 
+	{
 		if(x == highestXOrder)
 			octaves[index] = octaves[y * size.x];
 		if(y == highestYOrder)
 			octaves[index] = octaves[x]; 
-	} else {
+	} 
+	else 
+	{
 		octaves[index] = 0.0f;
 	}		
 }
 
-float fade(float t) {
- 	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
- 	//return t * t * (3.0f - 2.0f * t);
+float Fade(float t) 
+{
+ 	return t * t * (3.0f - 2.0f * t);
 }
 
-void fillLattice() {
+void fillLattice() 
+{
 	uint x = gl_GlobalInvocationID.x;
-	uint y = gl_GlobalInvocationID.y; 
-	uint index = y * size.x + x;
+	uint y = gl_GlobalInvocationID.y;
+	uint index = GetIndex();
 	
 	bool isOrder = x % order == 0 && y % order == 0; 
-	if(isOrder == false) {
+	if(isOrder == false) 
+	{
 		uint left, right, up, down;
 		left = x - x % order;
 		right = left + order;
-		if(right >= size.x) {
+		if(right >= size.x) 
+		{
 			right -= size.x;
-			//right += 1;
 		}
 		up = y - y % order;
 		down = up + order;
-		if(down >= size.y) {
+		if(down >= size.y) 
+		{
 			down -= size.y;
-			//down += 1;
 		}
 		float upperLeft, upperRight, lowerLeft, lowerRight;
 		upperLeft = octaves[up * size.x + left];
@@ -128,9 +137,9 @@ void fillLattice() {
 		lowerRight = octaves[down * size.x + right];
 		
 		float horizontalFactor = float(x % order) / float(order);
-		horizontalFactor = fade(horizontalFactor);
+		horizontalFactor = Fade(horizontalFactor);
 		float verticalFactor = float(y % order) / float(order);
-		verticalFactor = fade(verticalFactor);
+		verticalFactor = Fade(verticalFactor);
 		
 		float upperFactor = (upperRight - upperLeft) * horizontalFactor + upperLeft;
 		float lowerFactor = (lowerRight - lowerLeft) * horizontalFactor + lowerLeft;
@@ -145,24 +154,18 @@ void fillLattice() {
 	result[index] += octaves[index];
 }
 
-void addOctaves() {
-	uint x = gl_GlobalInvocationID.x;
-	uint y = gl_GlobalInvocationID.y;
-	uint index = y * size.x + x;
+void addOctaves() 
+{
+	uint index = GetIndex();
 
 	result[index] = result[index] / float(octaveCount) + 0.5f;
 	result[index] = pow(result[index], pow(contrastStrength, 16.0f * contrast - 16.0f * result[index]));
 	result[index] = result[index] * (range.y - range.x) + range.x;
-	/*if(result[index] > 0.5f)
-		result[index] = 1.0f;
-	else
-		result[index] = 0.0f;*/
 }
 
-void clear() {
-	uint x = gl_GlobalInvocationID.x;
-	uint y = gl_GlobalInvocationID.y;
-	uint index = y * size.x + x;
+void clear() 
+{
+	uint index = GetIndex();
 
 	result[index] = 0.0f;
 	
