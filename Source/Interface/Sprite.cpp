@@ -38,6 +38,31 @@ void Sprite::Draw(Camera* camera)
 {
 	shader_->Bind();
 
+	SetDefaultConstants(camera);
+
+	SetExtraConstants();
+
+	BindDefaultTextures();
+
+	BindExtraTextures();
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	shader_->Unbind();
+
+	if(texture_)
+	{
+		texture_->Unbind();
+	}
+}
+
+float & Sprite::GetOpacity()
+{
+	return opacity_;
+}
+
+void Sprite::SetDefaultConstants(Camera* camera)
+{
 	shader_->SetConstant(camera->GetMatrix(), "viewMatrix");
 
 	shader_->SetConstant(parent_->GetGlobalPosition(), "spritePosition");
@@ -61,24 +86,20 @@ void Sprite::Draw(Camera* camera)
 
 	auto drawOrder = (float)parent_->GetDrawOrder() * 0.1f;
 	shader_->SetConstant(drawOrder, "depth");
+}
 
+void Sprite::BindDefaultTextures()
+{
 	if(texture_)
 	{
-		//shader_->BindTexture(texture_, "diffuse");
-		texture_->Bind(0, shader_, "diffuse");
-	}
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	shader_->Unbind();
-
-	if(texture_)
-	{
-		texture_->Unbind();
+		shader_->BindTexture(texture_, "diffuse");
 	}
 }
 
-float & Sprite::GetOpacity()
+void Sprite::SetExtraConstants()
 {
-	return opacity_;
+}
+
+void Sprite::BindExtraTextures()
+{
 }

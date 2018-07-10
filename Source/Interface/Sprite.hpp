@@ -31,6 +31,15 @@ private:
 
 	Color* color_;
 
+	void SetDefaultConstants(Camera*);
+
+	void BindDefaultTextures();
+
+protected:
+	virtual void SetExtraConstants();
+
+	virtual void BindExtraTextures();
+
 public:
 	Sprite();
 
