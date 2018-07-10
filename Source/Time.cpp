@@ -9,6 +9,8 @@ double Time::lastTimeStamp_ = 0.0;
 
 double Time::currentTimeStamp_ = 0.0;
 
+double Time::clockStart_ = 0.0;
+
 void Time::Update()
 {
 	using namespace std::chrono;
@@ -24,4 +26,27 @@ void Time::Update()
 float Time::GetDelta()
 {
 	return delta_;
+}
+
+void Time::StartClock()
+{
+	using namespace std::chrono;
+	auto timeStamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+
+	clockStart_ = timeStamp.count() / 1000.0;
+}
+
+float Time::GetClock(bool isReset)
+{
+	using namespace std::chrono;
+	auto timeStamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+
+	auto delta = timeStamp.count() / 1000.0 - clockStart_;
+
+	if(isReset)
+	{
+		clockStart_ = timeStamp.count() / 1000.0;
+	}
+
+	return (float)delta;
 }

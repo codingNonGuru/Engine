@@ -9,8 +9,14 @@ private:
 
 	static double currentTimeStamp_;
 
+	static double clockStart_;
+
 public:
 	static void Update();
 
 	static float GetDelta();
+
+	static void StartClock();
+
+	static float GetClock(bool = true);
 };
