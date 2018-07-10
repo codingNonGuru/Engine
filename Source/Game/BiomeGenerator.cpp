@@ -5,6 +5,7 @@
 #include "Shader.hpp"
 #include "ShaderManager.hpp"
 #include "Utility/Perlin.hpp"
+#include "Time.hpp"
 
 #include "BiomeGenerator.hpp"
 #include "Game/World.hpp"
@@ -16,6 +17,8 @@ DataBuffer* reliefBuffer = nullptr;
 
 void BiomeGenerator::Generate(World& world)
 {
+	Time::StartClock();
+
 	auto size = world.GetSize();
 
 	auto& tiles = world.GetTiles();
@@ -62,12 +65,15 @@ void BiomeGenerator::Generate(World& world)
 	shader->SetConstant(size, "size");
 
 	shader->SetConstant(0, "stage");
-	shader->DispatchCompute(size / 4);
+	shader->DispatchCompute(size / 16);
 
 	shader->SetConstant(1, "stage");
-	shader->DispatchCompute(size / 4);
+	shader->DispatchCompute(size / 16);
 
 	shader->Unbind();
+
+	auto time = Time::GetClock();
+	std::cout<<"BIOME GENERATION TIME (in seconds) ------> "<<time<<"\n";
 
 	Grid <Float> biomes(&reliefs);
 	output->Download(&biomes);
