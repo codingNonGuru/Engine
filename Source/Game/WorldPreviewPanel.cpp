@@ -30,7 +30,7 @@ void WorldPreviewPanel::SetViewMode(WorldPreviewModes mode)
 		texture = WorldGenerator::GetBiomePreview();
 		break;
 	case WorldPreviewModes::POLITY:
-		//texture = WorldGenerator::GetReliefPreview();
+		texture = WorldGenerator::GetCulturePreview();
 		break;
 	}
 

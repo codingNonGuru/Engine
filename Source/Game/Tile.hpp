@@ -22,6 +22,8 @@ class Tile
 
 	Settlement* settlement_;
 
+	Settlement* domain_;
+
 public:
 	Tile();
 
@@ -34,4 +36,8 @@ public:
 	Settlement* GetSettlement();
 
 	void SetSettlement(Settlement*);
+
+	Settlement* GetDomain();
+
+	void SetDomain(Settlement*);
 };

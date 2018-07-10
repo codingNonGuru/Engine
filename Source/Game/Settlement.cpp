@@ -1,3 +1,5 @@
+#include "Utility/Utility.hpp"
+
 #include "Game/Settlement.hpp"
 #include "Game/World.hpp"
 #include "Game/Tile.hpp"
@@ -7,6 +9,13 @@ World* Settlement::world_ = nullptr;
 void Settlement::SetWorld(World* world)
 {
 	world_ = world;
+}
+
+Settlement::Settlement()
+{
+	tile_ = nullptr;
+
+	banner_ = Color(utility::GetRandom(0.0f, 1.0f), 0.0f, 0.0f);
 }
 
 void Settlement::Initialize(Position2 position)
@@ -25,6 +34,22 @@ void Settlement::Initialize(Position2 position)
 int Settlement::GetPopulation() const
 {
 	return population_;
+}
+
+Position2 Settlement::GetPosition() const
+{
+	return position_;
+}
+
+Color & Settlement::GetBanner()
+{
+	return banner_;
+}
+
+float Settlement::GetDistance(Settlement* settlement) const
+{
+	auto direction = position_ - settlement->GetPosition();
+	return glm::length(direction);
 }
 
 void Settlement::EvaluateFertility()

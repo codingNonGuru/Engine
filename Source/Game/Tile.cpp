@@ -3,6 +3,8 @@
 Tile::Tile()
 {
 	settlement_ = nullptr;
+
+	domain_ = nullptr;
 }
 
 Position3 & Tile::GetPosition()
@@ -28,4 +30,14 @@ Settlement* Tile::GetSettlement()
 void Tile::SetSettlement(Settlement* settlement)
 {
 	settlement_ = settlement;
+}
+
+Settlement* Tile::GetDomain()
+{
+	return domain_;
+}
+
+void Tile::SetDomain(Settlement* domain)
+{
+	domain_ = domain;
 }
