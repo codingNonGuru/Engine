@@ -21,3 +21,8 @@ enum class WorldPreviewModes
 {
 	RELIEF, BIOME, POLITY, COUNT
 };
+
+enum class DisplaceTerrainBuffers
+{
+	INDEX_LINKS, POSITION_INPUT, POSITION_OUTPUT, NORMAL_OUTPUT, TANGENT_OUTPUT, COUNT
+};
