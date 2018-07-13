@@ -84,3 +84,5 @@ enum class KernelTypes
 	CAUCHY,
 	LAPLACE
 };
+
+enum class States;

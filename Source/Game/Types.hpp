@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Types.hpp"
+
 enum class WorldSizeOptions {TINY, SMALL, MEDIUM, LARGE, IMMENSE, COUNT};
 
 enum class ElementShapes
@@ -26,3 +28,5 @@ enum class DisplaceTerrainBuffers
 {
 	INDEX_LINKS, POSITION_INPUT, POSITION_OUTPUT, NORMAL_OUTPUT, TANGENT_OUTPUT, COUNT
 };
+
+enum class States {NONE, INTRO, PREGAME, WORLD, BATTLE};
