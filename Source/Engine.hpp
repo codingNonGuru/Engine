@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Conventions.hpp"
+#include "Delegate.hpp"
 
 class Screen;
 class RenderManager;
@@ -18,6 +19,8 @@ private:
 	static RenderManager* renderManager_;
 
 public:
+	static Delegate OnInitialize_;
+
 	static void Initialize();
 
 	static void StartGameLoop();

@@ -2,14 +2,9 @@
 
 #include "Model.hpp"
 
-Map <Model, LongWord> ModelManager::models_ = Map <Model, LongWord> ();
-
 #define MAXIMUM_MODEL_COUNT 256
 
-void ModelManager::Initialize()
-{
-	models_.Initialize(MAXIMUM_MODEL_COUNT);
-}
+Map <Model, LongWord> ModelManager::models_ = Map <Model, LongWord> (MAXIMUM_MODEL_COUNT);
 
 Map <Model, LongWord> & ModelManager::GetModels()
 {

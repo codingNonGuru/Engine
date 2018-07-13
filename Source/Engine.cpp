@@ -6,9 +6,11 @@
 #include "RenderManager.hpp"
 #include "Window.hpp"
 #include "InputHandler.hpp"
+#include "AssetManager.hpp"
 #include "Interface/Interface.hpp"
 #include "Interface/Element.hpp"
 #include "Time.hpp"
+#include "Utility/Perlin.hpp"
 
 bool Engine::isRunning_ = false;
 
@@ -18,19 +20,23 @@ Screen* Engine::screen_ = nullptr;
 
 RenderManager* Engine::renderManager_ = nullptr;
 
+Delegate Engine::OnInitialize_ = Delegate();
+
 void Engine::Initialize()
 {
+	AssetManager::Initialize();
+
 	screen_ = new Screen(2560, 1440);
 
 	window_ = new Window(screen_);
 
-	glewInit();
-
-	glEnable(GL_DEBUG_OUTPUT);
-
 	renderManager_ = RenderManager::Get();
 
 	renderManager_->Initialize();
+
+	AssetManager::LoadAssets();
+
+	OnInitialize_.Invoke();
 }
 
 void Engine::StartGameLoop()

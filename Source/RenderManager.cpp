@@ -35,6 +35,10 @@ RenderManager* RenderManager::Get()
 
 void RenderManager::Initialize()
 {
+	glewInit();
+
+	glEnable(GL_DEBUG_OUTPUT);
+
 	screen_ = Engine::GetScreen();
 
 	cameras_.Initialize(16);
