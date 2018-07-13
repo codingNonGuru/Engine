@@ -13,9 +13,9 @@ class Perlin
 
 	static bool isInitialized_;
 
-public:
 	static void Initialize();
 
+public:
 	static void Destroy();
 
 	static DataBuffer* Generate(Size, Range, float, float, float, float);

@@ -61,6 +61,8 @@ void Perlin::Destroy()
 
 DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float octaveDecay, float contrast, float contrastStrength)
 {
+	Initialize();
+
 	clock_t start = clock();
 
 	int blockSize = 16;
