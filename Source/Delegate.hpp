@@ -17,6 +17,8 @@ public:
 
 	template <class ClassType, class ObjectType>
 	void Remove(ObjectType*, void (ClassType::*)());
+
+	void Clear();
 };
 
 template <class ClassType, class ObjectType>

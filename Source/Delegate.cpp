@@ -25,7 +25,16 @@ void Delegate::Add(void (*function)())
 	callback->bind(function);
 }
 
+void Delegate::Clear()
+{
+	for(auto callback = callbacks_.GetStart(); callback != callbacks_.GetEnd(); ++callback)
+	{
+		if(callback->empty())
+			continue;
 
+		callback->clear();
+	}
+}
 
 
 
