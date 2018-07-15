@@ -9,4 +9,6 @@ private:
 
 public:
 	static void Initialize();
+
+	static void HandleGameLoopStart();
 };

@@ -9,6 +9,8 @@ class PregameState : public State
 private:
 	Element* mainMenu_;
 
+	float mainMenuOpenDelay_;
+
 protected:
 	virtual void HandleEnter() override;
 

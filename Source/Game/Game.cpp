@@ -5,11 +5,16 @@
 #include "MeshManager.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
+#include "State.hpp"
+#include "StateManager.hpp"
 
 #include "Game/Game.hpp"
 #include "Game/InterfaceBuilder.hpp"
 #include "Game/SceneBuilder.hpp"
 #include "Game/Filter/FilterBuilder.hpp"
+#include "Game/Types.hpp"
+#include "Game/States/PregameState.hpp"
+#include "Game/States/WorldState.hpp"
 
 Game* Game::instance_ = Game::Register();
 
@@ -30,11 +35,22 @@ void Game::Initialize()
 	FilterBuilder::GenerateFilters();
 
 	InterfaceBuilder::GenerateInterface();
+
+	StateManager::Register(new State(), States::INTRO);
+	StateManager::Register(new PregameState(), States::PREGAME);
+	StateManager::Register(new WorldState(), States::PREGAME);
 }
 
 Game* Game::Register()
 {
 	Engine::OnInitialize_.Add(&Game::Initialize);
 
+	Engine::OnGameLoopStart_.Add(&Game::HandleGameLoopStart);
+
 	return new Game();
+}
+
+void Game::HandleGameLoopStart()
+{
+	StateManager::Enter(States::PREGAME);
 }
