@@ -1,6 +1,12 @@
 #include "Object.hpp"
-
 #include "Transform.hpp"
+
+Object::Object()
+{
+	parent_ = nullptr;
+
+	transform_ = nullptr;
+}
 
 void Object::Enable()
 {

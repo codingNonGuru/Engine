@@ -21,6 +21,8 @@ protected:
 	virtual void HandleSetParent(Object*);
 
 public:
+	Object();
+
 	void Enable();
 
 	void Disable();
