@@ -8,6 +8,8 @@
 #include "HeaderBuffer.hpp"
 #include "DataBuffer.hpp"
 
+enum class Shaders {GENERIC};
+
 Model::Model() {}
 
 Model::Model(Mesh* mesh, Shader* shader)
@@ -15,12 +17,16 @@ Model::Model(Mesh* mesh, Shader* shader)
 	Initialize(mesh, shader);
 }
 
+void Model::Initialize() {}
+
 void Model::Initialize(Mesh* mesh, Shader* shader)
 {
 	mesh_ = mesh;
-	shader_ = shader;
 
-	textures_.Initialize(shader_->GetTextureCount());
+	shaders_.Initialize(1);
+	*shaders_.Add(Shaders::GENERIC) = shader;
+
+	textures_.Initialize(shader->GetTextureCount());
 
 	SetupBuffer();
 }
@@ -33,32 +39,40 @@ void Model::AddTexture(Texture* texture, const char* name)
 
 void Model::Render(Camera* camera)
 {
-	shader_->Bind();
+	auto shader = *shaders_.Get(Shaders::GENERIC);
 
-	shader_->SetConstant(camera->GetMatrix(), "viewMatrix");
+	shader->Bind();
+
+	shader->SetConstant(camera->GetMatrix(), "viewMatrix");
 
 	auto indexCount = mesh_->GetIndexCount();
-	shader_->SetConstant(indexCount, "indexCount");
+	shader->SetConstant(indexCount, "indexCount");
 
 	auto vertexCount = mesh_->GetVertexCount();
-	shader_->SetConstant(vertexCount, "vertexCount");
+	shader->SetConstant(vertexCount, "vertexCount");
 
 	auto cameraPosition = camera->GetPosition();
-	shader_->SetConstant(cameraPosition, "cameraPosition");
+	shader->SetConstant(cameraPosition, "cameraPosition");
 
-	buffer_->SetSlaveBindPoint("position", 0);
-	buffer_->SetSlaveBindPoint("normal", 1);
-	buffer_->SetSlaveBindPoint("index", 2);
+	DataBuffer* buffer = nullptr;
+
+	buffer = *buffers_.Get("position");
+	buffer->Bind(0);
+
+	buffer = *buffers_.Get("normal");
+	buffer->Bind(1);
+
+	buffer = *buffers_.Get("index");
+	buffer->Bind(2);
 
 	glDrawArrays(GL_TRIANGLES, 0, indexCount);
 
-	shader_->Unbind();
+	shader->Unbind();
 }
 
 void Model::SetupBuffer()
 {
-	buffer_ = new HeaderBuffer(4);
-	buffer_->Bind();
+	buffers_.Initialize(4);
 
 	int index = 0;
 	auto meshAttributes = mesh_->GetAttributes();
@@ -69,7 +83,7 @@ void Model::SetupBuffer()
 		if(meshAttributeData == nullptr)
 			continue;
 
-		auto slaveBuffer = new DataBuffer(meshAttributeData->GetMemoryCapacity(), meshAttributeData->GetData());
-		buffer_->AddBuffer(index, slaveBuffer, *meshAttributeKey);
+		auto buffer = new DataBuffer(meshAttributeData->GetMemoryCapacity(), meshAttributeData->GetData());
+		*buffers_.Add(*meshAttributeKey) = buffer;
 	}
 }

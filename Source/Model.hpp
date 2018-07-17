@@ -3,19 +3,21 @@
 #include "Conventions.hpp"
 
 class Mesh;
-class HeaderBuffer;
+class DataBuffer;
 class Camera;
 class Texture;
 class Shader;
 
+enum class Shaders;
+
 class Model
 {
-private:
+protected:
 	Mesh* mesh_;
 
-	HeaderBuffer* buffer_;
+	Map <DataBuffer*, LongWord> buffers_;
 
-	Shader* shader_;
+	Map <Shader*, Shaders> shaders_;
 
 	Map <Texture*, LongWord> textures_;
 
@@ -26,9 +28,11 @@ public:
 
 	Model(Mesh*, Shader*);
 
+	virtual void Initialize();
+
 	void Initialize(Mesh*, Shader*);
 
 	void AddTexture(Texture*, const char*);
 
-	void Render(Camera*);
+	virtual void Render(Camera*);
 };
