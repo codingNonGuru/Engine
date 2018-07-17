@@ -5,13 +5,24 @@
 class World;
 struct WorldParameterSet;
 class File;
+class TerrainModel;
 
-class MainScene : public Scene
+class WorldScene : public Scene
 {
+	static WorldScene* instance_;
+
 	World* world_;
 
+	TerrainModel* worldModel_;
+
+	void HandleStartGame();
+
 public:
+	WorldScene();
+
 	void Initialize(File*);
 
 	void Initialize(const WorldParameterSet&);
+
+	static World* GetWorld();
 };

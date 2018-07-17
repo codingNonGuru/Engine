@@ -12,6 +12,7 @@
 #include "Game/WorldParameterSet.hpp"
 #include "Game/World.hpp"
 #include "Game/Tile.hpp"
+#include "Game/Types.hpp"
 
 enum class Buffers
 {
@@ -19,6 +20,8 @@ enum class Buffers
 };
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
+
+Map <DataBuffer*, LongWord> ReliefGenerator::modelBuffers_ = Map <DataBuffer*, LongWord> (TerrainModelBuffers::COUNT);
 
 Shader* shader = nullptr;
 
@@ -170,6 +173,15 @@ DataBuffer* ReliefGenerator::GetFinalBuffer()
 	return buffers.Get(Buffers::TERRAIN);
 }
 
+DataBuffer* ReliefGenerator::GetModelBuffer(LongWord identifier)
+{
+	auto bufferPointer = modelBuffers_.Get(identifier);
+	if(bufferPointer == nullptr)
+		return nullptr;
+
+	return *bufferPointer;
+}
+
 void ReliefGenerator::SetupBuffers(World& world)
 {
 	auto size = world.GetSize();
@@ -254,4 +266,183 @@ void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize
 
 	shader->SetConstant(1, "mode");
 	shader->DispatchCompute(computeSize);
+}
+
+void ReliefGenerator::GenerateModel(World& world)
+{
+	struct LinkBatch
+	{
+		Index links_[12];
+		unsigned int count_;
+
+		LinkBatch()
+		{
+			count_ = 0;
+		}
+
+		void Add(Index link)
+		{
+			links_[count_] = link;
+			count_++;
+		}
+	};
+
+	Index capacity = 4096 * 256;
+	Array <Float3> vertexPositions(capacity);
+	Array <Index> indices(16384 * 256);
+	Array <unsigned int> indexSeries(16384);
+	Array <LinkBatch> linkBatches(capacity);
+	Array <unsigned int> links(capacity * 12);
+
+	for(int i = 0; i < linkBatches.GetCapacity(); ++i)
+		linkBatches.Allocate()->count_ = 0;
+
+	float horIncr = 0.01f;
+	float vertIncr = 0.866f * horIncr;
+
+	bool flip = true;
+	Index index = 0;
+
+	*indexSeries.Allocate() = index;
+	for(float y = -5.0f; y < 5.0f; y += vertIncr)
+	{
+		for(float x = -3.0f + (flip ? 0.0f : horIncr * 0.5f); x < 3.0f; x += horIncr)
+		{
+			*vertexPositions.Allocate() = Float3(x, y, 0.0f);
+			index++;
+		}
+		flip = flip ? false : true;
+		*indexSeries.Allocate() = index;
+	}
+
+	for(int i = 0; i < indexSeries.GetSize() - 3; i += 2)
+	{
+		bool first = false;
+		int j = *indexSeries.Get(i);
+		int l = *indexSeries.Get(i + 2);
+		for(int k = *indexSeries.Get(i + 1); k < *indexSeries.Get(i + 2) - 3; ++j, ++k, ++l)
+		{
+			*indices.Allocate() = j;
+			*indices.Allocate() = j + 1;
+			*indices.Allocate() = k;
+
+			linkBatches.Get(j)->Add(j + 1);
+			linkBatches.Get(j)->Add(k);
+			linkBatches.Get(j + 1)->Add(j);
+			linkBatches.Get(j + 1)->Add(k);
+			linkBatches.Get(k)->Add(j);
+			linkBatches.Get(k)->Add(j + 1);
+
+			*indices.Allocate() = j + 1;
+			*indices.Allocate() = k;
+			*indices.Allocate() = k + 1;
+
+			linkBatches.Get(j + 1)->Add(k);
+			linkBatches.Get(j + 1)->Add(k + 1);
+			linkBatches.Get(k)->Add(j + 1);
+			linkBatches.Get(k)->Add(k + 1);
+			linkBatches.Get(k + 1)->Add(j + 1);
+			linkBatches.Get(k + 1)->Add(k);
+
+			*indices.Allocate() = l;
+			*indices.Allocate() = k;
+			*indices.Allocate() = l + 1;
+
+			linkBatches.Get(l)->Add(k);
+			linkBatches.Get(l)->Add(l + 1);
+			linkBatches.Get(k)->Add(l);
+			linkBatches.Get(k)->Add(l + 1);
+			linkBatches.Get(l + 1)->Add(l);
+			linkBatches.Get(l + 1)->Add(k);
+
+			*indices.Allocate() = l + 1;
+			*indices.Allocate() = k;
+			*indices.Allocate() = k + 1;
+
+			linkBatches.Get(l + 1)->Add(k);
+			linkBatches.Get(l + 1)->Add(k + 1);
+			linkBatches.Get(k)->Add(l + 1);
+			linkBatches.Get(k)->Add(k + 1);
+			linkBatches.Get(k + 1)->Add(l + l);
+			linkBatches.Get(k + 1)->Add(k);
+		}
+	}
+
+	for(int i = 0; i < linkBatches.GetSize(); ++i)
+	{
+		for(int j = 0; j < 12; ++j)
+			*links.Allocate() = linkBatches.Get(i)->links_[j];
+	}
+
+	auto positionInputBuffer = modelBuffers_.Add(TerrainModelBuffers::POSITION_INPUT);
+	*positionInputBuffer = new DataBuffer(vertexPositions.GetMemorySize(), vertexPositions.GetStart());
+	(*positionInputBuffer)->SetSize(vertexPositions.GetSize());
+
+	auto indexLinkBuffer = modelBuffers_.Add(TerrainModelBuffers::INDEX_LINKS);
+	*indexLinkBuffer = new DataBuffer(links.GetMemorySize(), links.GetStart());
+
+	auto indexBuffer = modelBuffers_.Add(TerrainModelBuffers::INDICES);
+	*indexBuffer = new DataBuffer(indices.GetMemorySize(), indices.GetStart());
+
+	/*int i = 0;
+	for(auto l = links.getStart(); l != links.getEnd(); ++l) {
+		std::cout<<*l<<" ";
+		if(i % 6 == 5)
+			std::cout<<"\n";
+	}*/
+
+	/*container::Array<glm::vec3> vertexPositions(4096 * 64);
+	container::Array<unsigned int> indices(16384 * 64);
+	int order = 8;
+	float increment = 1.0f / pow(2.0f, (float)order);
+	float offset = increment / 2.0f;
+	for(int x = 0; x <= pow(2, order); ++x)
+		for(int y = 0; y <= pow(2, order); ++y)
+			*vertexPositions.Allocate() = glm::vec3((float)x * increment - 0.5f, (float)y * increment - 0.5f, 0.0f);
+	for(int x = 0; x < pow(2, order); ++x)
+		for(int y = 0; y < pow(2, order); ++y)
+			*vertexPositions.Allocate() = glm::vec3(offset + (float)x * increment - 0.5f, offset + (float)y * increment - 0.5f, 0.0f);
+	int middleStart = (pow(2, order) + 1) * (pow(2, order) + 1);
+	for(int x = 0; x < pow(2, order); ++x)
+		for(int y = 0; y < pow(2, order); ++y) {
+			int index = x * pow(2, order) + y;
+			int middle = middleStart + index;
+			int topLeft = index + x;
+			int topRight = topLeft + 1;
+			int bottomLeft = topLeft + pow(2, order) + 1;
+			int bottomRight = bottomLeft + 1;
+			*indices.Allocate() = middle;
+			*indices.Allocate() = topLeft;
+			*indices.Allocate() = topRight;
+
+			*indices.Allocate() = middle;
+			*indices.Allocate() = topRight;
+			*indices.Allocate() = bottomRight;
+
+			*indices.Allocate() = middle;
+			*indices.Allocate() = bottomRight;
+			*indices.Allocate() = bottomLeft;
+
+			*indices.Allocate() = middle;
+			*indices.Allocate() = bottomLeft;
+			*indices.Allocate() = topLeft;
+		}*/
+
+	auto & worldTiles = world.GetTiles();
+	Grid <Float> heightMap (worldTiles.GetWidth(), worldTiles.GetHeight());
+	for(int x = 0; x < heightMap.GetWidth(); ++x)
+		for(int y = 0; y < heightMap.GetHeight(); ++y)
+		{
+			//*heightMap(x, y) = (worldTiles.Get(x, y)->position_.z - world.averageHeight_) * 1.0f + world.averageHeight_;
+			auto & position = worldTiles.Get(x, y)->GetPosition();
+			*heightMap(x, y) = position.z;
+		}
+
+	auto texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &heightMap);
+
+	Grid <Float> detailMap(worldTiles.GetWidth(), worldTiles.GetHeight());
+	Perlin::Generate(world.GetSize(), Range(0.0f, 1.0f), 0.0f, 2.0f, 0.5f, 1.0f);
+
+	Perlin::Download(&detailMap);
+	texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &detailMap);
 }

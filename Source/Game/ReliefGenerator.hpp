@@ -8,6 +8,8 @@ class DataBuffer;
 
 class ReliefGenerator
 {
+	static Map <DataBuffer*, LongWord> modelBuffers_;
+
 	static void SetupBuffers(World&);
 
 	static void LiftTerrain(Float2, Float, Size);
@@ -15,5 +17,9 @@ class ReliefGenerator
 public:
 	static void Generate(World&);
 
+	static void GenerateModel(World&);
+
 	static DataBuffer* GetFinalBuffer();
+
+	static DataBuffer* GetModelBuffer(LongWord);
 };
