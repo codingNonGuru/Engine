@@ -26,3 +26,15 @@ Filter* FilterManager::AddFilter(const char* name, Filter* filter)
 
 	return filter;
 }
+
+void FilterManager::Update(Camera* camera)
+{
+	for(auto filterIterator = filters_.GetStart(); filterIterator != filters_.GetEnd(); ++filterIterator)
+	{
+		auto filter = *filterIterator;
+		if(!filter)
+			continue;
+
+		filter->Update(camera);
+	}
+}
