@@ -17,6 +17,8 @@ void DataBuffer::Generate(int memorySize, void* data)
 {
 	type_ = GL_SHADER_STORAGE_BUFFER;
 
+	memorySize_ = memorySize;
+
 	glGenBuffers(1, &key_);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, memorySize, data, GL_STATIC_DRAW);

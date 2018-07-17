@@ -13,6 +13,8 @@ class DataBuffer
 
 	unsigned int size_;
 
+	unsigned int memorySize_;
+
 public:
 	DataBuffer() {}
 
@@ -35,6 +37,8 @@ public:
 	void SetSize(unsigned int size) {size_ = size;}
 
 	unsigned int GetSize() const {return size_;}
+
+	unsigned int GetMemorySize() const {return memorySize_;}
 
 	void Delete();
 };
