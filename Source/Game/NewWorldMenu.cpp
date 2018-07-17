@@ -35,7 +35,7 @@ void NewWorldMenu::HandleInitialize()
 		sizeLabel_ = sizeOptionButton_->GetChild("SizeLabel");
 	}
 
-	mainScene_ = SceneManager::GetScene(Scenes::WORLD);
+	mainScene_ = SceneManager::Get(Scenes::WORLD);
 
 	sizeOption_ = WorldSizeOptions::MEDIUM;
 

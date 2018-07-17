@@ -7,7 +7,7 @@
 
 TerrainModel::TerrainModel()
 {
-	/*auto world = WorldScene::GetWorld();
+	auto world = WorldScene::GetWorld();
 	ReliefGenerator::GenerateModel(*world);
 
 	DataBuffer* buffer = nullptr;
@@ -27,7 +27,7 @@ TerrainModel::TerrainModel()
 	*buffers_.Add(TerrainModelBuffers::TANGENT_OUTPUT) = buffer;
 
 	buffer = new DataBuffer(bufferSize);
-	*buffers_.Add(TerrainModelBuffers::NORMAL_OUTPUT) = buffer;*/
+	*buffers_.Add(TerrainModelBuffers::NORMAL_OUTPUT) = buffer;
 }
 
 void TerrainModel::Initialize()
