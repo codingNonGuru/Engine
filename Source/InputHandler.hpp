@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SDL2/SDL.h"
+
 #include "Conventions.hpp"
 
 class Engine;
@@ -20,8 +22,6 @@ struct Mouse
 class InputHandler
 {
 	static Mouse mouse_;
-
-	static int keyCount_;
 
 	static container::Array<int> currentKeys_;
 

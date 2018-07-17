@@ -1,13 +1,9 @@
-#include "SDL2/SDL.h"
-
 #include "InputHandler.hpp"
 
 #include "Engine.hpp"
 #include "Screen.hpp"
 
 Mouse InputHandler::mouse_ = Mouse();
-
-int InputHandler::keyCount_ = 0;
 
 container::Array<int> InputHandler::currentKeys_ = container::Array<int>();
 
@@ -29,18 +25,12 @@ void InputHandler::Update()
 
 	currentKeys_.Reset();
 
-	SDL_PumpEvents();
-
 	UpdateMouse();
 
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_KEYDOWN)
-		{
-			*currentKeys_.Allocate() = event.key.keysym.sym;
-		}
-		else if(event.type == SDL_MOUSEBUTTONDOWN)
+		if(event.type == SDL_MOUSEBUTTONDOWN)
 		{
 			if(event.button.button == SDL_BUTTON_LEFT)
 				mouse_.CurrentLeft_ = true;
@@ -55,6 +45,18 @@ void InputHandler::Update()
 				mouse_.ScrollUp_ = true;
 		}
 	}
+
+	int keyCount = 0;
+	const Uint8* keyStates = SDL_GetKeyboardState(&keyCount);
+
+	int keyIndex = 0;
+	for(auto key = keyStates; key != keyStates + keyCount; ++key, ++keyIndex)
+	{
+		if(*key)
+			*currentKeys_.Allocate() = keyIndex;
+	}
+
+	SDL_PumpEvents();
 }
 
 void InputHandler::UpdateMouse()

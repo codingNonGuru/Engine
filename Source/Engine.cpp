@@ -50,7 +50,7 @@ void Engine::StartGameLoop()
 
 		InputHandler::Update();
 
-		if(InputHandler::IsPressed(SDLK_ESCAPE))
+		if(InputHandler::IsPressed(SDL_SCANCODE_ESCAPE))
 		{
 			ShutDown();
 		}
