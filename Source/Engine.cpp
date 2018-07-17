@@ -9,9 +9,10 @@
 #include "AssetManager.hpp"
 #include "Interface/Interface.hpp"
 #include "Interface/Element.hpp"
+#include "SceneManager.hpp"
+#include "TaskManager.hpp"
 #include "Time.hpp"
 #include "Utility/Perlin.hpp"
-#include "TaskManager.hpp"
 
 bool Engine::isRunning_ = false;
 
@@ -20,6 +21,8 @@ Screen* Engine::screen_ = nullptr;
 Delegate Engine::OnInitialize_ = Delegate();
 
 Delegate Engine::OnGameLoopStart_ = Delegate();
+
+Delegate Engine::OnShutDown_ = Delegate();
 
 void Engine::Initialize()
 {
@@ -54,6 +57,8 @@ void Engine::StartGameLoop()
 		{
 			ShutDown();
 		}
+
+		SceneManager::Update();
 
 		TaskManager::Update();
 
