@@ -5,23 +5,13 @@
 #include "Interface/Interface.hpp"
 
 #include "Game/NewGameMenu.hpp"
+#include "Game/Types.hpp"
 
 void NewGameMenu::HandleInitialize()
 {
 	mainMenu_ = Interface::GetElement("MainMenu");
 
-	newWorldMenu_ = Interface::GetElement("NewWorldMenu");
-
-	auto animation = animator_->GetAnimation("Close");
-	if(animation == nullptr)
-		return;
-
-	closeEvent_ = animation->AddEvent();
-	if(closeEvent_ == nullptr)
-		return;
-
-	closeEvent_->Initialize(0.5f);
-	closeEvent_->GetActions().Add(this, &NewGameMenu::Disable);
+	newWorldMenu_ = Interface::GetElement(Elements::NEW_WORLD_MENU);
 }
 
 void NewGameMenu::OpenNewWorldMenu()

@@ -25,9 +25,9 @@ public:
 
 	static Map <Element*, LongWord> & GetElements();
 
-	static Element* GetElement(const char*);
+	static Element* GetElement(LongWord);
 
-	static Element* AddElement(const char*, Element*);
+	static Element* AddElement(LongWord, Element*);
 
 	static Element* GetHoveredElement();
 };

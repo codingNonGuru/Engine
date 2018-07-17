@@ -5,7 +5,7 @@
 
 class AnimationEvent;
 class Text;
-class MainScene;
+class WorldScene;
 
 class NewWorldMenu : public Element
 {
@@ -27,15 +27,15 @@ class NewWorldMenu : public Element
 
 	Element* worldPreview_;
 
-	AnimationEvent* closeEvent_;
-
-	MainScene* mainScene_;
+	WorldScene* mainScene_;
 
 	WorldSizeOptions sizeOption_;
 
 	void HandleNewGameMenuOpen();
 
 	void UpdateSizeLabel();
+
+	void StartGame();
 
 public:
 	virtual void HandleInitialize() override;

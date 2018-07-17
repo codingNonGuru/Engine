@@ -7,20 +7,19 @@
 #include "Render/Filter.hpp"
 #include "Render/FilterManager.hpp"
 
+#include "Game/Types.hpp"
+
 void MainMenu::HandleInitialize()
 {
 	saturateFilter_ = FilterManager::GetFilter("Saturate");
 	blurFilter_ = FilterManager::GetFilter("Blur");
 
-	newGameMenu_ = Interface::GetElement("NewGameMenu");
+	newGameMenu_ = Interface::GetElement(Elements::NEW_GAME_MENU);
 
-	auto animation = animator_->GetAnimation("Close");
-	if(!animation)
-		return;
-
-	auto event = animation->GetFinishEvent();
-	event->GetActions().Add(this, &MainMenu::Disable);
-	event->GetActions().Add(this, &MainMenu::OpenNewGameMenu);
+	if(closeEvent_ != nullptr)
+	{
+		closeEvent_->GetActions().Add(this, &MainMenu::OpenNewGameMenu);
+	}
 }
 
 void MainMenu::HandleOpen()

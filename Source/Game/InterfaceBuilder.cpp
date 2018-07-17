@@ -124,7 +124,7 @@ void InterfaceBuilder::GenerateNewGameMenu()
 	auto texture = TextureManager::GetTexture("NewGameMenu");
 	auto sprite = new Sprite(texture, spriteShader);
 
-	auto menu = Interface::AddElement("NewGameMenu", new NewGameMenu());
+	auto menu = Interface::AddElement(Elements::NEW_GAME_MENU, new NewGameMenu());
 	menu->Configure(Size(400, 400), DrawOrder(-1), new Transform(Position2(0.0f, 0.0f)), sprite);
 
 	auto animator = menu->GetAnimator();
@@ -157,7 +157,7 @@ void InterfaceBuilder::GenerateNewWorldButton()
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewGameMenu");
+	auto parent = Interface::GetElement(Elements::NEW_GAME_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -190,7 +190,7 @@ void InterfaceBuilder::GenerateNewGameMenuBackButton()
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, 300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewGameMenu");
+	auto parent = Interface::GetElement(Elements::NEW_GAME_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -218,7 +218,7 @@ void InterfaceBuilder::GenerateNewWorldMenu()
 	auto texture = TextureManager::GetTexture("NewWorldMenu");
 	auto sprite = new Sprite(texture, spriteShader);
 
-	auto menu = Interface::AddElement("NewWorldMenu", new NewWorldMenu());
+	auto menu = Interface::AddElement(Elements::NEW_WORLD_MENU, new NewWorldMenu());
 	menu->Configure(Size(400, 400), DrawOrder(-1), new Transform(Position2(0.0f, 0.0f)), sprite);
 
 	AddOpenAnimation(menu, 1800.0f, 0.0f);
@@ -257,7 +257,7 @@ void InterfaceBuilder::GenerateNewWorldMenuSizeButton()
 	button->Configure(Size(512, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	//button->SetInteractivity(true);
@@ -291,7 +291,7 @@ void InterfaceBuilder::GenerateNewWorldMenuLeftScrollButton()
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(-340.0f, -300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -327,7 +327,7 @@ void InterfaceBuilder::GenerateNewWorldMenuRightScrollButton()
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(340.0f, -300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -362,7 +362,7 @@ void InterfaceBuilder::GenerateNewWorldMenuGenerateButton()
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, -100.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -394,7 +394,7 @@ void InterfaceBuilder::GenerateNewWorldMenuStartGameButton()
 	auto button = Interface::AddElement("StartGameButton", new Element());
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, -300.0f)), sprite, Opacity(1.0f));
 
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -427,7 +427,7 @@ void InterfaceBuilder::GenerateNewWorldMenuBackButton()
 	button->Configure(Size(256, 256), DrawOrder(3), new Transform(Position2(0.0f, 300.0f)), sprite, Opacity(1.0f));
 
 	button->Enable();
-	auto parent = Interface::GetElement("NewWorldMenu");
+	auto parent = Interface::GetElement(Elements::NEW_WORLD_MENU);
 	button->SetParent(parent);
 
 	button->SetInteractivity(true);
@@ -455,12 +455,12 @@ void InterfaceBuilder::GenerateWorldPreview()
 	auto texture = TextureManager::GetTexture("WorldPreviewPanel");
 	auto sprite = new Sprite(texture, spriteShader);
 
-	auto panel = Interface::AddElement("WorldPreview", new WorldPreviewPanel());
+	auto panel = Interface::AddElement(Elements::WORLD_PREVIEW_PANEL, new WorldPreviewPanel());
 	panel->Configure(Size(256, 256), DrawOrder(1), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
 
 	AddOpenAnimation(panel, 1800.0f, 800.0f);
 
-	AddCloseAnimation(panel, 800.0f, 1800.0f);
+	AddCloseAnimation(panel, 1800.0f, 800.0f);
 
 	texture = TextureManager::GetTexture("WorldPreviewPanelShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -501,8 +501,8 @@ void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 		button->Configure(Size(256, 256), DrawOrder(4), new Transform(Position2(x, 330.0f)), sprite, Opacity(1.0f));
 
 		button->Enable();
-		auto menu = Interface::GetElement("WorldPreview");
-		button->SetParent(menu);
+		auto panel = Interface::GetElement(Elements::WORLD_PREVIEW_PANEL);
+		button->SetParent(panel);
 
 		button->SetMode(previewModes[index]);
 

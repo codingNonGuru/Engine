@@ -5,6 +5,7 @@
 #include "Transform.hpp"
 #include "Animation.hpp"
 #include "Animator.hpp"
+#include "AnimationEvent.hpp"
 #include "AnimationProperty.hpp"
 #include "InputHandler.hpp"
 #include "Delegate.hpp"
@@ -119,6 +120,13 @@ Sprite* Element::GetSprite()
 
 void Element::Initialize()
 {
+	auto animation = animator_->GetAnimation("Close");
+	if(animation != nullptr)
+	{
+		closeEvent_ = animation->GetFinishEvent();
+		closeEvent_->GetActions().Add(this, &Element::Disable);
+	}
+
 	HandleInitialize();
 }
 

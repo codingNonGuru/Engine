@@ -11,8 +11,6 @@ class NewGameMenu : public Element
 
 	Element* newWorldMenu_;
 
-	AnimationEvent* closeEvent_;
-
 	virtual void HandleInitialize();
 
 	void HandleNewWorldOpen();

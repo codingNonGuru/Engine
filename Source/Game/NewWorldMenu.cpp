@@ -6,14 +6,15 @@
 #include "Interface/Text.hpp"
 #include "SceneManager.hpp"
 
-#include "NewWorldMenu.hpp"
-#include "Game/MainScene.hpp"
+#include "Game/NewWorldMenu.hpp"
 #include "Game/WorldParameterSet.hpp"
 #include "Game/WorldGenerator.hpp"
+#include "Game/WorldScene.hpp"
+#include "Game/Game.hpp"
 
 void NewWorldMenu::HandleInitialize()
 {
-	newGameMenu_ = Interface::GetElement("NewGameMenu");
+	newGameMenu_ = Interface::GetElement(Elements::NEW_GAME_MENU);
 
 	sizeOptionButton_ = GetChild("SizeButton");
 
@@ -27,27 +28,26 @@ void NewWorldMenu::HandleInitialize()
 
 	discardButton_ = GetChild("DiscardButton");
 
-	worldPreview_ = Interface::GetElement("WorldPreview");
+	worldPreview_ = Interface::GetElement(Elements::WORLD_PREVIEW_PANEL);
 
 	if(sizeOptionButton_ != nullptr)
 	{
 		sizeLabel_ = sizeOptionButton_->GetChild("SizeLabel");
 	}
 
-	mainScene_ = SceneManager::GetScene("MainScene");
-
-	auto animation = animator_->GetAnimation("Close");
-	if(animation == nullptr)
-		return;
-
-	closeEvent_ = animation->GetFinishEvent();
-	closeEvent_->GetActions().Add(this, &NewWorldMenu::Disable);
+	mainScene_ = SceneManager::GetScene(Scenes::WORLD);
 
 	sizeOption_ = WorldSizeOptions::MEDIUM;
 
 	if(sizeOption_ == WorldSizeOptions::TINY && leftScrollButton_ != nullptr)
 	{
 		leftScrollButton_->Disable();
+	}
+
+	if(startGameButton_ != nullptr)
+	{
+		auto & clickEvents = startGameButton_->GetClickEvents();
+		clickEvents.Add(this, &NewWorldMenu::StartGame);
 	}
 
 	UpdateSizeLabel();
@@ -197,5 +197,10 @@ void NewWorldMenu::FinishGeneration()
 	{
 		discardButton_->Enable();
 	}
+}
+
+void NewWorldMenu::StartGame()
+{
+	Game::StartGame();
 }
 

@@ -8,7 +8,7 @@
 
 void WorldPreviewButton::HandleInitialize()
 {
-	previewPanel_ = (WorldPreviewPanel*)Interface::GetElement("WorldPreview");
+	previewPanel_ = (WorldPreviewPanel*)Interface::GetElement(Elements::WORLD_PREVIEW_PANEL);
 
 	SetInteractivity(true);
 	clickEvents_->Add(this, &WorldPreviewButton::Press);

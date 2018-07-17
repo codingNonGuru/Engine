@@ -10,6 +10,7 @@ class Sprite;
 class Camera;
 class Transform;
 class Animator;
+class AnimationEvent;
 class AnimationProperty;
 class Delegate;
 
@@ -21,6 +22,8 @@ protected:
 	Sprite* sprite_;
 
 	Animator* animator_;
+
+	AnimationEvent* closeEvent_;
 
 	Array <Element*> children_;
 

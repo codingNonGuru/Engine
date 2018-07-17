@@ -1,7 +1,10 @@
 #include "Interface/Interface.hpp"
 #include "Interface/Sprite.hpp"
+#include "Animator.hpp"
+#include "Animation.hpp"
+#include "AnimationEvent.hpp"
 
-#include "WorldPreviewPanel.hpp"
+#include "Game/WorldPreviewPanel.hpp"
 #include "Game/WorldGenerator.hpp"
 
 void WorldPreviewPanel::HandleInitialize()
