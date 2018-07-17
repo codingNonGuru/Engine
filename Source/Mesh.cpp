@@ -159,12 +159,3 @@ Length Mesh::GetAttributeMemoryCapacity(const char* identifier)
 
 Mesh::~Mesh() {}
 
-void MeshAtlas::Initialize(const char* name, int vertexDataCount)
-{
-	auto mesh = meshes_.Get(name);
-	if(!mesh)
-		return;
-
-	mesh->Initialize(vertexDataCount);
-}
-

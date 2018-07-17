@@ -61,16 +61,3 @@ public:
 
 	virtual ~Mesh();
 };
-
-class MeshAtlas
-{
-private:
-	Map <Mesh> meshes_;
-
-public:
-	void AddMesh(const char*) {}
-
-	void Initialize(const char*, int);
-
-	Mesh& operator[](const char* name) {return *meshes_.Get(name);}
-};
