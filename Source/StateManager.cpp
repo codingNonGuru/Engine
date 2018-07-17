@@ -1,13 +1,15 @@
 #include "StateManager.hpp"
 #include "State.hpp"
 
+#define MAXIMUM_STATE_COUNT 16
+
 States StateManager::currentState_ = States();
 
 States StateManager::nextState_ = States();
 
 States StateManager::previousState_ = States();
 
-Map <State*, States> StateManager::states_ = Map <State*, States> ();
+Map <State*, States> StateManager::states_ = Map <State*, States> (MAXIMUM_STATE_COUNT);
 
 void StateManager::Enter(States state)
 {

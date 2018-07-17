@@ -3,11 +3,7 @@
 
 State::State() {}
 
-State::State(States stateType)
-{
-	StateManager::Register(this, stateType);
-	std::cout<<"PELEEEEEEEEEEEEEEEEU\n";
-}
+State::State(States stateType) {}
 
 void State::Enter()
 {
