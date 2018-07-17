@@ -18,6 +18,8 @@
 
 Game* Game::instance_ = Game::Register();
 
+Delegate Game::OnStartGame_ = Delegate();
+
 void Game::Initialize()
 {
 	Model* cubeModel = nullptr;
@@ -38,7 +40,14 @@ void Game::Initialize()
 
 	StateManager::Register(new State(), States::INTRO);
 	StateManager::Register(new PregameState(), States::PREGAME);
-	StateManager::Register(new WorldState(), States::PREGAME);
+	StateManager::Register(new WorldState(), States::WORLD);
+}
+
+void Game::StartGame()
+{
+	OnStartGame_.Invoke();
+
+	StateManager::Enter(States::WORLD);
 }
 
 Game* Game::Register()

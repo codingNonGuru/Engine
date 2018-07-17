@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Delegate.hpp"
+
 class Game
 {
 private:
@@ -8,7 +10,11 @@ private:
 	static Game* instance_;
 
 public:
+	static Delegate OnStartGame_;
+
 	static void Initialize();
+
+	static void StartGame();
 
 	static void HandleGameLoopStart();
 };
