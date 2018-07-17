@@ -16,8 +16,6 @@ private:
 
 	static Window* window_;
 
-	static RenderManager* renderManager_;
-
 public:
 	static Delegate OnInitialize_;
 

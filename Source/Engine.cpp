@@ -19,8 +19,6 @@ Window* Engine::window_ = nullptr;
 
 Screen* Engine::screen_ = nullptr;
 
-RenderManager* Engine::renderManager_ = nullptr;
-
 Delegate Engine::OnInitialize_ = Delegate();
 
 Delegate Engine::OnGameLoopStart_ = Delegate();
@@ -33,9 +31,7 @@ void Engine::Initialize()
 
 	window_ = new Window(screen_);
 
-	renderManager_ = RenderManager::Get();
-
-	renderManager_->Initialize();
+	RenderManager::Initialize();
 
 	AssetManager::LoadAssets();
 
@@ -68,7 +64,7 @@ void Engine::StartGameLoop()
 
 		Interface::Update();
 
-		renderManager_->Update();
+		RenderManager::Update();
 	}
 }
 

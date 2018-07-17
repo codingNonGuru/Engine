@@ -20,18 +20,11 @@
 #include "Render/FilterManager.hpp"
 #include "Render/Filter.hpp"
 #include "Utility/Color.hpp"
+#include "SceneManager.hpp"
 
-RenderManager* RenderManager::instance_ = nullptr;
+Map <Camera, LongWord> RenderManager::cameras_ = Map <Camera, LongWord> (16);
 
-RenderManager* RenderManager::Get()
-{
-	if(instance_ == nullptr)
-	{
-		instance_ = new RenderManager();
-	}
-
-	return instance_;
-}
+Color RenderManager::backgroundColor_ = Color();
 
 void RenderManager::Initialize()
 {
@@ -39,34 +32,31 @@ void RenderManager::Initialize()
 
 	glEnable(GL_DEBUG_OUTPUT);
 
-	screen_ = Engine::GetScreen();
+	auto screen = Engine::GetScreen();
 
-	cameras_.Initialize(16);
-
-	*cameras_.Add("main") = Camera(screen_, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
-	*cameras_.Add("interface") = Camera(screen_);
+	*cameras_.Add("main") = Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
+	*cameras_.Add("interface") = Camera(screen);
 
 	auto frameBuffer = BufferManager::GetFrameBuffers().Add("default");
 	if(frameBuffer)
 	{
-		*frameBuffer = new FrameBuffer(Size(screen_->getWidthInteger(), screen_->getHeightInteger()));
+		*frameBuffer = new FrameBuffer(screen->GetSize());
 	}
 
-	auto screenTexture = new Texture(RenderManager::Get()->screen_->GetSize(), TextureFormats::FOUR_BYTE);
+	auto screenTexture = new Texture(screen->GetSize(), TextureFormats::FOUR_BYTE);
 	TextureManager::AddTexture(screenTexture, "Screen");
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_SAMPLE_SHADING);
 
 	DEBUG_OPENGL
+
+	backgroundColor_ = Color(0.0f, 0.2f, 0.7f, 1.0f);
 }
 
 void RenderManager::Update()
 {
 	UpdateCameras();
-
-	auto mainCamera = cameras_.Get("main");
-	auto interfaceCamera = cameras_.Get("interface");
 
 	EnableDepthTesting();
 
@@ -74,25 +64,18 @@ void RenderManager::Update()
 	if(defaultFrameBuffer)
 	{
 		defaultFrameBuffer->BindBuffer();
-		defaultFrameBuffer->Clear(Color(0.0f, 0.2f, 0.7f, 1.0f));
+		defaultFrameBuffer->Clear(backgroundColor_);
 	}
 
-	auto cubeModel = ModelManager::GetModels().Get("Cube");
-	cubeModel->Render(mainCamera);
+	SceneManager::Render();
 
 	DisableDepthTesting();
 
 	SetBlendMode();
 
-	auto filters = FilterManager::GetFilters();
-	for(auto filterIterator = filters.GetStart(); filterIterator != filters.GetEnd(); ++filterIterator)
-	{
-		auto filter = *filterIterator;
-		if(!filter)
-			continue;
+	auto interfaceCamera = cameras_.Get("interface");
 
-		filter->Update(interfaceCamera);
-	}
+	FilterManager::Update(interfaceCamera);
 
 	Interface::Render(interfaceCamera);
 
@@ -142,4 +125,9 @@ void RenderManager::DisableBlending()
 	glDisable(GL_BLEND);
 
 	DEBUG_OPENGL
+}
+
+Camera* RenderManager::GetCamera(LongWord identifier)
+{
+	return cameras_.Get(identifier);
 }

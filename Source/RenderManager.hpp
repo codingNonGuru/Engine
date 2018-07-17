@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Conventions.hpp"
+#include "Utility/Color.hpp"
 
 class Screen;
 class Camera;
@@ -8,26 +9,24 @@ class Camera;
 class RenderManager
 {
 private:
-	static RenderManager* instance_;
+	static Map <Camera, LongWord> cameras_;
 
-	Screen* screen_;
-
-	Map <Camera, LongWord> cameras_;
+	static Color backgroundColor_;
 
 public:
-	static RenderManager* Get();
+	static void Initialize();
 
-	void Initialize();
+	static void Update();
 
-	void Update();
+	static void UpdateCameras();
 
-	void UpdateCameras();
+	static void EnableDepthTesting();
 
-	void EnableDepthTesting();
+	static void DisableDepthTesting();
 
-	void DisableDepthTesting();
+	static void SetBlendMode();
 
-	void SetBlendMode();
+	static void DisableBlending();
 
-	void DisableBlending();
+	static Camera* GetCamera(LongWord);
 };
