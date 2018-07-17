@@ -12,5 +12,7 @@ private:
 public:
 	static Map <Model, Word> & GetModels();
 
+	static Model* GetModel(const char*);
+
 	static void AddModel(Model*, const char*);
 };

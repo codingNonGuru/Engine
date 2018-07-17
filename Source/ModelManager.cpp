@@ -23,6 +23,9 @@ void ModelManager::AddModel(Model* model, const char* name)
 	*newModel = *model;
 }
 
-
+Model* ModelManager::GetModel(const char* identifier)
+{
+	return models_.Get(identifier);
+}
 
 

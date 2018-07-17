@@ -4,6 +4,8 @@
 
 class PregameScene : public Scene
 {
+	virtual void Update() override;
+
 public:
 	PregameScene();
 
