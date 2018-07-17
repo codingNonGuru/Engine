@@ -9,6 +9,10 @@ class PregameState : public State
 private:
 	Element* mainMenu_;
 
+	Element* newWorldMenu_;
+
+	Element* worldPreviewPanel_;
+
 	float mainMenuOpenDelay_;
 
 protected:
