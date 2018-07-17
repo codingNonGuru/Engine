@@ -11,6 +11,7 @@
 #include "Interface/Element.hpp"
 #include "Time.hpp"
 #include "Utility/Perlin.hpp"
+#include "TaskManager.hpp"
 
 bool Engine::isRunning_ = false;
 
@@ -21,6 +22,8 @@ Screen* Engine::screen_ = nullptr;
 RenderManager* Engine::renderManager_ = nullptr;
 
 Delegate Engine::OnInitialize_ = Delegate();
+
+Delegate Engine::OnGameLoopStart_ = Delegate();
 
 void Engine::Initialize()
 {
@@ -36,6 +39,8 @@ void Engine::Initialize()
 
 	AssetManager::LoadAssets();
 
+	InputHandler::Initialize();
+
 	OnInitialize_.Invoke();
 }
 
@@ -43,7 +48,9 @@ void Engine::StartGameLoop()
 {
 	isRunning_ = true;
 
-	InputHandler::Initialize();
+	Time::Update();
+
+	OnGameLoopStart_.Invoke();
 
 	while(isRunning_)
 	{
@@ -52,13 +59,12 @@ void Engine::StartGameLoop()
 		InputHandler::Update();
 
 		if(InputHandler::IsPressed(SDLK_ESCAPE))
-			isRunning_ = false;
-
-		if(InputHandler::IsPressed(SDLK_a))
 		{
-			auto mainMenu = Interface::GetElement("MainMenu");
-			mainMenu->Open();
+			ShutDown();
+			break;
 		}
+
+		TaskManager::Update();
 
 		Interface::Update();
 
@@ -69,6 +75,7 @@ void Engine::StartGameLoop()
 void Engine::ShutDown()
 {
 	isRunning_ = false;
+
 	SDL_Quit();
 }
 

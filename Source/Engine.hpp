@@ -21,6 +21,8 @@ private:
 public:
 	static Delegate OnInitialize_;
 
+	static Delegate OnGameLoopStart_;
+
 	static void Initialize();
 
 	static void StartGameLoop();
