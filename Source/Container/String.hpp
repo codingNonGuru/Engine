@@ -64,7 +64,7 @@ namespace container
 			return size_;
 		}
 
-		operator char*()
+		operator const char*()
 		{
 			return values_;
 		}
