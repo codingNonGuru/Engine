@@ -12,15 +12,15 @@ private:
 	{
 		Index position_;
 
-		LongWord name_;
+		Word name_;
 
-		LongWord typeName_;
+		Word typeName_;
 
 		Expression() {}
 
-		Expression(Index position, LongWord name) {position_ = position; name_ = name;}
+		Expression(Index position, Word name) {position_ = position; name_ = name;}
 
-		Expression(Index position, LongWord name, LongWord typeName) {position_ = position; name_ = name; typeName_ = typeName;}
+		Expression(Index position, Word name, Word typeName) {position_ = position; name_ = name; typeName_ = typeName;}
 	};
 
 	static bool isTracing_;

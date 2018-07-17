@@ -4,7 +4,7 @@
 #include "File.hpp"
 #include "Mesh.hpp"
 
-Map <Mesh, LongWord> MeshManager::meshes_ = Map <Mesh, LongWord>();
+Map <Mesh, Word> MeshManager::meshes_ = Map <Mesh, Word>();
 
 #define MAXIMUM_MESH_COUNT 256
 
@@ -26,7 +26,7 @@ void MeshManager::LoadMeshes()
 		if(extensionPosition == nullptr)
 			continue;
 
-		LongWord meshName;
+		Word meshName;
 		meshName.Add(file->GetName(), extensionPosition - file->GetName());
 
 		auto mesh = meshes_.Add(meshName);
@@ -37,7 +37,7 @@ void MeshManager::LoadMeshes()
 	}
 }
 
-Map <Mesh, LongWord> & MeshManager::GetMeshes()
+Map <Mesh, Word> & MeshManager::GetMeshes()
 {
 	return meshes_;
 }

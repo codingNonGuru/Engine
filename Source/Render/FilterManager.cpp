@@ -4,9 +4,9 @@
 
 #define MAXIMUM_FILTER_COUNT 32
 
-Map <Filter*, LongWord> FilterManager::filters_ = Map <Filter*, LongWord> (MAXIMUM_FILTER_COUNT);
+Map <Filter*, Word> FilterManager::filters_ = Map <Filter*, Word> (MAXIMUM_FILTER_COUNT);
 
-Map <Filter*, LongWord> & FilterManager::GetFilters()
+Map <Filter*, Word> & FilterManager::GetFilters()
 {
 	return filters_;
 }

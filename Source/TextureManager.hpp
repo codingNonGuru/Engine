@@ -7,12 +7,12 @@ class Texture;
 class TextureManager
 {
 private:
-	static Map <Texture*, LongWord> textures_;
+	static Map <Texture*> textures_;
 
 public:
 	static void LoadTextures();
 
-	static Map <Texture*, LongWord> & GetTextures();
+	static Map <Texture*> & GetTextures();
 
 	static Texture* GetTexture(const char*);
 

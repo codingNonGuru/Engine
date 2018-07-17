@@ -4,9 +4,9 @@
 
 #define MAXIMUM_MODEL_COUNT 256
 
-Map <Model, LongWord> ModelManager::models_ = Map <Model, LongWord> (MAXIMUM_MODEL_COUNT);
+Map <Model, Word> ModelManager::models_ = Map <Model, Word> (MAXIMUM_MODEL_COUNT);
 
-Map <Model, LongWord> & ModelManager::GetModels()
+Map <Model, Word> & ModelManager::GetModels()
 {
 	return models_;
 }

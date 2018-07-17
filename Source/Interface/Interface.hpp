@@ -8,7 +8,7 @@ class Camera;
 class Interface
 {
 private:
-	static Map <Element*, LongWord> elements_;
+	static Map <Element*, Word> elements_;
 
 	static Element* hoveredElement_;
 
@@ -23,11 +23,11 @@ public:
 
 	static void Render(Camera*);
 
-	static Map <Element*, LongWord> & GetElements();
+	static Map <Element*, Word> & GetElements();
 
-	static Element* GetElement(LongWord);
+	static Element* GetElement(Word);
 
-	static Element* AddElement(LongWord, Element*);
+	static Element* AddElement(Word, Element*);
 
 	static Element* GetHoveredElement();
 };

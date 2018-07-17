@@ -22,7 +22,7 @@
 #include "Utility/Color.hpp"
 #include "SceneManager.hpp"
 
-Map <Camera, LongWord> RenderManager::cameras_ = Map <Camera, LongWord> (16);
+Map <Camera> RenderManager::cameras_ = Map <Camera> (16);
 
 Color RenderManager::backgroundColor_ = Color();
 
@@ -127,7 +127,7 @@ void RenderManager::DisableBlending()
 	DEBUG_OPENGL
 }
 
-Camera* RenderManager::GetCamera(LongWord identifier)
+Camera* RenderManager::GetCamera(Word identifier)
 {
 	return cameras_.Get(identifier);
 }

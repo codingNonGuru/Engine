@@ -8,7 +8,7 @@
 
 #define TEXTURE_EXTENSION_COUNT 2
 
-Map <Texture*, LongWord> TextureManager::textures_ = Map <Texture*, LongWord> (MAXIMUM_TEXTURE_COUNT);
+Map <Texture*> TextureManager::textures_ = Map <Texture*> (MAXIMUM_TEXTURE_COUNT);
 
 void TextureManager::LoadTextures()
 {
@@ -27,7 +27,7 @@ void TextureManager::LoadTextures()
 			if(extensionPosition == nullptr)
 				continue;
 
-			LongWord textureName;
+			Word textureName;
 			textureName.Add(file->GetName(), extensionPosition - file->GetName());
 
 			auto texturePointer = textures_.Add(textureName);
@@ -57,7 +57,7 @@ void TextureManager::AddTexture(Texture* texture, const char* identifier)
 	*texturePointer = texture;
 }
 
-Map <Texture*, LongWord> & TextureManager::GetTextures()
+Map <Texture*> & TextureManager::GetTextures()
 {
 	return textures_;
 }

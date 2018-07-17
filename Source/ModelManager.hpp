@@ -7,10 +7,10 @@ class Model;
 class ModelManager
 {
 private:
-	static Map <Model, LongWord> models_;
+	static Map <Model, Word> models_;
 
 public:
-	static Map <Model, LongWord> & GetModels();
+	static Map <Model, Word> & GetModels();
 
 	static void AddModel(Model*, const char*);
 };

@@ -8,7 +8,7 @@ class DataBuffer;
 
 class ReliefGenerator
 {
-	static Map <DataBuffer*, LongWord> modelBuffers_;
+	static Map <DataBuffer*, Word> modelBuffers_;
 
 	static void SetupBuffers(World&);
 
@@ -21,5 +21,5 @@ public:
 
 	static DataBuffer* GetFinalBuffer();
 
-	static DataBuffer* GetModelBuffer(LongWord);
+	static DataBuffer* GetModelBuffer(Word);
 };

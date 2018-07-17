@@ -21,7 +21,7 @@ enum class Buffers
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
 
-Map <DataBuffer*, LongWord> ReliefGenerator::modelBuffers_ = Map <DataBuffer*, LongWord> (TerrainModelBuffers::COUNT);
+Map <DataBuffer*, Word> ReliefGenerator::modelBuffers_ = Map <DataBuffer*, Word> (TerrainModelBuffers::COUNT);
 
 Shader* shader = nullptr;
 
@@ -173,7 +173,7 @@ DataBuffer* ReliefGenerator::GetFinalBuffer()
 	return buffers.Get(Buffers::TERRAIN);
 }
 
-DataBuffer* ReliefGenerator::GetModelBuffer(LongWord identifier)
+DataBuffer* ReliefGenerator::GetModelBuffer(Word identifier)
 {
 	auto bufferPointer = modelBuffers_.Get(identifier);
 	if(bufferPointer == nullptr)

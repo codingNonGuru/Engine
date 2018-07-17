@@ -7,12 +7,12 @@ class Font;
 class FontManager
 {
 private:
-	static Map <Font*, LongWord> fonts_;
+	static Map <Font*, Word> fonts_;
 
 public:
 	static void LoadFonts();
 
-	static Map <Font*, LongWord> & GetFonts();
+	static Map <Font*, Word> & GetFonts();
 
 	static Font * GetFont(const char*);
 

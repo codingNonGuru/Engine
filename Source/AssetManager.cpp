@@ -12,7 +12,7 @@
 
 Array <File>* AssetManager::files_ = nullptr;
 
-Map <AttributeType, LongWord> AssetManager::attributeTypes_ = Map <AttributeType, LongWord> ();
+Map <AttributeType, Word> AssetManager::attributeTypes_ = Map <AttributeType, Word> ();
 
 Delegate* AssetManager::OnAssetsLoaded_ = new Delegate();
 
@@ -100,7 +100,7 @@ Array <File>* AssetManager::GetFiles()
 	return files_;
 }
 
-Map <AttributeType, LongWord> & AssetManager::GetAttributeTypes()
+Map <AttributeType, Word> & AssetManager::GetAttributeTypes()
 {
 	return attributeTypes_;
 }

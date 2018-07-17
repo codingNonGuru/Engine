@@ -6,7 +6,7 @@
 
 #define MAXIMUM_FONT_COUNT 16
 
-Map <Font*, LongWord> FontManager::fonts_ = Map <Font*, LongWord> (MAXIMUM_FONT_COUNT);
+Map <Font*, Word> FontManager::fonts_ = Map <Font*, Word> (MAXIMUM_FONT_COUNT);
 
 void FontManager::LoadFonts()
 {
@@ -20,7 +20,7 @@ void FontManager::LoadFonts()
 		if(extensionPosition == nullptr)
 			continue;
 
-		LongWord fontName;
+		Word fontName;
 		fontName.Add(file->GetName(), extensionPosition - file->GetName());
 
 		auto font = fonts_.Add(fontName);
@@ -31,7 +31,7 @@ void FontManager::LoadFonts()
 	}
 }
 
-Map <Font*, LongWord> & FontManager::GetFonts()
+Map <Font*, Word> & FontManager::GetFonts()
 {
 	return fonts_;
 }

@@ -17,7 +17,7 @@
 #include "Utility/Utility.hpp"
 #include "Utility/Palette.hpp"
 
-Map <DataBuffer, LongWord> InterfacePainter::buffers_ = Map <DataBuffer, LongWord> (16);
+Map <DataBuffer, Word> InterfacePainter::buffers_ = Map <DataBuffer, Word> (16);
 
 Map <Array <ElementTextureSet>, InterfacePainter::ElementTextureClass> InterfacePainter::textureSets_ = Map <Array <ElementTextureSet>, ElementTextureClass> (16);
 

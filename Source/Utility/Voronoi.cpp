@@ -9,7 +9,7 @@
 
 Shader* Voronoi::shader_ = nullptr;
 
-Map <DataBuffer, LongWord> Voronoi::buffers_ = Map <DataBuffer, LongWord> (6);
+Map <DataBuffer> Voronoi::buffers_ = Map <DataBuffer> (6);
 
 enum class Stages
 {

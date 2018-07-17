@@ -6,7 +6,7 @@
 
 Array <ShaderFile> ShaderManager::shaderFiles_ = Array <ShaderFile>();
 
-Map <Shader, LongWord> ShaderManager::shaders_ = Map <Shader, LongWord>();
+Map <Shader, Word> ShaderManager::shaders_ = Map <Shader, Word>();
 
 #define MAXIMUM_SHADER_COUNT 128
 
@@ -40,7 +40,7 @@ struct ShaderFileBatch
 	void Add(ShaderFile* file) {*Files_.Allocate() = file;}
 };
 
-Map <ShaderFileBatch, LongWord> shaderFileBatches;
+Map <ShaderFileBatch, Word> shaderFileBatches;
 
 void ShaderManager::LoadShaders()
 {
@@ -59,7 +59,7 @@ void ShaderManager::LoadShaders()
 			if(extensionPosition == nullptr)
 				continue;
 
-			LongWord shaderName;
+			Word shaderName;
 			shaderName.Add(file->GetName(), extensionPosition - file->GetName());
 
 			auto shaderFileBatch = shaderFileBatches.Get(shaderName);

@@ -8,7 +8,7 @@ class HeaderBuffer
 {
 	Index key_;
 
-	Map <DataBuffer*, LongWord> slaveBuffers_;
+	Map <DataBuffer*, Word> slaveBuffers_;
 
 public:
 	HeaderBuffer() {}

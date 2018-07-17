@@ -15,11 +15,11 @@ class Model
 protected:
 	Mesh* mesh_;
 
-	Map <DataBuffer*, LongWord> buffers_;
+	Map <DataBuffer*, Word> buffers_;
 
 	Map <Shader*, Shaders> shaders_;
 
-	Map <Texture*, LongWord> textures_;
+	Map <Texture*, Word> textures_;
 
 	void SetupBuffer();
 

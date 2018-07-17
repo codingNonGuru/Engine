@@ -11,7 +11,7 @@ class AssetManager
 private:
 	static Array <File> *files_;
 
-	static Map <AttributeType, LongWord> attributeTypes_;
+	static Map <AttributeType, Word> attributeTypes_;
 
 	static void LoadTextures();
 
@@ -24,7 +24,7 @@ public:
 
 	static Array <File> *GetFiles();
 
-	static Map <AttributeType, LongWord> & GetAttributeTypes();
+	static Map <AttributeType, Word> & GetAttributeTypes();
 
 	static void Initialize();
 

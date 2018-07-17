@@ -15,15 +15,15 @@ class Shader
 private:
 	GLuint key_;
 
-	LongWord name_;
+	Word name_;
 
 	GLuint shaderKeys_[3];
 
 	Array <ShaderFile*> *shaderFiles_;
 
-	Map <TextureBinding, LongWord> textureBindings_;
+	Map <TextureBinding, Word> textureBindings_;
 
-	Map <ConstantBinding, LongWord> constantBindings_;
+	Map <ConstantBinding, Word> constantBindings_;
 
 	void Compile(int, GLenum);
 
@@ -82,7 +82,7 @@ public:
 
 	Array <ShaderFile*> *GetShaderFiles() {return shaderFiles_;}
 
-	LongWord& GetName() {return name_;}
+	Word& GetName() {return name_;}
 
 	void DispatchCompute(Size);
 

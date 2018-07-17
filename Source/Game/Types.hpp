@@ -38,20 +38,20 @@ enum class Scenes
 class TerrainModelBuffers
 {
 public:
-	static LongWord const INDEX_LINKS;
-	static LongWord const POSITION_INPUT;
-	static LongWord const POSITION_OUTPUT;
-	static LongWord const NORMAL_OUTPUT;
-	static LongWord const TANGENT_OUTPUT;
-	static LongWord const INDICES;
+	static Word const INDEX_LINKS;
+	static Word const POSITION_INPUT;
+	static Word const POSITION_OUTPUT;
+	static Word const NORMAL_OUTPUT;
+	static Word const TANGENT_OUTPUT;
+	static Word const INDICES;
 	static int const COUNT;
 };
 
 class Elements
 {
 public:
-	static LongWord const MAIN_MENU;
-	static LongWord const NEW_GAME_MENU;
-	static LongWord const NEW_WORLD_MENU;
-	static LongWord const WORLD_PREVIEW_PANEL;
+	static Word const MAIN_MENU;
+	static Word const NEW_GAME_MENU;
+	static Word const NEW_WORLD_MENU;
+	static Word const WORLD_PREVIEW_PANEL;
 };

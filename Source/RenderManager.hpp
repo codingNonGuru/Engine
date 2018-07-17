@@ -9,7 +9,7 @@ class Camera;
 class RenderManager
 {
 private:
-	static Map <Camera, LongWord> cameras_;
+	static Map <Camera> cameras_;
 
 	static Color backgroundColor_;
 
@@ -28,5 +28,5 @@ public:
 
 	static void DisableBlending();
 
-	static Camera* GetCamera(LongWord);
+	static Camera* GetCamera(Word);
 };

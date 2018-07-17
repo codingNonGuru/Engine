@@ -5,7 +5,7 @@
 
 #define MAXIMUM_ELEMENT_COUNT 256
 
-Map <Element*, LongWord> Interface::elements_ = Map <Element*, LongWord> (MAXIMUM_ELEMENT_COUNT);
+Map <Element*, Word> Interface::elements_ = Map <Element*, Word> (MAXIMUM_ELEMENT_COUNT);
 
 Element* Interface::hoveredElement_ = nullptr;
 
@@ -97,7 +97,7 @@ void Interface::Sort()
 	isSorted_ = true;
 }
 
-Element* Interface::GetElement(LongWord name)
+Element* Interface::GetElement(Word name)
 {
 	auto elementPointer = elements_.Get(name);
 	if(!elementPointer)
@@ -106,12 +106,12 @@ Element* Interface::GetElement(LongWord name)
 	return *elementPointer;
 }
 
-Map <Element*, LongWord> & Interface::GetElements()
+Map <Element*, Word> & Interface::GetElements()
 {
 	return elements_;
 }
 
-Element* Interface::AddElement(LongWord name, Element* element)
+Element* Interface::AddElement(Word name, Element* element)
 {
 	auto elementPointer = elements_.Add(name);
 	if(!elementPointer)

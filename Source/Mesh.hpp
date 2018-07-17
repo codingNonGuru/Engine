@@ -32,7 +32,7 @@ public:
 class Mesh
 {
 private:
-	Map <MeshAttribute, LongWord> attributes_;
+	Map <MeshAttribute, Word> attributes_;
 
 	Length indexCount_;
 
@@ -47,7 +47,7 @@ public:
 
 	void Initialize(File*);
 
-	Map <MeshAttribute, LongWord> & GetAttributes() {return attributes_;}
+	Map <MeshAttribute, Word> & GetAttributes() {return attributes_;}
 
 	MeshAttribute* GetAttribute(const char*);
 

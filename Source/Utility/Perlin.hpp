@@ -9,7 +9,7 @@ class Perlin
 {
 	static Shader* shader_;
 
-	static Map <DataBuffer, LongWord> buffers_;
+	static Map <DataBuffer> buffers_;
 
 	static bool isInitialized_;
 

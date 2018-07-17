@@ -9,18 +9,18 @@ class FrameBuffer;
 class BufferManager
 {
 private:
-	static Map <HeaderBuffer*, LongWord> headerBuffers_;
+	static Map <HeaderBuffer*> headerBuffers_;
 
-	static Map <DataBuffer*, LongWord> dataBuffers_;
+	static Map <DataBuffer*> dataBuffers_;
 
-	static Map <FrameBuffer*, LongWord> frameBuffers_;
+	static Map <FrameBuffer*> frameBuffers_;
 
 public:
-	static Map <HeaderBuffer*, LongWord> & GetHeaderBuffers();
+	static Map <HeaderBuffer*> & GetHeaderBuffers();
 
-	static Map <DataBuffer*, LongWord> & GetDataBuffers();
+	static Map <DataBuffer*> & GetDataBuffers();
 
-	static Map <FrameBuffer*, LongWord> & GetFrameBuffers();
+	static Map <FrameBuffer*> & GetFrameBuffers();
 
 	static HeaderBuffer* GetHeaderBuffer(const char*);
 

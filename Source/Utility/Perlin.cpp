@@ -7,7 +7,7 @@
 
 Shader* Perlin::shader_ = nullptr;
 
-Map <DataBuffer, LongWord> Perlin::buffers_ = Map <DataBuffer, LongWord> (3);
+Map <DataBuffer> Perlin::buffers_ = Map <DataBuffer> (3);
 
 bool Perlin::isInitialized_ = false;
 

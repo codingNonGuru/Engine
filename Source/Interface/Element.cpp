@@ -103,12 +103,12 @@ void Element::Configure(Size size, DrawOrder drawOrder, Transform* transform, Sp
 	HandleConfigure();
 }
 
-LongWord Element::GetIdentifier()
+Word Element::GetIdentifier()
 {
 	return identifier_;
 }
 
-void Element::SetIdentifier(LongWord identifier)
+void Element::SetIdentifier(Word identifier)
 {
 	identifier_ = identifier;
 }
@@ -277,7 +277,7 @@ void Element::AddChild(Element* child)
 	*childPointer = child;
 }
 
-Element* Element::GetChild(LongWord identifier)
+Element* Element::GetChild(Word identifier)
 {
 	for(auto childIterator = children_.GetStart(); childIterator != children_.GetEnd(); ++childIterator)
 	{

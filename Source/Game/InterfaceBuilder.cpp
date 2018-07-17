@@ -485,7 +485,7 @@ void InterfaceBuilder::GenerateWorldPreview()
 
 void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 {
-	LongWord buttonNames[] = {"ReliefModeButton", "BiomeModeButton", "PolityModeButton"};
+	Word buttonNames[] = {"ReliefModeButton", "BiomeModeButton", "PolityModeButton"};
 	WorldPreviewModes previewModes[] = {WorldPreviewModes::RELIEF, WorldPreviewModes::BIOME, WorldPreviewModes::POLITY};
 
 	for(int index = 0; index < 3; ++index)

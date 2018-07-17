@@ -17,7 +17,7 @@ class Delegate;
 class Element : public Object
 {
 protected:
-	LongWord identifier_;
+	Word identifier_;
 
 	Sprite* sprite_;
 
@@ -68,9 +68,9 @@ public:
 
 	void Configure(Size, DrawOrder, Transform*, Sprite*, Opacity = 1.0f);
 
-	LongWord GetIdentifier();
+	Word GetIdentifier();
 
-	void SetIdentifier(LongWord);
+	void SetIdentifier(Word);
 
 	Sprite* GetSprite();
 
@@ -100,7 +100,7 @@ public:
 
 	void AddChild(Element*);
 
-	Element* GetChild(LongWord);
+	Element* GetChild(Word);
 
 	void HandleClick();
 

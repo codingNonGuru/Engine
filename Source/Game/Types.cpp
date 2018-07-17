@@ -1,14 +1,14 @@
 #include "Game/Types.hpp"
 
-LongWord const TerrainModelBuffers::INDEX_LINKS = LongWord("IndexLinks");
-LongWord const TerrainModelBuffers::POSITION_INPUT = LongWord("PositionInput");
-LongWord const TerrainModelBuffers::POSITION_OUTPUT = LongWord("PositionOutput");
-LongWord const TerrainModelBuffers::NORMAL_OUTPUT = LongWord("NormalOutput");
-LongWord const TerrainModelBuffers::TANGENT_OUTPUT = LongWord("TangentOutput");
-LongWord const TerrainModelBuffers::INDICES = LongWord("Indices");
+Word const TerrainModelBuffers::INDEX_LINKS = Word("IndexLinks");
+Word const TerrainModelBuffers::POSITION_INPUT = Word("PositionInput");
+Word const TerrainModelBuffers::POSITION_OUTPUT = Word("PositionOutput");
+Word const TerrainModelBuffers::NORMAL_OUTPUT = Word("NormalOutput");
+Word const TerrainModelBuffers::TANGENT_OUTPUT = Word("TangentOutput");
+Word const TerrainModelBuffers::INDICES = Word("Indices");
 int const TerrainModelBuffers::COUNT = 6;
 
-LongWord const Elements::MAIN_MENU = LongWord("MainMenu");
-LongWord const Elements::NEW_GAME_MENU = LongWord("NewGameMenu");
-LongWord const Elements::NEW_WORLD_MENU = LongWord("NewWorldMenu");
-LongWord const Elements::WORLD_PREVIEW_PANEL = LongWord("WorldPreviewPanel");
+Word const Elements::MAIN_MENU = Word("MainMenu");
+Word const Elements::NEW_GAME_MENU = Word("NewGameMenu");
+Word const Elements::NEW_WORLD_MENU = Word("NewWorldMenu");
+Word const Elements::WORLD_PREVIEW_PANEL = Word("WorldPreviewPanel");

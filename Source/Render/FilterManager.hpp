@@ -8,10 +8,10 @@ class Camera;
 class FilterManager
 {
 private:
-	static Map <Filter*, LongWord> filters_;
+	static Map <Filter*, Word> filters_;
 
 public:
-	static Map <Filter*, LongWord> & GetFilters();
+	static Map <Filter*, Word> & GetFilters();
 
 	static Filter* GetFilter(const char*);
 

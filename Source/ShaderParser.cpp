@@ -154,7 +154,7 @@ void ShaderParser::LocateSamplers()
 
 		Index semicolonPosition = FindNextSymbol(character, ';');
 
-		LongWord identifier;
+		Word identifier;
 		identifier.Add(character, semicolonPosition - identifierPosition);
 
 		bool hasFound = false;
@@ -206,7 +206,7 @@ void ShaderParser::LocateConstants()
 
 		Index typeEndPosition = FindNextSymbol(character, ' ');
 
-		LongWord typeName;
+		Word typeName;
 		typeName.Add(character, typeEndPosition - typeStartPosition);
 
 		character = shaderCode + typeEndPosition;
@@ -217,7 +217,7 @@ void ShaderParser::LocateConstants()
 
 		Index semiColonPosition = FindNextSymbol(character, ';');
 
-		LongWord identifier;
+		Word identifier;
 		identifier.Add(character, semiColonPosition - identifierStartPosition);
 
 		bool hasFound = false;

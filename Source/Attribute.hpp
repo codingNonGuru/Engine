@@ -4,7 +4,7 @@
 
 struct AttributeType
 {
-	LongWord Identifier_;
+	Word Identifier_;
 
 	Length MemorySize_;
 
@@ -14,7 +14,7 @@ struct AttributeType
 
 	AttributeType() {}
 
-	AttributeType(LongWord identifier, Length memorySize, Length componentCount, AttributeElementTypes type) : Identifier_(identifier), MemorySize_(memorySize), ComponentCount_(componentCount), ElementType_(type) {}
+	AttributeType(Word identifier, Length memorySize, Length componentCount, AttributeElementTypes type) : Identifier_(identifier), MemorySize_(memorySize), ComponentCount_(componentCount), ElementType_(type) {}
 };
 
 class Attribute

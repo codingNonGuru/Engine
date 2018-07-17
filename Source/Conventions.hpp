@@ -63,7 +63,10 @@ typedef unsigned int Length;
 #include "Container/Block.hpp"
 
 typedef container::String<16> ShortWord;
-typedef container::String<32> LongWord;
+typedef container::String<32> Word;
+typedef container::String<64> LongWord;
+typedef container::String<256> Phrase;
+
 typedef container::String<32> FileName;
 typedef container::String<256> FilePath;
 
@@ -74,8 +77,8 @@ template <class Type>
 using Grid = container::Grid<Type>;
 template <class Type>
 using Pool = container::Pool<Type>;
-template <class ValueType, class KeyType = ShortWord>
-using Map = container::StaticMap<ValueType, KeyType>;
+template <class ValueType, class KeyType = Word>
+using Map = container::StaticMap <ValueType, KeyType>;
 
 #define ITERATE(grid) for(auto cell = grid.GetStart(); cell != grid.GetEnd(); ++cell)
 

@@ -48,7 +48,7 @@ class InterfacePainter
 		}
 	};
 
-	static Map <DataBuffer, LongWord> buffers_;
+	static Map <DataBuffer, Word> buffers_;
 
 	static Map <Array <ElementTextureSet>, ElementTextureClass> textureSets_;
 

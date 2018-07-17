@@ -10,23 +10,23 @@
 
 #define MAXIMUM_FRAME_BUFFER_COUNT 32
 
-Map <HeaderBuffer*, LongWord> BufferManager::headerBuffers_ = Map <HeaderBuffer*, LongWord>(MAXIMUM_HEADER_BUFFER_COUNT);
+Map <HeaderBuffer*> BufferManager::headerBuffers_ = Map <HeaderBuffer*> (MAXIMUM_HEADER_BUFFER_COUNT);
 
-Map <DataBuffer*, LongWord> BufferManager::dataBuffers_ = Map <DataBuffer*, LongWord>(MAXIMUM_DATA_BUFFER_COUNT);
+Map <DataBuffer*> BufferManager::dataBuffers_ = Map <DataBuffer*> (MAXIMUM_DATA_BUFFER_COUNT);
 
-Map <FrameBuffer*, LongWord> BufferManager::frameBuffers_ = Map <FrameBuffer*, LongWord>(MAXIMUM_FRAME_BUFFER_COUNT);
+Map <FrameBuffer*> BufferManager::frameBuffers_ = Map <FrameBuffer*> (MAXIMUM_FRAME_BUFFER_COUNT);
 
-Map <HeaderBuffer*, LongWord> & BufferManager::GetHeaderBuffers()
+Map <HeaderBuffer*> & BufferManager::GetHeaderBuffers()
 {
 	return headerBuffers_;
 }
 
-Map <DataBuffer*, LongWord> & BufferManager::GetDataBuffers()
+Map <DataBuffer*> & BufferManager::GetDataBuffers()
 {
 	return dataBuffers_;
 }
 
-Map <FrameBuffer*, LongWord> & BufferManager::GetFrameBuffers()
+Map <FrameBuffer*> & BufferManager::GetFrameBuffers()
 {
 	return frameBuffers_;
 }

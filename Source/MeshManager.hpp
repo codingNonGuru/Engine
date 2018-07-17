@@ -12,19 +12,19 @@ struct MeshAttributeType : public AttributeType
 
 	MeshAttributeType() {}
 
-	MeshAttributeType(LongWord identifier, Length memorySize, Length componentCount, AttributeElementTypes elementType, MeshAttributeTypes attributeType) :
+	MeshAttributeType(Word identifier, Length memorySize, Length componentCount, AttributeElementTypes elementType, MeshAttributeTypes attributeType) :
 		AttributeType(identifier, memorySize, componentCount, elementType), AttributeType_(attributeType) {}
 };
 
 class MeshManager
 {
 private:
-	static Map <Mesh, LongWord> meshes_;
+	static Map <Mesh, Word> meshes_;
 
 public:
 	static void Initialize();
 
 	static void LoadMeshes();
 
-	static Map <Mesh, LongWord> & GetMeshes();
+	static Map <Mesh, Word> & GetMeshes();
 };

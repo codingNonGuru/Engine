@@ -7,7 +7,7 @@ class Animation;
 class Animator
 {
 private:
-	Map <Animation*, LongWord> animations_;
+	Map <Animation*, Word> animations_;
 
 public:
 	Animator();
