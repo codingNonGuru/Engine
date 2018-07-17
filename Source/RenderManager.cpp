@@ -24,9 +24,11 @@
 
 Window* RenderManager::window_ = nullptr;
 
-Map <Camera> RenderManager::cameras_ = Map <Camera> (16);
+Map <Camera*> RenderManager::cameras_ = Map <Camera*> (16);
 
 Color RenderManager::backgroundColor_ = Color();
+
+Word interfaceCameraKey = Word("Interface");
 
 void RenderManager::Initialize()
 {
@@ -34,12 +36,12 @@ void RenderManager::Initialize()
 
 	window_ = new Window(screen);
 
+	auto camera = new Camera(screen);
+	AddCamera(interfaceCameraKey, camera);
+
 	glewInit();
 
 	glEnable(GL_DEBUG_OUTPUT);
-
-	*cameras_.Add("main") = Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
-	*cameras_.Add("interface") = Camera(screen);
 
 	auto frameBuffer = BufferManager::GetFrameBuffers().Add("default");
 	if(frameBuffer)
@@ -68,11 +70,9 @@ void RenderManager::Update()
 
 	SetBlendMode();
 
-	auto interfaceCamera = cameras_.Get("interface");
+	FilterManager::Update();
 
-	FilterManager::Update(interfaceCamera);
-
-	Interface::Render(interfaceCamera);
+	Interface::Render();
 
 	if(window_ != nullptr)
 	{
@@ -82,8 +82,12 @@ void RenderManager::Update()
 
 void RenderManager::UpdateCameras()
 {
-	for(auto camera = cameras_.GetStart(); camera != cameras_.GetEnd(); ++camera)
+	for(auto cameraIterator = cameras_.GetStart(); cameraIterator != cameras_.GetEnd(); ++cameraIterator)
 	{
+		auto camera = *cameraIterator;
+		if(camera == nullptr)
+			continue;
+
 		camera->Update();
 	}
 }
@@ -122,7 +126,25 @@ void RenderManager::DisableBlending()
 
 Camera* RenderManager::GetCamera(Word identifier)
 {
-	return cameras_.Get(identifier);
+	auto cameraPointer = cameras_.Get(identifier);
+	if(cameraPointer == nullptr)
+		return nullptr;
+
+	return *cameraPointer;
+}
+
+void RenderManager::AddCamera(Word identifier, Camera* camera)
+{
+	auto cameraPointer = cameras_.Add(identifier);
+	if(cameraPointer == nullptr)
+		return;
+
+	*cameraPointer = camera;
+}
+
+Camera* RenderManager::GetInterfaceCamera()
+{
+	return GetCamera(interfaceCameraKey);
 }
 
 void RenderManager::ClearDefaultBuffer()

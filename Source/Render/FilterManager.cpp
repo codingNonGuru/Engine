@@ -1,6 +1,6 @@
 #include "Render/FilterManager.hpp"
-
 #include "Render/Filter.hpp"
+#include "RenderManager.hpp"
 
 #define MAXIMUM_FILTER_COUNT 32
 
@@ -27,8 +27,10 @@ Filter* FilterManager::AddFilter(const char* name, Filter* filter)
 	return filter;
 }
 
-void FilterManager::Update(Camera* camera)
+void FilterManager::Update()
 {
+	auto camera = RenderManager::GetInterfaceCamera();
+
 	for(auto filterIterator = filters_.GetStart(); filterIterator != filters_.GetEnd(); ++filterIterator)
 	{
 		auto filter = *filterIterator;

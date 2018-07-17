@@ -3,7 +3,6 @@
 #include "Conventions.hpp"
 
 class Filter;
-class Camera;
 
 class FilterManager
 {
@@ -17,5 +16,5 @@ public:
 
 	static Filter* AddFilter(const char*, Filter*);
 
-	static void Update(Camera*);
+	static void Update();
 };

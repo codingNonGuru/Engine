@@ -7,6 +7,8 @@
 #include "Shader.hpp"
 #include "State.hpp"
 #include "StateManager.hpp"
+#include "Camera.hpp"
+#include "RenderManager.hpp"
 
 #include "Game/Game.hpp"
 #include "Game/InterfaceBuilder.hpp"
@@ -22,13 +24,19 @@ Delegate Game::OnStartGame_ = Delegate();
 
 void Game::Initialize()
 {
-	Model* cubeModel = nullptr;
+	auto screen = Engine::GetScreen();
+
+	Camera* camera = nullptr;
+
+	camera = new Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
+	RenderManager::AddCamera(Cameras::PREGAME, camera);
+
 	auto cubeMesh = MeshManager::GetMeshes().Get("Sphere");
-	auto genericShader = ShaderManager::GetShaderMap().Get("Generic");
+	auto genericShader = ShaderManager::GetShader("Generic");
 
 	if(cubeMesh != nullptr)
 	{
-		cubeModel = new Model(cubeMesh, genericShader);
+		auto cubeModel = new Model(cubeMesh, genericShader);
 		ModelManager::AddModel(cubeModel, "Cube");
 	}
 

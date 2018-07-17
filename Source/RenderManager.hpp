@@ -11,7 +11,7 @@ class RenderManager
 private:
 	static Window* window_;
 
-	static Map <Camera> cameras_;
+	static Map <Camera*> cameras_;
 
 	static Color backgroundColor_;
 
@@ -31,6 +31,10 @@ public:
 	static void DisableBlending();
 
 	static Camera* GetCamera(Word);
+
+	static void AddCamera(Word, Camera*);
+
+	static Camera* GetInterfaceCamera();
 
 	static void ClearDefaultBuffer();
 };

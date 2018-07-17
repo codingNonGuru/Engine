@@ -3,7 +3,6 @@
 #include "Conventions.hpp"
 
 class Element;
-class Camera;
 
 class Interface
 {
@@ -21,7 +20,7 @@ public:
 
 	static void Update();
 
-	static void Render(Camera*);
+	static void Render();
 
 	static Map <Element*, Word> & GetElements();
 

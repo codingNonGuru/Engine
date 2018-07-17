@@ -55,3 +55,9 @@ public:
 	static Word const NEW_WORLD_MENU;
 	static Word const WORLD_PREVIEW_PANEL;
 };
+
+class Cameras
+{
+public:
+	static Word const PREGAME;
+};

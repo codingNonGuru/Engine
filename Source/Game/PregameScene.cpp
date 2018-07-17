@@ -7,10 +7,11 @@
 #include "InputHandler.hpp"
 
 #include "Game/PregameScene.hpp"
+#include "Game/Types.hpp"
 
 PregameScene::PregameScene()
 {
-	camera_ = RenderManager::GetCamera("main");
+	camera_ = RenderManager::GetCamera(Cameras::PREGAME);
 }
 
 void PregameScene::Update()

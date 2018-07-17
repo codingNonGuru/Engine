@@ -1,7 +1,7 @@
 #include "Interface.hpp"
-
 #include "Element.hpp"
 #include "InputHandler.hpp"
+#include "RenderManager.hpp"
 
 #define MAXIMUM_ELEMENT_COUNT 256
 
@@ -53,12 +53,14 @@ void Interface::Update()
 	}
 }
 
-void Interface::Render(Camera* camera)
+void Interface::Render()
 {
 	if(!isSorted_)
 	{
 		Sort();
 	}
+
+	auto camera = RenderManager::GetInterfaceCamera();
 
 	for(auto elementIterator = sortedElements.GetStart(); elementIterator != sortedElements.GetEnd(); ++elementIterator)
 	{
