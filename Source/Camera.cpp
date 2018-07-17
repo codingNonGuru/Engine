@@ -44,6 +44,8 @@ Camera::Camera(Screen* screen, Position3 from, Position3 to)
 	pivot_ = to_;
 
 	type_ = CameraTypes::PERSPECTIVE;
+
+	spinImpulse_ = 0.0f;
 }
 
 Camera::Camera(Screen* screen)
@@ -124,16 +126,23 @@ void Camera::Zoom(float impulse)
 void Camera::Spin(float impulse)
 {
 	spinImpulse_ -= impulse;
-
-	azimuth_ += spinImpulse_;
-	if(azimuth_ > 6.2831f)
-		azimuth_ -= 6.2831f;
-	if(azimuth_ < 0.0f)
-		azimuth_ += 6.2831f;
 }
 
 void Camera::Update()
 {
+	if(type_ == CameraTypes::PERSPECTIVE)
+	{
+		azimuth_ += spinImpulse_;
+
+		while(azimuth_ > 6.2831f)
+			azimuth_ -= 6.2831f;
+
+		while(azimuth_ < 0.0f)
+			azimuth_ += 6.2831f;
+
+		spinImpulse_ *= 0.95f;
+	}
+
 	viewDirection_ = glm::vec3(sin(zenith_) * cos(azimuth_), sin(zenith_) * sin(azimuth_), cos(zenith_));
 
 	from_ = to_ + (viewDirection_ * viewDistance_);
@@ -147,7 +156,6 @@ void Camera::Update()
 	up_ = glm::vec3(horizontal.x, horizontal.y, vertical);
 
 	scrollImpulse_ *= 0.95f;
-	spinImpulse_ *= 0.95f;
 	driftImpulse_ *= 0.95f;
 
 	ComputeMatrix();
