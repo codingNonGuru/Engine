@@ -22,17 +22,21 @@
 #include "Utility/Color.hpp"
 #include "SceneManager.hpp"
 
+Window* RenderManager::window_ = nullptr;
+
 Map <Camera> RenderManager::cameras_ = Map <Camera> (16);
 
 Color RenderManager::backgroundColor_ = Color();
 
 void RenderManager::Initialize()
 {
+	auto screen = Engine::GetScreen();
+
+	window_ = new Window(screen);
+
 	glewInit();
 
 	glEnable(GL_DEBUG_OUTPUT);
-
-	auto screen = Engine::GetScreen();
 
 	*cameras_.Add("main") = Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
 	*cameras_.Add("interface") = Camera(screen);
@@ -79,10 +83,9 @@ void RenderManager::Update()
 
 	Interface::Render(interfaceCamera);
 
-	auto window = Engine::GetWindow();
-	if(window != nullptr)
+	if(window_ != nullptr)
 	{
-		window->Refresh();
+		window_->Refresh();
 	}
 }
 

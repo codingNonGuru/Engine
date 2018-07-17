@@ -3,12 +3,14 @@
 #include "Conventions.hpp"
 #include "Utility/Color.hpp"
 
-class Screen;
 class Camera;
+class Window;
 
 class RenderManager
 {
 private:
+	static Window* window_;
+
 	static Map <Camera> cameras_;
 
 	static Color backgroundColor_;

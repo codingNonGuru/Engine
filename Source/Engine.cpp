@@ -15,8 +15,6 @@
 
 bool Engine::isRunning_ = false;
 
-Window* Engine::window_ = nullptr;
-
 Screen* Engine::screen_ = nullptr;
 
 Delegate Engine::OnInitialize_ = Delegate();
@@ -28,8 +26,6 @@ void Engine::Initialize()
 	AssetManager::Initialize();
 
 	screen_ = new Screen(2560, 1440);
-
-	window_ = new Window(screen_);
 
 	RenderManager::Initialize();
 
@@ -57,7 +53,6 @@ void Engine::StartGameLoop()
 		if(InputHandler::IsPressed(SDLK_ESCAPE))
 		{
 			ShutDown();
-			break;
 		}
 
 		TaskManager::Update();
@@ -72,12 +67,9 @@ void Engine::ShutDown()
 {
 	isRunning_ = false;
 
-	SDL_Quit();
-}
+	OnShutDown_.Invoke();
 
-Window* Engine::GetWindow()
-{
-	return window_;
+	SDL_Quit();
 }
 
 Screen* Engine::GetScreen()

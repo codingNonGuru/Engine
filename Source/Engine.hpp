@@ -14,20 +14,18 @@ private:
 
 	static Screen* screen_;
 
-	static Window* window_;
-
 public:
 	static Delegate OnInitialize_;
 
 	static Delegate OnGameLoopStart_;
+
+	static Delegate OnShutDown_;
 
 	static void Initialize();
 
 	static void StartGameLoop();
 
 	static void ShutDown();
-
-	static Window* GetWindow();
 
 	static Screen* GetScreen();
 };
