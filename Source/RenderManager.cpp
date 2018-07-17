@@ -62,15 +62,6 @@ void RenderManager::Update()
 {
 	UpdateCameras();
 
-	EnableDepthTesting();
-
-	auto defaultFrameBuffer = BufferManager::GetFrameBuffer("default");
-	if(defaultFrameBuffer)
-	{
-		defaultFrameBuffer->BindBuffer();
-		defaultFrameBuffer->Clear(backgroundColor_);
-	}
-
 	SceneManager::Render();
 
 	DisableDepthTesting();
@@ -93,7 +84,6 @@ void RenderManager::UpdateCameras()
 {
 	for(auto camera = cameras_.GetStart(); camera != cameras_.GetEnd(); ++camera)
 	{
-		camera->Spin(0.0003f);
 		camera->Update();
 	}
 }
@@ -133,4 +123,14 @@ void RenderManager::DisableBlending()
 Camera* RenderManager::GetCamera(Word identifier)
 {
 	return cameras_.Get(identifier);
+}
+
+void RenderManager::ClearDefaultBuffer()
+{
+	auto defaultFrameBuffer = BufferManager::GetFrameBuffer("default");
+	if(defaultFrameBuffer == nullptr)
+		return;
+
+	defaultFrameBuffer->BindBuffer();
+	defaultFrameBuffer->Clear(backgroundColor_);
 }

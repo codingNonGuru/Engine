@@ -1,6 +1,10 @@
+#include "SDL2/SDL.h"
+
 #include "Model.hpp"
 #include "ModelManager.hpp"
 #include "RenderManager.hpp"
+#include "Camera.hpp"
+#include "InputHandler.hpp"
 
 #include "Game/PregameScene.hpp"
 
@@ -23,6 +27,10 @@ void PregameScene::Update()
 
 void PregameScene::Render()
 {
-	auto cubeModel = ModelManager::GetModels().Get("Cube");
+	RenderManager::EnableDepthTesting();
+
+	RenderManager::ClearDefaultBuffer();
+
+	auto cubeModel = ModelManager::GetModel("Cube");
 	cubeModel->Render(camera_);
 }

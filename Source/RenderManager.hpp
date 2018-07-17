@@ -31,4 +31,6 @@ public:
 	static void DisableBlending();
 
 	static Camera* GetCamera(Word);
+
+	static void ClearDefaultBuffer();
 };
