@@ -3,10 +3,13 @@
 #include "State.hpp"
 
 class Element;
+class Scene;
 
 class PregameState : public State
 {
 private:
+	Scene* pregameScene_;
+
 	Element* mainMenu_;
 
 	Element* newWorldMenu_;

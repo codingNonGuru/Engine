@@ -32,7 +32,7 @@ enum class States
 
 enum class Scenes
 {
-	WORLD, BATTLE
+	PREGAME, WORLD, BATTLE
 };
 
 class TerrainModelBuffers
