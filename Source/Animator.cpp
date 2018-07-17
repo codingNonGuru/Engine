@@ -9,7 +9,11 @@ Animator::Animator()
 
 Animation* Animator::GetAnimation(const char* name)
 {
-	return *animations_.Get(name);
+	auto animation = animations_.Get(name);
+	if(animation == nullptr)
+		return nullptr;
+
+	return *animation;
 }
 
 Animation* Animator::AddAnimation(Animation* animation, const char* name)
