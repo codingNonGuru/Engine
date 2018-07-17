@@ -4,14 +4,16 @@
 
 class Scene;
 
+enum class Scenes;
+
 class SceneManager
 {
-	static Map <Scene*, LongWord> scenes_;
+	static Map <Scene*, Scenes> scenes_;
 
 public:
-	static Scene * GetScene(const char*);
+	static Scene * GetScene(Scenes);
 
-	static Scene * AddScene(Scene*, const char*);
+	static Scene * AddScene(Scene*, Scenes);
 
 	static void Update();
 

@@ -4,9 +4,9 @@
 
 #define MAXIMUM_SCENE_COUNT 32
 
-Map <Scene*, LongWord> SceneManager::scenes_ = Map <Scene*, LongWord> (MAXIMUM_SCENE_COUNT);
+Map <Scene*, Scenes> SceneManager::scenes_ = Map <Scene*, Scenes> (MAXIMUM_SCENE_COUNT);
 
-Scene * SceneManager::GetScene(const char* sceneName)
+Scene * SceneManager::GetScene(Scenes sceneName)
 {
 	auto scenePointer = scenes_.Get(sceneName);
 	if(!scenePointer)
@@ -15,7 +15,7 @@ Scene * SceneManager::GetScene(const char* sceneName)
 	return *scenePointer;
 }
 
-Scene * SceneManager::AddScene(Scene* scene, const char* sceneName)
+Scene * SceneManager::AddScene(Scene* scene, Scenes sceneName)
 {
 	auto scenePointer = scenes_.Add(sceneName);
 	if(!scenePointer)
