@@ -6,6 +6,7 @@ class Camera;
 
 class Scene : public Object
 {
+protected:
 	Camera* camera_;
 
 public:

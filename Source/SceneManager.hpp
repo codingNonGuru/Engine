@@ -11,7 +11,7 @@ class SceneManager
 	static Map <Scene*, Scenes> scenes_;
 
 public:
-	static Scene * GetScene(Scenes);
+	static Scene * Get(Scenes);
 
 	static Scene * AddScene(Scene*, Scenes);
 

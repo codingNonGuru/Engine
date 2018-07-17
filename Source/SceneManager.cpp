@@ -6,7 +6,7 @@
 
 Map <Scene*, Scenes> SceneManager::scenes_ = Map <Scene*, Scenes> (MAXIMUM_SCENE_COUNT);
 
-Scene * SceneManager::GetScene(Scenes sceneName)
+Scene * SceneManager::Get(Scenes sceneName)
 {
 	auto scenePointer = scenes_.Get(sceneName);
 	if(!scenePointer)
@@ -46,7 +46,7 @@ void SceneManager::Render()
 	for(auto sceneIterator = scenes_.GetStart(); sceneIterator != scenes_.GetEnd(); ++sceneIterator)
 	{
 		auto scene = *sceneIterator;
-		if(!scene)
+		if(scene == nullptr)
 			continue;
 
 		if(!scene->IsGloballyActive())
