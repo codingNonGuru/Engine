@@ -9,7 +9,7 @@ Array <File> FileManager::files_ = Array <File>();
 
 void FileManager::Initialize()
 {
-	files_.Initialize(4096);
+	files_.Initialize(16384);
 }
 
 Array <File>* FileManager::GetFilesInFolder(const char* path, bool isRecursive)

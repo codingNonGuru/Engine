@@ -63,7 +63,7 @@ void AssetManager::LoadAssets()
 void AssetManager::CountScripts()
 {
 	Length scriptCount = 0;
-	Length lineCount = 0;
+	Length totalLineCount = 0;
 	for(auto file = files_->GetStart(); file != files_->GetEnd(); ++file)
 	{
 		if((FindString(file->GetName(), ".hpp") || FindString(file->GetName(), ".cpp")) && !FindString(file->GetName(), "FastDelegate") && !FindString(file->GetName(), ".o") && FindString(file->GetPath(), "Source"))
@@ -72,9 +72,8 @@ void AssetManager::CountScripts()
 
 			fseek(fileStream, 0, SEEK_END);
 			Length fileSize = ftell(fileStream);
+			Length lineCount = 0;
 			rewind(fileStream);
-
-			std::cout<<file->GetName()<<" "<<fileSize<<"\n";
 
 			fread(code, 1, fileSize, fileStream);
 			for(auto sign = code; sign != code + fileSize; ++sign)
@@ -87,12 +86,15 @@ void AssetManager::CountScripts()
 
 			fclose(fileStream);
 
+			std::cout<<file->GetName()<<" ---------> "<<lineCount<<"\n";
+
+			totalLineCount += lineCount;
 			scriptCount++;
 		}
 	}
 	std::cout<<"\n";
 	std::cout<<scriptCount<<" Scripts found.\n";
-	std::cout<<lineCount<<" Lines found.\n";
+	std::cout<<totalLineCount<<" Lines found.\n";
 }
 
 Array <File>* AssetManager::GetFiles()
