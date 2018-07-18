@@ -57,9 +57,15 @@ public:
 
 	void Spin(float impulse);
 
+	void PushForward(float);
+
 	void SetTargetAsPivot();
 
 	Position3 GetPosition() const {return from_;}
+
+	float GetAzimuth() const {return azimuth_;}
+
+	float GetViewDistance() const {return viewDistance_;}
 
 	void Update();
 };

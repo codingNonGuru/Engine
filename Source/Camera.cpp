@@ -96,31 +96,21 @@ void Camera::SetTarget(glm::vec3 target)
 	if(to_.x > world.width_) to_.x = world.width_;*/
 }
 
+void Camera::PushForward(float impulse)
+{
+	auto direction = Float3(cos(azimuth_), sin(azimuth_), 0.0f) * impulse;
+
+	Drag(direction);
+}
+
 void Camera::Drag(glm::vec3 targetDelta)
 {
 	driftImpulse_ += targetDelta;
-
-	to_ += driftImpulse_;
-	/*if(to_.y < 0.0f) to_.y = 0.0f;
-	if(to_.y > world.height_) to_.y = world.height_ - 0.001f;
-	if(to_.x < 0.0f) to_.x = 0.0f;
-	if(to_.x > world.width_) to_.x = world.width_ - 0.001f;
-	Tile& G = *const_cast<World&>(world).tiles_(to_.x, to_.y);
-	if(1 - (to_.x - (int)to_.x) > to_.y - (int)to_.y) 
-		to_.z = utility::Utility::getHeightFromPlaneNormal(G.getNormal(0), G.vertices_[0]->position_, to_.x, to_.y);
-	else
-		to_.z = utility::Utility::getHeightFromPlaneNormal(G.getNormal(1), G.vertices_[3]->position_, to_.x, to_.y);*/
 }
 
 void Camera::Zoom(float impulse)
 {
 	scrollImpulse_ -= impulse;
-
-	viewDistance_ += scrollImpulse_;
-	if(viewDistance_ < 1.0f)
-		viewDistance_ = 1.0f;
-	else if(viewDistance_ > 600.0f)
-		viewDistance_ = 600.0f;
 }
 
 void Camera::Spin(float impulse)
@@ -141,6 +131,20 @@ void Camera::Update()
 			azimuth_ += 6.2831f;
 
 		spinImpulse_ *= 0.95f;
+
+		to_ += driftImpulse_;
+
+		driftImpulse_ *= 0.95f;
+
+		viewDistance_ += scrollImpulse_;
+
+		if(viewDistance_ < 1.0f)
+			viewDistance_ = 1.0f;
+
+		if(viewDistance_ > 600.0f)
+			viewDistance_ = 600.0f;
+
+		scrollImpulse_ *= 0.95f;
 	}
 
 	viewDirection_ = glm::vec3(sin(zenith_) * cos(azimuth_), sin(zenith_) * sin(azimuth_), cos(zenith_));
@@ -154,9 +158,6 @@ void Camera::Update()
 	horizontal = -glm::normalize(horizontal) * viewDirection_.z;
 
 	up_ = glm::vec3(horizontal.x, horizontal.y, vertical);
-
-	scrollImpulse_ *= 0.95f;
-	driftImpulse_ *= 0.95f;
 
 	ComputeMatrix();
 }
