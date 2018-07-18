@@ -745,71 +745,12 @@ void Shader::DispatchCompute(Size computeSize)
 	DEBUG_OPENGL
 }
 
+void Shader::DispatchCompute(Length computeSize)
+{
+	glDispatchCompute(computeSize, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	DEBUG_OPENGL
+}
+
 Shader::~Shader(void) {}
-
-// ----- SHADER MAP Definitions
-
-ShaderMap::ShaderMap(int mapSize)
-{
-	shaders_.Initialize(mapSize);
-}
-
-void ShaderMap::Initialize(int mapSize)
-{
-	shaders_.Initialize(mapSize);
-}
-
-bool ShaderMap::Add(const char* shaderName, const char* firstShaderPath, const char* secondShaderPath, const char* thirdShaderPath)
-{
-	/*auto shader = shaders_.Allocate(ShortWord(shaderName));
-	if(shader == nullptr)
-		return false;
-
-	if(thirdShaderPath != nullptr)
-		shader->Initialize(firstShaderPath, secondShaderPath, thirdShaderPath);
-	else if(secondShaderPath != nullptr)
-		shader->Initialize(firstShaderPath, secondShaderPath);
-	else
-		shader->Initialize(firstShaderPath);*/
-
-	return true;
-}
-
-void ShaderMap::Use(const char* shaderName)
-{
-	auto shader = shaders_.Get(shaderName);
-	if(shader == nullptr)
-		return;
-
-	shader->Bind();
-}
-
-void ShaderMap::Unuse(const char* shaderName)
-{
-	auto shader = shaders_.Get(shaderName);
-	if(shader == nullptr)
-		return;
-
-	shader->Unbind();
-}
-
-GLuint ShaderMap::GetTextureLocation(const char* shaderName, const char* textureName)
-{
-	auto shader = shaders_.Get(shaderName);
-	if(shader == nullptr)
-		return 0;
-
-	return shader->GetTextureLocation(textureName);
-}
-
-Shader& ShaderMap::Get(const char* shaderName)
-{
-	return *shaders_.Get(shaderName);
-}
-
-Shader& ShaderMap::operator [](const char* shaderName)
-{
-	return *shaders_.Get(shaderName);
-}
-
-#pragma endregion ShaderMap

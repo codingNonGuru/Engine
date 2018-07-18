@@ -86,32 +86,8 @@ public:
 
 	void DispatchCompute(Size);
 
+	void DispatchCompute(Length);
+
 	~Shader(void);
 };
-
-class ShaderMap
-{
-private:
-	Map <Shader> shaders_;
-
-public:
-	ShaderMap() {}
-
-	ShaderMap(int);
-
-	void Initialize(int);
-
-	bool Add(const char*, const char*, const char*, const char*);
-
-	void Use(const char*);
-
-	void Unuse(const char*);
-
-	GLuint GetTextureLocation(const char*, const char*);
-
-	Shader& Get(const char*);
-
-	Shader& operator [](const char*);
-};
-
 
