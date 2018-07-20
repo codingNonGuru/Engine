@@ -37,4 +37,6 @@ public:
 	static Camera* GetInterfaceCamera();
 
 	static void ClearDefaultBuffer();
+
+	static void SetBackgroundColor(Color);
 };

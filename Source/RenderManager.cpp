@@ -64,6 +64,8 @@ void RenderManager::Update()
 {
 	UpdateCameras();
 
+	ClearDefaultBuffer();
+
 	SceneManager::Render();
 
 	DisableDepthTesting();
@@ -155,4 +157,9 @@ void RenderManager::ClearDefaultBuffer()
 
 	defaultFrameBuffer->BindBuffer();
 	defaultFrameBuffer->Clear(backgroundColor_);
+}
+
+void RenderManager::SetBackgroundColor(Color color)
+{
+	backgroundColor_ = color;
 }
