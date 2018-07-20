@@ -134,7 +134,7 @@ void Camera::Update()
 
 		to_ += driftImpulse_;
 
-		driftImpulse_ *= 0.95f;
+		driftImpulse_ *= 0.9f;
 
 		viewDistance_ += scrollImpulse_;
 

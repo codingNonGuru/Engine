@@ -31,6 +31,9 @@ void Game::Initialize()
 	camera = new Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.7f, 0.0f, 3.0f);
 	RenderManager::AddCamera(Cameras::PREGAME, camera);
 
+	camera = new Camera(screen, Position3(0.0f, 0.0f, 0.0f), 0.5f, 0.0f, 3.0f);
+	RenderManager::AddCamera(Cameras::WORLD, camera);
+
 	auto cubeMesh = MeshManager::GetMeshes().Get("Sphere");
 	auto genericShader = ShaderManager::GetShader("Generic");
 
