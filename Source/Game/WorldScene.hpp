@@ -24,5 +24,9 @@ public:
 
 	void Initialize(const WorldParameterSet&);
 
+	void Update() override;
+
+	void Render() override;
+
 	static World* GetWorld();
 };

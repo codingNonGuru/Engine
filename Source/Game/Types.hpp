@@ -47,6 +47,14 @@ public:
 	static int const COUNT;
 };
 
+class TerrainModelTextures
+{
+public:
+	static Word const BASE_HEIGHT;
+	static Word const DETAIL_HEIGHT;
+	static int const COUNT;
+};
+
 class Elements
 {
 public:
@@ -60,4 +68,5 @@ class Cameras
 {
 public:
 	static Word const PREGAME;
+	static Word const WORLD;
 };

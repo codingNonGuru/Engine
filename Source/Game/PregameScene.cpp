@@ -30,8 +30,6 @@ void PregameScene::Render()
 {
 	RenderManager::EnableDepthTesting();
 
-	RenderManager::ClearDefaultBuffer();
-
 	auto cubeModel = ModelManager::GetModel("Cube");
 	cubeModel->Render(camera_);
 }

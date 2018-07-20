@@ -81,8 +81,8 @@ void lift()
 	
 	float distance = pow(float(x) - newX, 2.0f) + pow(float(y) - newY, 2.0f);
 	float factor = exp(-distance / (2.0f * pow(decay, 2.0f)));
-	if(factor > terrain[index])
-		terrain[index] = factor;
+	//if(factor > terrain[index])
+	terrain[index] += factor;
 }
 
 void addDetail() 

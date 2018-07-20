@@ -21,7 +21,9 @@ enum class Buffers
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
 
-Map <DataBuffer*, Word> ReliefGenerator::modelBuffers_ = Map <DataBuffer*, Word> (TerrainModelBuffers::COUNT);
+Map <DataBuffer*> ReliefGenerator::modelBuffers_ = Map <DataBuffer*> (TerrainModelBuffers::COUNT);
+
+Map <Texture*> ReliefGenerator::modelTextures_ = Map <Texture*> (TerrainModelTextures::COUNT);
 
 Shader* shader = nullptr;
 
@@ -83,37 +85,19 @@ void ReliefGenerator::Generate(World& world)
 	shader->SetConstant(3, "mode");
 	shader->DispatchCompute(computeSize);
 
-	/*
-	for(int erodePass = 0; erodePass < 1; ++erodePass) {
+
+	/*for(int erodePass = 0; erodePass < 1; ++erodePass)
+	  {
 		glUniform1ui(0, 4);
 		glDispatchCompute(width_ / workGroupSize, height_ / workGroupSize, 1);
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-		for(int flowPass = 0; flowPass < 200; ++flowPass) {
+
+		for(int flowPass = 0; flowPass < 200; ++flowPass)
+		{
 			glUniform1ui(0, 10);
 			glUniform2i(4, particles.getWidth(), particles.getHeight());
 			glDispatchCompute(particles.getWidth(), particles.getHeight(), 1);
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			engine_->getShader(Shaders::GENERATE_TERRAIN).unuse();
-
-			glClearColor(0.5f, 0.1f, 0.0f, 1.0f);
-			glClearDepth(1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			engine_->getShader(Shaders::BASIC).use();
-			glBindBuffer(GL_ARRAY_BUFFER, particleBuffer);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-			glUniformMatrix4fv(0, 1, GL_FALSE, &finalMatrix[0][0]);
-			glPointSize(1.0f);
-			glDrawArrays(GL_POINTS, 0, particles.getWidth() * particles.getHeight());
-			engine_->getShader(Shaders::BASIC).unuse();
-
-			SDL_GL_SwapWindow(engine_->getWindow());
-
-			engine_->getShader(Shaders::GENERATE_TERRAIN).use();
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleBuffer);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 11, particleBuffer);
 		}
 		glFinish();
 	}*/
@@ -180,6 +164,15 @@ DataBuffer* ReliefGenerator::GetModelBuffer(Word identifier)
 		return nullptr;
 
 	return *bufferPointer;
+}
+
+Texture* ReliefGenerator::GetModelTexture(Word identifier)
+{
+	auto texturePointer = modelTextures_.Get(identifier);
+	if(texturePointer == nullptr)
+		return nullptr;
+
+	return *texturePointer;
 }
 
 void ReliefGenerator::SetupBuffers(World& world)
@@ -255,8 +248,8 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(particleVelocities.GetMemorySize(), particleVelocities.GetStart());
 	}
 
-	container::Grid <float> perlinDetail(size.x, size.y);
-	Perlin::Generate(size, Range(0.0f, 1.0f), 3.5f, 1.5f, 0.5f, 2.0f);
+	Grid <Float> perlinDetail(size.x, size.y);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 2.0f, 1.5f, 0.5f, 2.0f);
 }
 
 void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)
@@ -383,50 +376,7 @@ void ReliefGenerator::GenerateModel(World& world)
 
 	auto indexBuffer = modelBuffers_.Add(TerrainModelBuffers::INDICES);
 	*indexBuffer = new DataBuffer(indices.GetMemorySize(), indices.GetStart());
-
-	/*int i = 0;
-	for(auto l = links.getStart(); l != links.getEnd(); ++l) {
-		std::cout<<*l<<" ";
-		if(i % 6 == 5)
-			std::cout<<"\n";
-	}*/
-
-	/*container::Array<glm::vec3> vertexPositions(4096 * 64);
-	container::Array<unsigned int> indices(16384 * 64);
-	int order = 8;
-	float increment = 1.0f / pow(2.0f, (float)order);
-	float offset = increment / 2.0f;
-	for(int x = 0; x <= pow(2, order); ++x)
-		for(int y = 0; y <= pow(2, order); ++y)
-			*vertexPositions.Allocate() = glm::vec3((float)x * increment - 0.5f, (float)y * increment - 0.5f, 0.0f);
-	for(int x = 0; x < pow(2, order); ++x)
-		for(int y = 0; y < pow(2, order); ++y)
-			*vertexPositions.Allocate() = glm::vec3(offset + (float)x * increment - 0.5f, offset + (float)y * increment - 0.5f, 0.0f);
-	int middleStart = (pow(2, order) + 1) * (pow(2, order) + 1);
-	for(int x = 0; x < pow(2, order); ++x)
-		for(int y = 0; y < pow(2, order); ++y) {
-			int index = x * pow(2, order) + y;
-			int middle = middleStart + index;
-			int topLeft = index + x;
-			int topRight = topLeft + 1;
-			int bottomLeft = topLeft + pow(2, order) + 1;
-			int bottomRight = bottomLeft + 1;
-			*indices.Allocate() = middle;
-			*indices.Allocate() = topLeft;
-			*indices.Allocate() = topRight;
-
-			*indices.Allocate() = middle;
-			*indices.Allocate() = topRight;
-			*indices.Allocate() = bottomRight;
-
-			*indices.Allocate() = middle;
-			*indices.Allocate() = bottomRight;
-			*indices.Allocate() = bottomLeft;
-
-			*indices.Allocate() = middle;
-			*indices.Allocate() = bottomLeft;
-			*indices.Allocate() = topLeft;
-		}*/
+	(*indexBuffer)->SetSize(indices.GetSize());
 
 	auto & worldTiles = world.GetTiles();
 	Grid <Float> heightMap (worldTiles.GetWidth(), worldTiles.GetHeight());
@@ -435,14 +385,17 @@ void ReliefGenerator::GenerateModel(World& world)
 		{
 			//*heightMap(x, y) = (worldTiles.Get(x, y)->position_.z - world.averageHeight_) * 1.0f + world.averageHeight_;
 			auto & position = worldTiles.Get(x, y)->GetPosition();
-			*heightMap(x, y) = position.z;
+			*heightMap(x, y) = (position.z - 0.5f) * 30.0f;
 		}
 
 	auto texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &heightMap);
+	*modelTextures_.Add(TerrainModelTextures::BASE_HEIGHT) = texture;
 
-	Grid <Float> detailMap(worldTiles.GetWidth(), worldTiles.GetHeight());
-	Perlin::Generate(world.GetSize(), Range(0.0f, 1.0f), 0.0f, 2.0f, 0.5f, 1.0f);
+	auto mapSize = Size(4096, 4096);//world.GetSize();
+	Grid <Float> detailMap(mapSize.x, mapSize.y);
+	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f, 3.0f, 0.5f, 1.0f);
 
 	Perlin::Download(&detailMap);
-	texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &detailMap);
+	texture = new Texture(mapSize, TextureFormats::ONE_FLOAT, &detailMap);
+	*modelTextures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
 }

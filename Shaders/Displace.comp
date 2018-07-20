@@ -1,6 +1,7 @@
 #version 450
 
-struct Vector3 {
+struct Vector3 
+{
 	float x, y, z;
 };
 
@@ -18,12 +19,12 @@ layout (std430, binding = 0) buffer INDEX_LINKS {
 	uint indexLinks[];
 };
 
-layout (std430, binding = 1) buffer POSITION_RESULT {
-	Vector3 positionResult[];
+layout (std430, binding = 1) buffer VERTEX_POSITIONS {
+	Vector3 vertexPositions[];
 };
 
-layout (std430, binding = 2) buffer VERTEX_POSITIONS {
-	Vector3 vertexPositions[];
+layout (std430, binding = 2) buffer POSITION_RESULT {
+	Vector3 positionResult[];
 };
 
 layout (std430, binding = 3) buffer NORMAL_RESULT {
@@ -41,200 +42,35 @@ uniform sampler2D roadStencil;
 
 layout (local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
-float interpolateCubically(ivec2 coords, float x, float y, sampler texSampler, inout vec3 normal) {
-	vec2 rnd = vec2(x - float(coords.x), y - float(coords.y));
-	float values[4][4];
-	for(int i = 0; i < 4; ++i)
-		for(int j = 0; j < 4; ++j) 
-			values[i][j] = texelFetch(texSampler, coords + ivec2(i - 1, j - 1)).r;
-	
-	float finals[4];
-	for(int pass = 0; pass < 4; ++pass) {
-		float m0, m1, mu2, mu3;
-   		float a0, a1, a2, a3;
-	
-		mu2 = rnd.y * rnd.y;
-		mu3 = mu2 * rnd.y;
-	   	m0 = (values[pass][1] - values[pass][0]) / 2.0f;
-	   	m0 += (values[pass][2] - values[pass][1]) / 2.0f;
-	   	m1 = (values[pass][2] - values[pass][1]) / 2.0f;
-	   	m1 += (values[pass][3] - values[pass][2]) / 2.0f;
-	   	a0 = 2.0f * mu3 - 3.0f * mu2 + 1.0f;
-	   	a1 = mu3 - 2.0f * mu2 + rnd.y;
-	   	a2 = mu3 - mu2;
-	   	a3 = -2.0f * mu3 + 3.0f * mu2;
-	
-	   	finals[pass] = a0 * values[pass][1] + a1 * m0 + a2 * m1 + a3 * values[pass][2];
-	}
-	
-	float m0, m1, mu2, mu3;
-   	float a0, a1, a2, a3;
-
-	mu2 = rnd.x * rnd.x;
-	mu3 = mu2 * rnd.x;
-   	m0 = (finals[1] - finals[0]) / 2.0f;
-   	m0 += (finals[2] - finals[1]) / 2.0f;
-   	m1 = (finals[2] - finals[1]) / 2.0f;
-   	m1 += (finals[3] - finals[2]) / 2.0f;
-   	a0 = 2.0f * mu3 - 3.0f * mu2 + 1.0f;
-   	a1 = mu3 - 2.0f * mu2 + rnd.x;
-   	a2 = mu3 - mu2;
-   	a3 = -2.0f * mu3 + 3.0f * mu2;
-
-   	return a0 * finals[1] + a1 * m0 + a2 * m1 + a3 * finals[2];
-}
-
-/*float interpolateCubically(ivec2 coords, float x, float y, sampler texSampler, inout vec3 normal) {
-	vec2 rnd = vec2(x - float(coords.x), y - float(coords.y));
-	float values[4][4];
-	for(int i = 0; i < 4; ++i)
-		for(int j = 0; j < 4; ++j) 
-			values[i][j] = texelFetch(texSampler, coords + ivec2(i - 1, j - 1)).r;
-	
-	float finals[4];
-	for(int pass = 0; pass < 4; ++pass) {
-		float a0, a1, a2, a3, mu2;
-	
-	   	mu2 = rnd.y * rnd.y;
-	   	a0 = values[pass][3] - values[pass][2] - values[pass][0] + values[pass][1];
-	   	a1 = values[pass][0] - values[pass][1] - a0;
-	   	a2 = values[pass][2] - values[pass][0];
-	   	a3 = values[pass][1];
-	
-	   	finals[pass] = a0 * rnd.y * mu2 + a1 * mu2 + a2 * rnd.y + a3;
-	}
-	
-	float a0, a1, a2, a3, mu2;
-	
-   	mu2 = rnd.x * rnd.x;
-   	a0 = finals[3] - finals[2] - finals[0] + finals[1];
-   	a1 = finals[0] - finals[1] - a0;
-   	a2 = finals[2] - finals[0];
-   	a3 = finals[1];
-
-   	return a0 * rnd.x * mu2 + a1 * mu2 + a2 * rnd.x + a3;
-}*/
-
-vec3 interpolate(ivec2 coords, float x, float y) {
+vec3 interpolate(ivec2 coords, float x, float y) 
+{
 	vec2 flatValues = vec2(x - float(coords.x), y - float(coords.y));
 
 	float sum = 0.0f;
 	float weights = 0.0f;
 	float heights[6][6];
 	for(int i = 0; i < 6; ++i)
-		for(int j = 0; j < 6; ++j) {
+		for(int j = 0; j < 6; ++j) 
+		{
 			ivec2 newCoords = coords + ivec2(i - 2, j - 2);
-			newCoords.x = newCoords.x % 1024;
-			newCoords.y = newCoords.y % 512;
-			heights[i][j] = (texelFetch(sampler(reliefHeightMap), newCoords).r - 0.5f) * 50.0f;
+			newCoords.x = newCoords.x % 768;
+			newCoords.y = newCoords.y % 768;
+			heights[i][j] = texelFetch(sampler(reliefHeightMap), newCoords).r;
 			float weight = pow(float(newCoords.x) - x, 2.0f) + pow(float(newCoords.y) - y, 2.0f);
-			weight = exp(-weight / 0.8f);
+			weight = exp(-weight);
 			weights += weight;
 			sum += heights[i][j] * weight;
 		}
 		
-	return vec3(0.0f, 0.0f, sum / weights);
+	return vec3(x, y, sum / weights);
 }
 
-/*vec3 interpolate(ivec2 coords, float x, float y, sampler texSampler, inout vec3 normal) {	
-	vec2 flatValues = vec2(x - float(coords.x), y - float(coords.y));
-	ivec2 dir;
-	bool isLeft;
-	if(flatValues.x < 0.5f) {
-		dir.x = -1;
-		isLeft = true;
-	}
-	else {
-		dir.x = 0;
-		isLeft = false;
-	}
-	bool isBottom;
-	if(flatValues.y < 0.5f) {
-		dir.y = -1;
-		isBottom = true;
-	}
-	else {
-		dir.y = 0;
-		isBottom = false;
-	}
-	
-	float values[5][5];
-	float faces[3][3];
-	float heights[4][4];
-	for(int i = 0; i < 4; ++i)
-		for(int j = 0; j < 4; ++j) {
-			ivec2 newCoords = coords + ivec2(i - 1, j - 1);
-			newCoords.x = newCoords.x % 1024;
-			newCoords.y = newCoords.y % 512;
-			heights[i][j] = texelFetch(texSampler, newCoords).r;
-		}
-		
-	for(int i = 0; i < 3; ++i)
-		for(int j = 0; j < 3; ++j) {
-			faces[i][j] = heights[i][j] * 0.25f + heights[i][j + 1] * 0.25f + heights[i + 1][j] * 0.25f + heights[i + 1][j + 1] * 0.25f;
-		}
-			
-	values[1][1] = heights[0][0] * 0.25f + heights[0][1] * 0.25f + heights[1][0] * 0.25f + heights[1][1] * 0.25f;
-	values[1][3] = heights[0][1] * 0.25f + heights[0][2] * 0.25f + heights[1][1] * 0.25f + heights[1][2] * 0.25f;
-	values[3][1] = heights[1][0] * 0.25f + heights[1][1] * 0.25f + heights[2][0] * 0.25f + heights[2][1] * 0.25f;
-	values[3][3] = heights[1][1] * 0.25f + heights[1][2] * 0.25f + heights[2][1] * 0.25f + heights[2][2] * 0.25f;	
-			
-	float edgeAverage = 0.0f;
-	values[0][1] = heights[0][1] * 0.5f + heights[1][1] * 0.5f;
-	edgeAverage += values[0][1] * 0.25f;
-	values[0][1] = values[0][1] * 0.5f + values[0][0] * 0.25f + values[0][2] * 0.25f;
-	values[2][1] = heights[1][1] * 0.5f + heights[2][1] * 0.5f;
-	edgeAverage += values[2][1] * 0.25f;
-	values[2][1] = values[2][1] * 0.5f + values[2][0] * 0.25f + values[2][2] * 0.25f;
-	
-	values[1][0] = heights[1][0] * 0.5f + heights[1][1] * 0.5f;
-	edgeAverage += values[1][0] * 0.25f;
-	values[1][0] = values[1][0] * 0.5f + values[0][0] * 0.25f + values[2][0] * 0.25f;
-	values[1][2] = heights[1][1] * 0.5f + heights[1][2] * 0.5f;
-	edgeAverage += values[1][2] * 0.25f;
-	values[1][2] = values[1][2] * 0.5f + values[0][2] * 0.25f + values[2][2] * 0.25f;
-	
-	float faceAverage = values[0][0] * 0.25f + values[0][2] * 0.25f + values[2][0] * 0.25f + values[2][2] * 0.25f;
-	values[1][1] = heights[1][1] * 0.25f + faceAverage * 0.25f + edgeAverage * 0.5f;
-	
-	float beziers[3][2];
-	float t = isLeft ? flatValues.x + 0.5f : flatValues.x - 0.5f;
-	float s = isBottom ? flatValues.y + 0.5f : flatValues.y - 0.5f;
-	for(int i = 0; i < 3; ++i) {
-		float first = values[0][i] * 0.5f + values[1][i] * 0.5f;
-		float second = values[1][i] * 0.5f + values[2][i] * 0.5f;
-		//float first = values[0][i][0] * (1.0f - t) + values[1][i][0] * t;
-		//float second = values[1][i][0] * (1.0f - t) + values[2][i][0] * t;
-		//beziers[i][0] = first * (1.0f - t) + second * t;
-		beziers[i][0] = (1.0f - t) * (1.0f - t) * values[0][i] + 2.0f * (1.0f - t) * t * values[1][i] + t * t * values[2][i];
-		//beziers[i][0] = pow(1.0f - t, 4.0f) * values[0][i][0] + 4.0f * pow(1.0f - t, 3.0f) * t * first + 6.0f * pow(1.0f - t, 2.0f) * pow(t, 2.0f) * values[1][i][0] + 4.0f * (1.0f - t) * pow(t, 3.0f) * second + pow(t, 4.0f) * values[2][i][0];
-		//beziers[i][1] = (1.0f - s) * (1.0f - s) * values[i][0] + 2.0f * (1.0f - s) * s * values[i][1][1] + s * s * values[i][2][1];
-		//beziers[i][1] = pow(1.0f - s, 3.0f) * values[i][0][1] + 3.0f * pow(1.0f - s, 2.0f) * s * firstMid + 3.0f * (1.0f - s) * pow(s, 2.0f) * secondMid + pow(s, 3.0f) * values[i][2][1];
-	}
-	
-	//return vec3(0.0f, 0.0f, beziers[1][0]);
-	
-	float first = beziers[0][0] * 0.5f + beziers[1][0] * 0.5f;
-	float second = beziers[1][0] * 0.5f + beziers[2][0] * 0.5f;
-	
-	vec3 final;
-	//float finalScalar = pow(1.0f - s, 3.0f) * beziers[0][0] + 3.0f * pow(1.0f - s, 2.0f) * s * firstMid + 3.0f * pow(s, 2.0f) * (1.0f - s) * secondMid + pow(s, 3.0f) * beziers[2][0];
-	//float first = (float(coords.x + dir.x) + float(coords.x + dir.x + 1)) * 0.5f;
-	//float second = (float(coords.x + dir.x + 1) + float(coords.x + dir.x + 2)) * 0.5f;
-	final.x = (1.0f - t) * (1.0f - t) * first + 2.0f * (1.0f - t) * t * float(coords.x + dir.x + 1) + t * t * second;
-	//first = (float(coords.y + dir.y) + float(coords.y + dir.y + 1)) * 0.5f;
-	//second = (float(coords.y + dir.y + 1) + float(coords.y + dir.y + 2)) * 0.5f;
-	final.y = (1.0f - s) * (1.0f - s) * first + 2.0f * (1.0f - s) * s * float(coords.y + dir.y + 1) + s * s * second;  
-	final.z = (1.0f - s) * (1.0f - s) * beziers[0][0] + 2.0f * (1.0f - s) * s * beziers[1][0] + s * s * beziers[2][0];
-	//float finalScalar = (1.0f - t) * (1.0f - t) * beziers[0][1] + 2.0f * (1.0f - t) * t * beziers[1][1] + t * t * beziers[2][1];
-	
-	return final;
-}*/
-
-void main() {
+void main() 
+{
 	uint index = gl_GlobalInvocationID.x;
 	
-	if(mode == 0) {
+	if(mode == 0) 
+	{
 		float newX = vertexPositions[index].x * 0.4f * size;
 		float newY = vertexPositions[index].y * 0.4f * size;
 		
@@ -243,47 +79,49 @@ void main() {
 		float y = center.y + newX * s + newY * c;
 		y -= s * size * 0.55f;
 		
-		//float x = center.x + newX;
-		//float y = center.y + newY;
-		
-		vec3 normal;
-		//float height = interpolateCubically(ivec2(int(x), int(y)), x, y, reliefHeightMap, normal);
 		vec3 position = interpolate(ivec2(int(x), int(y)), x, y);
-		position.z += (texture(reliefDetailMap, vec2(x / 4.0f, y / 4.0f)).r - 0.5f) * strength * 0.0f;
+
+		position.z += (texture(reliefDetailMap, vec2(x / 48.0f, y / 48.0f)).r - 0.5f) * 10.0f;
 		
-		vec2 stencilCoord = vec2(x, y) - stencilPosition.xy;
+		/*vec2 stencilCoord = vec2(x, y) - stencilPosition.xy;
 		stencilCoord.x /= stencilScale.x;
 		stencilCoord.y /= stencilScale.y;
 		
 		float paveHeight = texture(pavementStencil, stencilCoord).r;
 		float roadHeight = pow(texture(roadStencil, stencilCoord).r, 0.2f) * (1.0f - paveHeight) * 0.65f;
 		float totalHeight = paveHeight + roadHeight;
-		//if(totalHeight > 1.0f)
-			//totalHeight = 1.0f;
+		
 		if(totalHeight > paveHeight)
 			paveHeight = totalHeight;
-		position.z += paveHeight * 0.0f;
+		position.z += paveHeight * 0.0f;*/
 		
-		positionResult[index].x = x;//position.x;
-		positionResult[index].y = y;//position.y;
+		positionResult[index].x = x;
+		positionResult[index].y = y;
 		positionResult[index].z = position.z;
-	} else {
+	} 
+	else 
+	{
 		vec3 fullNormal = vec3(0.0f);
 		vec3 fullTangent = vec3(0.0f);
 		vec3 thisPosition = vec3(positionResult[index].x, positionResult[index].y, positionResult[index].z);
 	
 		uint linkIndex = 12 * index; 
 		vec3 otherPositions[12];
-		for(int i = 0; i < 12; ++i) {
+		for(int i = 0; i < 12; ++i) 
+		{
 			uint other = indexLinks[linkIndex + i];
 			otherPositions[i] = vec3(positionResult[other].x, positionResult[other].y, positionResult[other].z);
 			otherPositions[i] -= thisPosition;
 		}
-		for(int i = 0; i < 12; i += 2) {
-			if(i != 2) {
+
+		for(int i = 0; i < 12; i += 2) 
+		{
+			if(i != 2) 
+			{
 				vec3 normal = cross(otherPositions[i], otherPositions[i + 1]);
 				if(normal.z < 0.0f)
 					normal *= -1.0f;
+
 				fullNormal += normalize(normal);
 				float r = 1.0f / (otherPositions[i].x * otherPositions[i + 1].y - otherPositions[i].y * otherPositions[i + 1].x);
 				fullTangent += normalize((otherPositions[i] * otherPositions[i + 1].y - otherPositions[i + 1] * otherPositions[i].y) * r);
