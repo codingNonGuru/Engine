@@ -31,7 +31,7 @@ void Perlin::Initialize()
 
 	clock_t start = clock();
 
-	Size capacity(2048, 2048);
+	Size capacity(4096, 4096);
 	Length pixelCount = capacity.x * capacity.y;
 
 	container::Array<float, int> stream(pow(2, 24));
@@ -68,23 +68,38 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float
 	int blockSize = 16;
 	Size computeSize(size.x / blockSize, size.y / blockSize);
 
-	//Bind shader and buffers
 	shader_->Bind();
 
 	buffers_.Get("octaves")->Bind(0);
 	buffers_.Get("result")->Bind(1);
 	buffers_.Get("stream")->Bind(2);
 
-	//Set all pixels to zero
-
 	shader_->SetConstant(size, "size");
 	auto stage = (int)Stages::CLEAR;
 	shader_->SetConstant(stage, "stage");
 	shader_->DispatchCompute(computeSize);
 
+	auto side = size.x;
+	int horizontalExponent = 0;
+	while(side % 2 == 0)
+	{
+		side /= 2;
+		horizontalExponent++;
+	}
+
+	side = size.y;
+	int verticalExponent = 0;
+	while(side % 2 == 0)
+	{
+		side /= 2;
+		verticalExponent++;
+	}
+
+	int exponent = verticalExponent > horizontalExponent ? horizontalExponent : verticalExponent;
+
 	//Generate layers and add them to result
-	unsigned int order = 512;
-	unsigned int octaveCount = 9;
+	unsigned int order = pow(2, exponent);
+	unsigned int octaveCount = exponent;
 	shader_->SetConstant(octaveCount, "octaveCount");
 
 	for(Index tier = octaveCount; tier >= 1; --tier, order /= 2)
@@ -122,7 +137,6 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float
 
 void Perlin::Download(container::Matrix* container)
 {
-	//Download texture from graphical memory to central memory
 	buffers_.Get("result")->Download(container);
 }
 

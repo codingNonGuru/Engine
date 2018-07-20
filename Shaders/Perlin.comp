@@ -151,7 +151,8 @@ void fillLattice()
 	
 		octaves[index] = (verticalValue + horizontalValue) * 0.5f;
 	}
-	result[index] += octaves[index];
+
+	result[index] += Fade(octaves[index] + 0.5f) - 0.5f;
 }
 
 void addOctaves() 
