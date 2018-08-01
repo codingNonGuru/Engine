@@ -262,7 +262,7 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(area * sizeof(Float));
 
 		Perlin::SetTargetBuffer(buffer);
-		Perlin::Generate(size, Range(0.0f, 1.0f), 0.1f, 0.5f, 2.0f);
+		Perlin::Generate(size, Range(0.0f, 1.0f), 0.0f, 0.5f, 2.0f);
 
 		Perlin::Generate(size, Range(0.0f, 1.0f), 0.5f, 0.5f, 4.0f);
 	}
@@ -407,9 +407,9 @@ void ReliefGenerator::GenerateModel(World& world)
 	auto texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &heightMap);
 	*modelTextures_.Add(TerrainModelTextures::BASE_HEIGHT) = texture;
 
-	auto mapSize = Size(4096, 4096);//world.GetSize();
+	auto mapSize = Size(4096, 4096);
 	Grid <Float> detailMap(mapSize.x, mapSize.y);
-	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f, 3.0f);
+	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f);
 
 	Perlin::Download(&detailMap);
 	texture = new Texture(mapSize, TextureFormats::ONE_FLOAT, &detailMap);

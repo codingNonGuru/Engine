@@ -114,17 +114,20 @@ void convertBlurToColor()
 	uint y = gl_GlobalInvocationID.y;
 	uint thisIndex = y * size.x + x;
 	
-	float sum = edgeBlurBuffer[thisIndex];// * perlin[thisIndex];
-	sum = 1.0f - sum;
-	sum *= 1.5f;
+	//float sum = edgeBlurBuffer[thisIndex];// * perlin[thisIndex];
+	//sum = 1.0f - sum;
+	//sum *= 1.5f;
 	
-	sum *= perlin[thisIndex];
+	//sum *= perlin[thisIndex];
 	
 	//sum = sum > 0.4f ? 1.0f : 0.0f;
+
+	float alpha = edgeBlurBuffer[thisIndex] < perlin[thisIndex] ? 1.0f : 0.0f;
+	alpha *= edgeBlurBuffer[thisIndex];
 	
-	diffuse[thisIndex].r = diffuse[thisIndex].r * (1.0f - sum) + 1.0f * sum;
-	diffuse[thisIndex].g = diffuse[thisIndex].g * (1.0f - sum) + 1.0f * sum;
-	diffuse[thisIndex].b = diffuse[thisIndex].b * (1.0f - sum) + 1.0f * sum; 
+	diffuse[thisIndex].r = diffuse[thisIndex].r * (1.0f - alpha) + alpha;
+	diffuse[thisIndex].g = diffuse[thisIndex].g * (1.0f - alpha) + alpha;
+	diffuse[thisIndex].b = diffuse[thisIndex].b * (1.0f - alpha) + alpha; 
 }
 
 void main() 

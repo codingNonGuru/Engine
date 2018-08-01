@@ -117,12 +117,15 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, Contr
 	unsigned int octaveCount = exponent;
 	shader_->SetConstant(octaveCount, "octaveCount");
 
-	for(Index tier = octaveCount; tier >= 1; --tier, order /= 2)
+	for(int tier = octaveCount; tier >= 0; --tier, order /= 2)
 	{
 		shader_->SetConstant(order, "order");
+
 		shader_->SetConstant(tier, "octaveIndex");
+
 		unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
 		shader_->SetConstant(timeSeed, "timeSeed");
+
 		shader_->SetConstant(dominantOctave, "strongestOctave");
 
 		for(Index stage = 0; stage < 3; ++stage)
