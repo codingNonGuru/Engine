@@ -10,7 +10,6 @@ layout (location = 4) uniform uint timeSeed;
 layout (location = 5) uniform uint octaveIndex;
 layout (location = 6) uniform vec2 range;
 layout (location = 7) uniform float strongestOctave;
-layout (location = 8) uniform float decay;
 layout (location = 9) uniform float contrast;
 layout (location = 10) uniform float contrastStrength;
 
@@ -53,7 +52,10 @@ float getRandomValue(uint seed_x, float min, float max)
 	return value;
 }
 
-void setLatticeCore() {
+const float octaveFalloff = 0.25f;
+
+void setLatticeCore() 
+{
 	uint x = gl_GlobalInvocationID.x;
 	uint y = gl_GlobalInvocationID.y; 
 	uint index = y * size.x + x;
@@ -62,7 +64,8 @@ void setLatticeCore() {
 	uint highestXOrder = size.x;
 	uint highestYOrder = size.y;
 	
-	float variation = 0.5f * exp(-pow(float(octaveCount - octaveIndex) - strongestOctave, 2.0f) / (2.0f * pow(decay, 2.0f)));
+	float normalizedCurrent = 1.0f - float(octaveIndex) / float(octaveCount);
+	float variation = 0.5f * exp(-pow(normalizedCurrent - strongestOctave, 2.0f) / (2.0f * pow(octaveFalloff, 2.0f)));
 	bool isCorner = x % highestXOrder == 0 && y % highestYOrder == 0;
 	bool isLowerOrRightEdge = x == highestXOrder || y == highestYOrder;
 	if(x % order == 0 && y % order == 0) 
@@ -118,18 +121,21 @@ void fillLattice()
 	if(isOrder == false) 
 	{
 		uint left, right, up, down;
+		
 		left = x - x % order;
 		right = left + order;
 		if(right >= size.x) 
 		{
 			right -= size.x;
 		}
+		
 		up = y - y % order;
 		down = up + order;
 		if(down >= size.y) 
 		{
 			down -= size.y;
 		}
+		
 		float upperLeft, upperRight, lowerLeft, lowerRight;
 		upperLeft = octaves[up * size.x + left];
 		upperRight = octaves[up * size.x + right];

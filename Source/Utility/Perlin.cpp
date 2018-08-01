@@ -9,6 +9,8 @@ Shader* Perlin::shader_ = nullptr;
 
 Map <DataBuffer> Perlin::buffers_ = Map <DataBuffer> (3);
 
+DataBuffer* Perlin::targetBuffer_ = nullptr;
+
 bool Perlin::isInitialized_ = false;
 
 enum class Stages
@@ -59,7 +61,12 @@ void Perlin::Destroy()
 	}
 }
 
-DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float octaveDecay, float contrast, float contrastStrength)
+void Perlin::SetTargetBuffer(DataBuffer* targetBuffer)
+{
+	targetBuffer_ = targetBuffer;
+}
+
+DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, ContrastThreshold contrastThreshold, ContrastStrength contrastStrength)
 {
 	Initialize();
 
@@ -71,7 +78,15 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float
 	shader_->Bind();
 
 	buffers_.Get("octaves")->Bind(0);
-	buffers_.Get("result")->Bind(1);
+	if(targetBuffer_ != nullptr)
+	{
+		targetBuffer_->Bind(1);
+		targetBuffer_ = nullptr;
+	}
+	else
+	{
+		buffers_.Get("result")->Bind(1);
+	}
 	buffers_.Get("stream")->Bind(2);
 
 	shader_->SetConstant(size, "size");
@@ -109,7 +124,6 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float
 		unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
 		shader_->SetConstant(timeSeed, "timeSeed");
 		shader_->SetConstant(dominantOctave, "strongestOctave");
-		shader_->SetConstant(octaveDecay, "decay");
 
 		for(Index stage = 0; stage < 3; ++stage)
 		{
@@ -123,7 +137,7 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, float
 	shader_->SetConstant(stage, "stage");
 	shader_->SetConstant(octaveCount, "octaveCount");
 	shader_->SetConstant(range, "range");
-	shader_->SetConstant(contrast, "contrast");
+	shader_->SetConstant(contrastThreshold, "contrast");
 	shader_->SetConstant(contrastStrength, "contrastStrength");
 
 	shader_->DispatchCompute(computeSize);

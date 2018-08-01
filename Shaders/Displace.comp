@@ -81,7 +81,7 @@ void main()
 		
 		vec3 position = interpolate(ivec2(int(x), int(y)), x, y);
 
-		position.z += (texture(reliefDetailMap, vec2(x / 48.0f, y / 48.0f)).r - 0.5f) * 10.0f;
+		position.z += (texture(reliefDetailMap, vec2(x / 192.0f, y / 192.0f)).r - 0.5f) * 15.0f;
 		
 		/*vec2 stencilCoord = vec2(x, y) - stencilPosition.xy;
 		stencilCoord.x /= stencilScale.x;

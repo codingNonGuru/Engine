@@ -123,7 +123,7 @@ void InterfacePainter::GenerateStencils()
 {
 	Size sourceSize(2048, 2048);
 
-	Perlin::Generate(sourceSize, Range(0.0f, 1.0f), 4.0f, 3.0f, 0.55f, 16.0f);
+	Perlin::Generate(sourceSize, Range(0.0f, 1.0f), 0.5f, 0.55f, 16.0f);
 	perlinBuffer = Perlin::GetResultBuffer();
 
 	container::LayeredGrid<float> stencils(512, 512, 16);
@@ -167,7 +167,7 @@ void InterfacePainter::GenerateStencils()
 
 void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 {
-	Perlin::Generate(size, Range(0.0f, 1.0f), 4.0f, 2.0f, 0.5f, 4.0f);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 0.3f, 0.5f, 4.0f);
 
 	Size computeSize(size.x / 16, size.y / 16);
 
@@ -193,7 +193,7 @@ void InterfacePainter::GenerateShadow(Size size, Size computeSize)
 
 void InterfacePainter::HighlightEdges(Size size, Size computeSize, const char* kernelName)
 {
-	Perlin::Generate(size, Range(0.0f, 1.0f), 10.0f, 2.0f, 0.5f, 8.0f);
+	Perlin::Generate(size, Range(0.0f, 1.0f), 1.2f, 0.52f, 8.0f);
 
 	SetupPaperGenerator(size);
 

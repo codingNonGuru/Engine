@@ -16,7 +16,7 @@
 
 enum class Buffers
 {
-	TERRAIN, CARVE, RELIEF, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY
+	TERRAIN, CARVE, RELIEF, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY, PERLIN_DETAIL
 };
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
@@ -40,7 +40,7 @@ void ReliefGenerator::Generate(World& world)
 	shader->Bind();
 
 	buffers.Get(Buffers::TERRAIN)->Bind(0);
-	Perlin::GetResultBuffer()->Bind(1);
+	buffers.Get(Buffers::PERLIN_DETAIL)->Bind(1);
 	buffers.Get(Buffers::CARVE)->Bind(2);
 	buffers.Get(Buffers::RELIEF)->Bind(3);
 	buffers.Get(Buffers::GRADIENT)->Bind(9);
@@ -77,6 +77,14 @@ void ReliefGenerator::Generate(World& world)
 	LiftTerrain(position, islandLift, computeSize);
 
 	for(int i = 0; i < 24; ++i)
+	{
+		shader->SetConstant(2, "mode");
+		shader->DispatchCompute(computeSize);
+	}
+
+	Perlin::GetResultBuffer()->Bind(1);
+
+	for(int i = 0; i < 0; ++i)
 	{
 		shader->SetConstant(2, "mode");
 		shader->DispatchCompute(computeSize);
@@ -248,8 +256,16 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(particleVelocities.GetMemorySize(), particleVelocities.GetStart());
 	}
 
-	Grid <Float> perlinDetail(size.x, size.y);
-	Perlin::Generate(size, Range(0.0f, 1.0f), 2.0f, 1.5f, 0.5f, 2.0f);
+	buffer = buffers.Add(Buffers::PERLIN_DETAIL);
+	if(buffer)
+	{
+		buffer->Generate(area * sizeof(Float));
+
+		Perlin::SetTargetBuffer(buffer);
+		Perlin::Generate(size, Range(0.0f, 1.0f), 0.1f, 0.5f, 2.0f);
+
+		Perlin::Generate(size, Range(0.0f, 1.0f), 0.5f, 0.5f, 4.0f);
+	}
 }
 
 void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)
@@ -393,7 +409,7 @@ void ReliefGenerator::GenerateModel(World& world)
 
 	auto mapSize = Size(4096, 4096);//world.GetSize();
 	Grid <Float> detailMap(mapSize.x, mapSize.y);
-	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f, 3.0f, 0.5f, 1.0f);
+	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f, 3.0f);
 
 	Perlin::Download(&detailMap);
 	texture = new Texture(mapSize, TextureFormats::ONE_FLOAT, &detailMap);
