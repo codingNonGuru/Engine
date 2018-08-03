@@ -28,14 +28,7 @@ void BiomeGenerator::Generate(World& world)
 		for(int y = 0; y < size.y; ++y)
 		{
 			auto tile = tiles(x, y);
-			if(tiles(x, y)->GetRelief() == ReliefTypes::OCEAN)
-			{
-				*reliefs(x, y) = 1.0f;
-			}
-			else
-			{
-				*reliefs(x, y) = 0.0f;
-			}
+			*reliefs(x, y) = 1.0f - tile->GetLandRatio();
 		}
 	}
 
@@ -51,7 +44,7 @@ void BiomeGenerator::Generate(World& world)
 	auto blurStrength = size.x / 4;
 	auto output = ImageProcessor::Blur(reliefBuffer, size, blurStrength);
 
-	auto variation = Perlin::Generate(size, Range(0.0f, 1.0f), 0.3f, ContrastStrength(2.0f));
+	auto variation = Perlin::Generate(size, FocusIndex(0.3f), ContrastThreshold(0.5f), ContrastStrength(2.0f));
 
 	auto shader = ShaderManager::GetShader("GenerateBiome");
 	if(shader == nullptr)

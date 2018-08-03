@@ -15,6 +15,10 @@ class World
 
 	Array <Settlement> settlements_;
 
+	Grid <Float> heightMap_;
+
+	int detailResolution_;
+
 public:
 	World();
 
@@ -29,4 +33,10 @@ public:
 	void SetSize(Size);
 
 	Array <Settlement> & GetSettlements();
+
+	Float GetHeight(Float, Float);
+
+	Grid <Float> & GetHeightMap();
+
+	void SetDetailResolution(int);
 };

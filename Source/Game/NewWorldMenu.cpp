@@ -69,6 +69,11 @@ void NewWorldMenu::HandleNewGameMenuOpen()
     	newGameMenu_->Open();
     }
 
+    if(worldPreview_ != nullptr)
+    {
+    	worldPreview_->Close();
+    }
+
     closeEvent_->GetActions().Remove(this, &NewWorldMenu::HandleNewGameMenuOpen);
 }
 

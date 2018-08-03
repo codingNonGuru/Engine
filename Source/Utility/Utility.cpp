@@ -169,4 +169,18 @@ namespace utility
 	{
 		return 3.0f * t * t - 2.0f * t * t * t;
 	}
+
+	void Clamp(float &value, float minimum, float maximum)
+	{
+		if(value > maximum)
+		{
+			value = maximum;
+			return;
+		}
+
+		if(value < minimum)
+		{
+			value = minimum;
+		}
+	}
 }

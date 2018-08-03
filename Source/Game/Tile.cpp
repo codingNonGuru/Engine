@@ -12,9 +12,19 @@ Position3 & Tile::GetPosition()
 	return position_;
 }
 
-ReliefTypes & Tile::GetRelief()
+ReliefTypes Tile::GetRelief()
 {
-	return relief_;
+	return landRatio_ > 0.5f ? ReliefTypes::LAND : ReliefTypes::OCEAN;
+}
+
+Float Tile::GetLandRatio()
+{
+	return landRatio_;
+}
+
+void Tile::SetLandRatio(Float landRatio)
+{
+	landRatio_ = landRatio;
 }
 
 Biome & Tile::GetBiome()

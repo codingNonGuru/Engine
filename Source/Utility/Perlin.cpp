@@ -66,7 +66,7 @@ void Perlin::SetTargetBuffer(DataBuffer* targetBuffer)
 	targetBuffer_ = targetBuffer;
 }
 
-DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, ContrastThreshold contrastThreshold, ContrastStrength contrastStrength)
+DataBuffer* Perlin::Generate(Size size, FocusIndex focusIndex, ContrastThreshold contrastThreshold, ContrastStrength contrastStrength, Range range)
 {
 	Initialize();
 
@@ -126,7 +126,7 @@ DataBuffer* Perlin::Generate(Size size, Range range, float dominantOctave, Contr
 		unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
 		shader_->SetConstant(timeSeed, "timeSeed");
 
-		shader_->SetConstant(dominantOctave, "strongestOctave");
+		shader_->SetConstant(focusIndex, "strongestOctave");
 
 		for(Index stage = 0; stage < 3; ++stage)
 		{

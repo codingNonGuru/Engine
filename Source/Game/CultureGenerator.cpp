@@ -32,7 +32,7 @@ void CultureGenerator::Generate(World& world)
 			{
 				*textureData(x, y) = Byte4(128, 0, 0, 0);
 			}
-			/*else
+			else
 			{
 				if(tile->GetSettlement() != nullptr)
 				{
@@ -42,8 +42,8 @@ void CultureGenerator::Generate(World& world)
 				{
 					*textureData(x, y) = Byte4(128, 0, 0, 255);
 				}
-			}*/
-			else
+			}
+			/*else
 			{
 				auto domain = tile->GetDomain();
 				if(domain != nullptr)
@@ -55,7 +55,7 @@ void CultureGenerator::Generate(World& world)
 				{
 					*textureData(x, y) = Byte4(128, 0, 0, 255);
 				}
-			}
+			}*/
 		}
 	}
 

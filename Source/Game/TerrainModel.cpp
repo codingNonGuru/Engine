@@ -104,6 +104,10 @@ void TerrainModel::Render(Camera* camera)
 	displaceShader->SetConstant((float)cos(azimuth), "c");
 	displaceShader->SetConstant((float)sin(azimuth), "s");
 
+	displaceShader->SetConstant(ReliefGenerator::DETAIL_STRENGTH, "strength");
+
+	displaceShader->SetConstant(ReliefGenerator::DETAIL_TILE_COUNT, "detailTileCount");
+
 	Length workSize = vertexCount / 32 + 1;
 
 	displaceShader->SetConstant(0, "mode");

@@ -35,35 +35,41 @@ void WorldScene::Initialize(const WorldParameterSet& parameterSet)
 	world_ = new World(parameterSet);
 }
 
+const float spinModifier = 0.01f;
+
+const float pushModifier = 0.01f;
+
+const float zoomModifier = 0.01f;
+
 void WorldScene::Update()
 {
 	if(InputHandler::IsPressed(SDL_SCANCODE_A))
 	{
-		camera_->Spin(-0.01f);
+		camera_->Spin(-spinModifier);
 	}
 	else if(InputHandler::IsPressed(SDL_SCANCODE_D))
 	{
-		camera_->Spin(0.01f);
+		camera_->Spin(spinModifier);
 	}
 
 	auto viewDistance = camera_->GetViewDistance();
 	if(InputHandler::IsPressed(SDL_SCANCODE_W))
 	{
-		camera_->PushForward(-viewDistance * 0.01f);
+		camera_->PushForward(-viewDistance * pushModifier);
 	}
 	else if(InputHandler::IsPressed(SDL_SCANCODE_S))
 	{
-		camera_->PushForward(viewDistance * 0.01f);
+		camera_->PushForward(viewDistance * pushModifier);
 	}
 
 	auto & mouse = InputHandler::GetMouse();
 	if(mouse.ScrollUp_)
 	{
-		camera_->Zoom(0.05f);
+		camera_->Zoom(viewDistance * zoomModifier);
 	}
 	else if(mouse.ScrollDown_)
 	{
-		camera_->Zoom(-0.05f);
+		camera_->Zoom(-viewDistance * zoomModifier);
 	}
 }
 

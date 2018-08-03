@@ -16,7 +16,7 @@ class Tile
 {
 	Position3 position_;
 
-	ReliefTypes relief_;
+	Float landRatio_;
 
 	Biome biome_;
 
@@ -29,7 +29,11 @@ public:
 
 	Position3 & GetPosition();
 
-	ReliefTypes & GetRelief();
+	ReliefTypes GetRelief();
+
+	Float GetLandRatio();
+
+	void SetLandRatio(Float);
 
 	Biome & GetBiome();
 

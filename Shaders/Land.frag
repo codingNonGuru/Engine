@@ -49,7 +49,7 @@ void main()
 	specular = pow(specular, 256.0f) * 0.5f + pow(specular, 64.0f) * 0.25f + pow(specular, 16.0f) * 0.25f;
 	//specular *= 0.5f;
 	
-	vec3 color = vec3(pos.z < -6.0f ? 1.0f : 0.5f) * diffuse;
+	vec3 color = vec3(pos.z < 0.0f ? 1.0f : 0.5f) * diffuse;
 	color = color * (1.0f - specular) + vec3(specular);
 
 	finalColor = vec4(color.rgb, 1.0f);

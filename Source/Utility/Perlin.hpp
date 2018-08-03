@@ -7,6 +7,7 @@ class DataBuffer;
 
 typedef float ContrastStrength;
 typedef float ContrastThreshold;
+typedef float FocusIndex;
 
 class Perlin
 {
@@ -25,7 +26,7 @@ public:
 
 	static void SetTargetBuffer(DataBuffer*);
 
-	static DataBuffer* Generate(Size, Range, float, ContrastThreshold = 0.5f, ContrastStrength = 1.0f);
+	static DataBuffer* Generate(Size, FocusIndex, ContrastThreshold = 0.5f, ContrastStrength = 1.0f, Range = Range(0.0f, 1.0f));
 
 	static void Download(container::Matrix*);
 

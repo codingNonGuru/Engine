@@ -16,6 +16,12 @@ class ReliefGenerator
 
 	static void LiftTerrain(Float2, Float, Size);
 
+	static void BindAssets(Size);
+
+	static void FillWorld(World&);
+
+	static const float DETAIL_STRENGTH_MODIFIER;
+
 public:
 	static void Generate(World&);
 
@@ -26,4 +32,14 @@ public:
 	static DataBuffer* GetModelBuffer(Word);
 
 	static Texture* GetModelTexture(Word);
+
+	static Grid <Float> * GetHeightMap();
+
+	static const int DETAIL_RESOLUTION;
+
+	static const int DETAIL_TILE_COUNT;
+
+	static const float DETAIL_STRENGTH;
+
+	static const float SEA_LEVEL;
 };

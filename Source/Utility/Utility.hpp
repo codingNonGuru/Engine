@@ -29,4 +29,6 @@ namespace utility
 	Color Lighten(Color, float);
 
 	float Interpolate(float);
+
+	void Clamp(float &, float = 0.0f, float = 1.0f);
 }

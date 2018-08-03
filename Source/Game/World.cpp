@@ -33,3 +33,18 @@ Array <Settlement> & World::GetSettlements()
 {
 	return settlements_;
 }
+
+Float World::GetHeight(Float x, Float y)
+{
+	return 0.0f;
+}
+
+Grid <Float> & World::GetHeightMap()
+{
+	return heightMap_;
+}
+
+void World::SetDetailResolution(int detailResolution)
+{
+	detailResolution_ = detailResolution;
+}

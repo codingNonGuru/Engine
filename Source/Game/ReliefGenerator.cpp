@@ -16,7 +16,7 @@
 
 enum class Buffers
 {
-	TERRAIN, CARVE, RELIEF, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY, PERLIN_DETAIL
+	TERRAIN, CARVE, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY, PERLIN_DETAIL, HIGH_DETAIL_TERRAIN
 };
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
@@ -27,30 +27,29 @@ Map <Texture*> ReliefGenerator::modelTextures_ = Map <Texture*> (TerrainModelTex
 
 Shader* shader = nullptr;
 
+Size detailMapSize = Size(4096, 4096);
+
+Grid <Float> detailMap = Grid <Float> (detailMapSize.x, detailMapSize.y);
+
+const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 60.0f;
+
+const int ReliefGenerator::DETAIL_RESOLUTION = 8;
+
+const int ReliefGenerator::DETAIL_TILE_COUNT = 4;
+
+const float ReliefGenerator::DETAIL_STRENGTH = DETAIL_STRENGTH_MODIFIER / Float(DETAIL_TILE_COUNT);
+
+const float ReliefGenerator::SEA_LEVEL = 0.0f;
+
 void ReliefGenerator::Generate(World& world)
 {
 	Size size = world.GetSize();
 
 	SetupBuffers(world);
 
-	shader = ShaderManager::GetShader("GenerateRelief");
-	if(!shader)
-		return;
-
-	shader->Bind();
-
-	buffers.Get(Buffers::TERRAIN)->Bind(0);
-	buffers.Get(Buffers::PERLIN_DETAIL)->Bind(1);
-	buffers.Get(Buffers::CARVE)->Bind(2);
-	buffers.Get(Buffers::RELIEF)->Bind(3);
-	buffers.Get(Buffers::GRADIENT)->Bind(9);
-	buffers.Get(Buffers::KERNEL)->Bind(10);
-	buffers.Get(Buffers::PARTICLE)->Bind(11);
-	buffers.Get(Buffers::PARTICLE_VELOCITY)->Bind(12);
+	BindAssets(size);
 
 	auto computeSize = size / 4;
-
-	shader->SetConstant(size, "size");
 
 	shader->SetConstant(0, "mode");
 	shader->DispatchCompute(computeSize);
@@ -93,6 +92,7 @@ void ReliefGenerator::Generate(World& world)
 	shader->SetConstant(3, "mode");
 	shader->DispatchCompute(computeSize);
 
+	shader->Unbind();
 
 	/*for(int erodePass = 0; erodePass < 1; ++erodePass)
 	  {
@@ -110,54 +110,33 @@ void ReliefGenerator::Generate(World& world)
 		glFinish();
 	}*/
 
+	Perlin::Generate(detailMapSize, FocusIndex(0.0f));
+	Perlin::Download(&detailMap);
+
+	auto texture = new Texture(detailMapSize, TextureFormats::ONE_FLOAT, &detailMap);
+	*modelTextures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
+
+	BindAssets(size);
+
+	auto highDetailTerrainSize = size * DETAIL_RESOLUTION;
+	shader->SetConstant(highDetailTerrainSize, "highDetailTerrainSize");
+
+	shader->SetConstant(DETAIL_RESOLUTION, "detailResolution");
+
+	shader->SetConstant(DETAIL_TILE_COUNT, "detailTileCount");
+
+	shader->SetConstant(DETAIL_STRENGTH, "detailStrength");
+
+	shader->BindTexture(texture, "reliefDetailMap");
+
+	computeSize = highDetailTerrainSize / 4;
+
+	shader->SetConstant(11, "mode");
+	shader->DispatchCompute(computeSize);
+
 	shader->Unbind();
 
-	Grid <Float> terrain(size.x, size.y);
-	buffers.Get(Buffers::TERRAIN)->Download(&terrain);
-
-	Grid <Integer> reliefs(size.x, size.y);
-	buffers.Get(Buffers::RELIEF)->Download(&reliefs);
-
-	Grid<Byte4> previewData(size.x, size.y);
-	for(int x = 0; x < previewData.GetWidth(); ++x)
-	{
-		int sum = 0;
-		for(int y = 0; y < previewData.GetHeight(); ++y)
-		{
-			auto previewPixel = previewData(x, y);
-			auto height = *reliefs(x, y) == 1 ? Byte(255) : Byte(0);
-			*previewPixel = Byte4(128, 0, 0, height);
-			//*previewPixel = Byte4(128, 0, 0, *terrain(x, y) * 100.0f);
-		}
-	}
-
-	auto previewTexture = WorldGenerator::GetReliefPreview();
-	previewTexture->Upload(previewData.GetData());
-
-	for(auto buffer = buffers.GetStart(); buffer != buffers.GetEnd(); ++buffer)
-	{
-		if(buffer == buffers.Get(Buffers::TERRAIN))
-			continue;
-
-		buffer->Delete();
-	}
-
-	auto& tiles = world.GetTiles();
-	tiles.Initialize(size.x, size.y);
-
-	for(int x = 0; x < tiles.GetWidth(); ++x)
-	{
-		for(int y = 0; y < tiles.GetHeight(); ++y)
-		{
-			auto& position = tiles(x, y)->GetPosition();
-			position.x = (float)x;
-			position.y = (float)y;
-			position.z = *terrain(x, y);
-
-			auto& relief = tiles(x, y)->GetRelief();
-			relief = (ReliefTypes)*reliefs(x, y);
-		}
-	}
+	FillWorld(world);
 }
 
 DataBuffer* ReliefGenerator::GetFinalBuffer()
@@ -183,6 +162,71 @@ Texture* ReliefGenerator::GetModelTexture(Word identifier)
 	return *texturePointer;
 }
 
+Grid <Float> * ReliefGenerator::GetHeightMap()
+{
+	return &detailMap;
+}
+
+void ReliefGenerator::FillWorld(World& world)
+{
+	Size size = world.GetSize();
+
+	Grid <Float> terrain(size.x, size.y);
+	buffers.Get(Buffers::TERRAIN)->Download(&terrain);
+
+	auto & highDetailTerrain = world.GetHeightMap();
+	highDetailTerrain.Initialize(size.x * DETAIL_RESOLUTION, size.y * DETAIL_RESOLUTION);
+
+	buffers.Get(Buffers::HIGH_DETAIL_TERRAIN)->Download(&highDetailTerrain);
+
+	auto & tiles = world.GetTiles();
+	tiles.Initialize(size.x, size.y);
+
+	int count = 0;
+	for(int x = 0; x < tiles.GetWidth(); ++x)
+	{
+		for(int y = 0; y < tiles.GetHeight(); ++y)
+		{
+			auto& position = tiles(x, y)->GetPosition();
+			position.x = (float)x;
+			position.y = (float)y;
+			position.z = *terrain(x, y);
+
+			int landCount = 0;
+			for(int i = 0; i < DETAIL_RESOLUTION; ++i)
+			{
+				for(int j = 0; j < DETAIL_RESOLUTION; ++j)
+				{
+					auto height = *highDetailTerrain.Get(x * DETAIL_RESOLUTION + i, y * DETAIL_RESOLUTION + j);
+					if(height > SEA_LEVEL)
+						landCount++;
+				}
+			}
+			auto landRatio = Float(landCount) / Float(DETAIL_RESOLUTION * DETAIL_RESOLUTION);
+
+			tiles(x, y)->SetLandRatio(landRatio);
+
+			count += landRatio > 0.5f ? 1 : 0;
+		}
+	}
+
+	Grid <Byte4> previewData(size.x, size.y);
+	for(int x = 0; x < previewData.GetWidth(); ++x)
+	{
+		int sum = 0;
+		for(int y = 0; y < previewData.GetHeight(); ++y)
+		{
+			auto previewPixel = previewData(x, y);
+			auto height = tiles(x, y)->GetRelief() == ReliefTypes::LAND ? Byte(255) : Byte(0);
+			*previewPixel = Byte4(128, 0, 0, height);
+			//*previewPixel = Byte4(128, 0, 0, *terrain(x, y) * 100.0f);
+		}
+	}
+
+	auto previewTexture = WorldGenerator::GetReliefPreview();
+	previewTexture->Upload(previewData.GetData());
+}
+
 void ReliefGenerator::SetupBuffers(World& world)
 {
 	auto size = world.GetSize();
@@ -200,12 +244,6 @@ void ReliefGenerator::SetupBuffers(World& world)
 	if(buffer)
 	{
 		buffer->Generate(area * sizeof(Float));
-	}
-
-	buffer = buffers.Add(Buffers::RELIEF);
-	if(buffer)
-	{
-		buffer->Generate(area * sizeof(Integer));
 	}
 
 	buffer = buffers.Add(Buffers::GRADIENT);
@@ -262,10 +300,38 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(area * sizeof(Float));
 
 		Perlin::SetTargetBuffer(buffer);
-		Perlin::Generate(size, Range(0.0f, 1.0f), 0.0f, 0.5f, 2.0f);
+		Perlin::Generate(size, FocusIndex(0.0f), ContrastThreshold(0.5f), ContrastStrength(2.0f));
 
-		Perlin::Generate(size, Range(0.0f, 1.0f), 0.5f, 0.5f, 4.0f);
+		Perlin::Generate(size, FocusIndex(0.5f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
 	}
+
+	auto highDetailArea = area * DETAIL_RESOLUTION * DETAIL_RESOLUTION;
+	buffer = buffers.Add(Buffers::HIGH_DETAIL_TERRAIN);
+	if(buffer)
+	{
+		buffer->Generate(highDetailArea * sizeof(Float));
+	}
+
+	shader = ShaderManager::GetShader("GenerateRelief");
+}
+
+void ReliefGenerator::BindAssets(Size size)
+{
+	if(!shader)
+		return;
+
+	shader->Bind();
+
+	buffers.Get(Buffers::TERRAIN)->Bind(0);
+	buffers.Get(Buffers::PERLIN_DETAIL)->Bind(1);
+	buffers.Get(Buffers::CARVE)->Bind(2);
+	buffers.Get(Buffers::GRADIENT)->Bind(9);
+	buffers.Get(Buffers::KERNEL)->Bind(10);
+	buffers.Get(Buffers::PARTICLE)->Bind(11);
+	buffers.Get(Buffers::PARTICLE_VELOCITY)->Bind(12);
+	buffers.Get(Buffers::HIGH_DETAIL_TERRAIN)->Bind(13);
+
+	shader->SetConstant(size, "size");
 }
 
 void ReliefGenerator::LiftTerrain(Float2 position, Float decay, Size computeSize)
@@ -401,17 +467,9 @@ void ReliefGenerator::GenerateModel(World& world)
 		{
 			//*heightMap(x, y) = (worldTiles.Get(x, y)->position_.z - world.averageHeight_) * 1.0f + world.averageHeight_;
 			auto & position = worldTiles.Get(x, y)->GetPosition();
-			*heightMap(x, y) = (position.z - 0.5f) * 30.0f;
+			*heightMap(x, y) = position.z;
 		}
 
 	auto texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &heightMap);
 	*modelTextures_.Add(TerrainModelTextures::BASE_HEIGHT) = texture;
-
-	auto mapSize = Size(4096, 4096);
-	Grid <Float> detailMap(mapSize.x, mapSize.y);
-	Perlin::Generate(mapSize, Range(0.0f, 1.0f), 0.0f);
-
-	Perlin::Download(&detailMap);
-	texture = new Texture(mapSize, TextureFormats::ONE_FLOAT, &detailMap);
-	*modelTextures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
 }
