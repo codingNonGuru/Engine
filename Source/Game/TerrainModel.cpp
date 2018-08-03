@@ -139,6 +139,7 @@ void TerrainModel::Render(Camera* camera)
 
 	renderShader->SetConstant(camera->GetMatrix(), "projMatrix");
 	renderShader->SetConstant(camera->GetPosition(), "cameraPos");
+	renderShader->SetConstant(ReliefGenerator::SEA_LEVEL, "seaLevel");
 
 	glDrawArrays(GL_TRIANGLES, 0, indexCount);
 

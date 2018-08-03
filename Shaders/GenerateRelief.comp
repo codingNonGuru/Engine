@@ -163,7 +163,7 @@ void finishTerrain()
 	uint y = gl_GlobalInvocationID.y;
 	uint index = y * size.x + x;
 
-	terrain[index] -= 0.4f;
+	terrain[index] -= 0.3f;
 	terrain[index] *= 30.0f;
 }
 

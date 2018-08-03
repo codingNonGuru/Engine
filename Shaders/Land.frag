@@ -49,9 +49,30 @@ void main()
 	specular = pow(specular, 256.0f) * 0.5f + pow(specular, 64.0f) * 0.25f + pow(specular, 16.0f) * 0.25f;
 	//specular *= 0.5f;
 	
-	vec3 color = vec3(pos.z < 0.0f ? 1.0f : 0.5f) * diffuse;
+	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
+	color *= diffuse;
 	color = color * (1.0f - specular) + vec3(specular);
 
 	finalColor = vec4(color.rgb, 1.0f);
 	//finalColor = vec4(1.0f);
+
+	if(pos.z < seaLevel) 
+	{
+		vec3 cameraRay = cameraPos - pos;
+		cameraRay = normalize(cameraRay);
+		float heightDifference = seaLevel - pos.z;
+		float t = heightDifference / cameraRay.z;
+		vec3 waterDepth =  vec3(t * cameraRay.x, t * cameraRay.y, seaLevel - pos.z);
+		
+		float cameraFactor = 1.0f - exp(-length(waterDepth) / 2.25f);
+		
+		heightDifference = exp(-heightDifference / 7.8f);
+		vec3 shallowOceanColor = vec3(0.0f, 0.95f, 0.8f);
+		vec3 deepOceanColor = vec3(0.0f, 0.03f, 0.02f);
+		vec3 oceanColor = shallowOceanColor * heightDifference + deepOceanColor * (1.0f - heightDifference);
+		//vec3 waveColor = vec3(1.0f, 1.0f, 1.0f);
+		
+		finalColor.rgb = finalColor.xyz * (1.0f - cameraFactor);
+		finalColor.rgb += oceanColor.xyz * cameraFactor;
+	} 
 }
