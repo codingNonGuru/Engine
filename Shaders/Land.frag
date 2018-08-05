@@ -72,7 +72,7 @@ void main()
 		vec3 oceanColor = shallowOceanColor * heightDifference + deepOceanColor * (1.0f - heightDifference);
 		//vec3 waveColor = vec3(1.0f, 1.0f, 1.0f);
 		
-		finalColor.rgb = finalColor.xyz * (1.0f - cameraFactor);
-		finalColor.rgb += oceanColor.xyz * cameraFactor;
-	} 
+		finalColor.rgb = finalColor.rgb * (1.0f - cameraFactor);
+		finalColor.rgb += oceanColor.rgb * cameraFactor;
+	}
 }

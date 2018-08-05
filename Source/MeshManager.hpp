@@ -27,4 +27,6 @@ public:
 	static void LoadMeshes();
 
 	static Map <Mesh, Word> & GetMeshes();
+
+	static Mesh* GetMesh(const char*);
 };

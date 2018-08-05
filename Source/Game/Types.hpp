@@ -55,6 +55,17 @@ public:
 	static int const COUNT;
 };
 
+class SettlementModelBuffers
+{
+public:
+	static Word const VERTEX_POSITIONS;
+	static Word const VERTEX_NORMALS;
+	static Word const INDICES;
+	static Word const BUILDING_DATAS;
+	static Word const BUILDING_INDICES;
+	static int const COUNT;
+};
+
 class Elements
 {
 public:

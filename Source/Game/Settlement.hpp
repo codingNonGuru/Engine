@@ -5,6 +5,7 @@
 
 class Tile;
 class World;
+struct SettlementRenderData;
 
 class Settlement
 {
@@ -19,6 +20,8 @@ class Settlement
 	int population_;
 
 	Color banner_;
+
+	SettlementRenderData* renderData_;
 
 	void EvaluateFertility();
 
@@ -36,4 +39,8 @@ public:
 	float GetDistance(Settlement*) const;
 
 	Color & GetBanner();
+
+	SettlementRenderData* GetRenderData();
+
+	void SetRenderData(SettlementRenderData*);
 };

@@ -83,6 +83,9 @@ void CultureGenerator::GenerateSettlements(World& world)
 		for(int y = 0; y < tiles.GetHeight(); ++y)
 		{
 			auto tile = tiles(x, y);
+			if(tile->GetLandRatio() < 0.1f)
+				continue;
+
 			auto & biome = tile->GetBiome();
 
 			float chance = biome.Productivity_;

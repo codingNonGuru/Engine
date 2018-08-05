@@ -74,8 +74,8 @@ void main()
 	
 	if(mode == 0) 
 	{
-		float newX = vertexPositions[index].x * 0.4f * size;
-		float newY = vertexPositions[index].y * 0.4f * size;
+		float newX = vertexPositions[index].x * 0.3f * size;
+		float newY = vertexPositions[index].y * 0.3f * size;
 		
 		float x = center.x + newX * c - newY * s;
 		x -= c * size * 0.55f;

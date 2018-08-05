@@ -35,7 +35,7 @@ const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 60.0f;
 
 const int ReliefGenerator::DETAIL_RESOLUTION = 8;
 
-const int ReliefGenerator::DETAIL_TILE_COUNT = 4;
+const int ReliefGenerator::DETAIL_TILE_COUNT = 8;
 
 const float ReliefGenerator::DETAIL_STRENGTH = DETAIL_STRENGTH_MODIFIER / Float(DETAIL_TILE_COUNT);
 
@@ -173,6 +173,8 @@ void ReliefGenerator::FillWorld(World& world)
 
 	Grid <Float> terrain(size.x, size.y);
 	buffers.Get(Buffers::TERRAIN)->Download(&terrain);
+
+	world.SetDetailResolution(DETAIL_RESOLUTION);
 
 	auto & highDetailTerrain = world.GetHeightMap();
 	highDetailTerrain.Initialize(size.x * DETAIL_RESOLUTION, size.y * DETAIL_RESOLUTION);

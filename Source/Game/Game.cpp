@@ -40,7 +40,7 @@ void Game::Initialize()
 	if(cubeMesh != nullptr)
 	{
 		auto cubeModel = new Model(cubeMesh, genericShader);
-		ModelManager::AddModel(cubeModel, "Cube");
+		ModelManager::AddModel(cubeModel, "Building");
 	}
 
 	SceneBuilder::GenerateScenes();

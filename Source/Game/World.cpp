@@ -36,7 +36,7 @@ Array <Settlement> & World::GetSettlements()
 
 Float World::GetHeight(Float x, Float y)
 {
-	return 0.0f;
+	return *heightMap_.Get(x * resolutionFactor_, y * resolutionFactor_);
 }
 
 Grid <Float> & World::GetHeightMap()
@@ -47,4 +47,6 @@ Grid <Float> & World::GetHeightMap()
 void World::SetDetailResolution(int detailResolution)
 {
 	detailResolution_ = detailResolution;
+
+	resolutionFactor_ = Float(detailResolution_);
 }

@@ -16,6 +16,8 @@ Settlement::Settlement()
 	tile_ = nullptr;
 
 	banner_ = Color(utility::GetRandom(0.0f, 1.0f), 0.0f, 0.0f);
+
+	renderData_ = nullptr;
 }
 
 void Settlement::Initialize(Position2 position)
@@ -44,6 +46,16 @@ Position2 Settlement::GetPosition() const
 Color & Settlement::GetBanner()
 {
 	return banner_;
+}
+
+SettlementRenderData* Settlement::GetRenderData()
+{
+	return renderData_;
+}
+
+void Settlement::SetRenderData(SettlementRenderData* renderData)
+{
+	renderData_ = renderData;
 }
 
 float Settlement::GetDistance(Settlement* settlement) const

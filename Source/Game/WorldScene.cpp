@@ -7,6 +7,8 @@
 #include "Game/Game.hpp"
 #include "Game/TerrainModel.hpp"
 #include "Game/Types.hpp"
+#include "Game/SettlementRenderer.hpp"
+#include "Game/CultureModelBuilder.hpp"
 
 WorldScene* WorldScene::instance_ = nullptr;
 
@@ -81,6 +83,8 @@ void WorldScene::Render()
 	{
 		worldModel_->Render(camera_);
 	}
+
+	SettlementRenderer::Update(camera_);
 }
 
 World* WorldScene::GetWorld()
@@ -97,4 +101,6 @@ void WorldScene::HandleStartGame()
 	{
 		worldModel_ = new TerrainModel();
 	}
+
+	CultureModelBuilder::Generate(*world_);
 }

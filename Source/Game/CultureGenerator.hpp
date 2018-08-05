@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Conventions.hpp"
+
 class World;
+class DataBuffer;
 
 class CultureGenerator
 {

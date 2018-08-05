@@ -63,6 +63,8 @@ public:
 
 	Position3 GetPosition() const {return from_;}
 
+	Position3 GetTarget() const {return to_;}
+
 	float GetAzimuth() const {return azimuth_;}
 
 	float GetViewDistance() const {return viewDistance_;}

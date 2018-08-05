@@ -41,3 +41,8 @@ Map <Mesh, Word> & MeshManager::GetMeshes()
 {
 	return meshes_;
 }
+
+Mesh* MeshManager::GetMesh(const char* identifier)
+{
+	return meshes_.Get(identifier);
+}

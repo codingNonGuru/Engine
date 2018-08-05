@@ -19,6 +19,8 @@ class World
 
 	int detailResolution_;
 
+	float resolutionFactor_;
+
 public:
 	World();
 

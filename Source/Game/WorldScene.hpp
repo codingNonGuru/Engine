@@ -6,6 +6,7 @@ class World;
 struct WorldParameterSet;
 class File;
 class TerrainModel;
+class SettlementModel;
 
 class WorldScene : public Scene
 {
