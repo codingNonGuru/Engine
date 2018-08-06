@@ -40,6 +40,8 @@ void CultureModelBuilder::Generate(World& world)
 
 			buildingData->Rotation_ = utility::GetRandom(0.0f, 6.2831f);
 
+			buildingData->MeshIndex_ = utility::GetRandom(0, 2);
+
 			buildingIndex++;
 		}
 	}

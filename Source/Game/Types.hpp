@@ -52,6 +52,7 @@ class TerrainModelTextures
 public:
 	static Word const BASE_HEIGHT;
 	static Word const DETAIL_HEIGHT;
+	static Word const SHADOW_MAP;
 	static int const COUNT;
 };
 
@@ -61,8 +62,16 @@ public:
 	static Word const VERTEX_POSITIONS;
 	static Word const VERTEX_NORMALS;
 	static Word const INDICES;
+	static Word const TEXTURE_INDICES;
 	static Word const BUILDING_DATAS;
 	static Word const BUILDING_INDICES;
+	static int const COUNT;
+};
+
+class SettlementModelTextures
+{
+public:
+	static Word const SHADOW_MAP;
 	static int const COUNT;
 };
 

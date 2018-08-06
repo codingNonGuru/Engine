@@ -10,14 +10,19 @@ int const TerrainModelBuffers::COUNT = 6;
 
 Word const TerrainModelTextures::BASE_HEIGHT = Word("BaseHeight");
 Word const TerrainModelTextures::DETAIL_HEIGHT = Word("DetailHeight");
-int const TerrainModelTextures::COUNT = 2;
+Word const TerrainModelTextures::SHADOW_MAP = Word("ShadowMap");
+int const TerrainModelTextures::COUNT = 3;
 
 Word const SettlementModelBuffers::VERTEX_POSITIONS = Word("VertexPositions");
 Word const SettlementModelBuffers::VERTEX_NORMALS = Word("VertexNormals");
 Word const SettlementModelBuffers::INDICES = Word("Indices");
 Word const SettlementModelBuffers::BUILDING_DATAS = Word("BuildingDatas");
 Word const SettlementModelBuffers::BUILDING_INDICES = Word("BuildingIndices");
-int const SettlementModelBuffers::COUNT = 5;
+Word const SettlementModelBuffers::TEXTURE_INDICES = Word("TextureIndices");
+int const SettlementModelBuffers::COUNT = 6;
+
+Word const SettlementModelTextures::SHADOW_MAP = Word("ShadowMap");;
+int const SettlementModelTextures::COUNT = 1;
 
 Word const Elements::MAIN_MENU = Word("MainMenu");
 Word const Elements::NEW_GAME_MENU = Word("NewGameMenu");

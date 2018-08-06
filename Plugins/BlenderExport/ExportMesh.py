@@ -14,6 +14,15 @@ def WriteMesh(object):
     file = open(object.name + ".mesh", "wb")
 
     attributeCount = 3
+
+    hasTextureIndices = False
+    try:
+        object.vertex_groups['TextureIndex']
+        hasTextureIndices = True
+        attributeCount = 4
+    except:
+        pass
+
     data = struct.pack('=I', attributeCount)
     file.write(data)
 
@@ -77,6 +86,28 @@ def WriteMesh(object):
     data = bytearray(attributeType + attributeTypeFiller, 'utf-8')
     file.write(data)
 
+# ATTRIBUTE HEADER : TEXTURE INDEX
+
+    if hasTextureIndices:
+        attributeName = "textureIndex"
+        attributeNameFiller = chr(0) * (32 - len(attributeName))
+        data = bytearray(attributeName + attributeNameFiller, 'utf-8')
+        file.write(data)
+
+        elementCount = len(object.data.vertices)
+        data = struct.pack('=I', elementCount)
+        file.write(data)
+
+        elementSize = 4
+        data = struct.pack('=I', elementSize)
+        file.write(data)
+
+        attributeType = "float"
+        attributeTypeFiller = chr(0) * (8 - len(attributeType))
+        data = bytearray(attributeType + attributeTypeFiller, 'utf-8')
+        file.write(data)
+
+
 # ATTRIBUTE DATA : POSITION
     
     for vertex in object.data.vertices:
@@ -103,6 +134,27 @@ def WriteMesh(object):
         for vertex in polygon.vertices:
             data = struct.pack('=I', vertex)
             file.write(data)
+
+# ATTRIBUTE DATA : TEXTURE INDEX
+
+    if hasTextureIndices:
+        vertexGroup = object.vertex_groups['TextureIndex']
+
+        index = 0
+        for vertex in object.data.vertices:
+            weight = 0.0
+            try:
+                weight = vertexGroup.weight(index)
+            except:
+                pass
+
+            print(weight)
+
+            data = struct.pack('=f', weight)
+            file.write(data)
+            index += 1
+
+# END
 
     file.close()
         

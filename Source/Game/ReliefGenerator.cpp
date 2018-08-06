@@ -33,7 +33,7 @@ Grid <Float> detailMap = Grid <Float> (detailMapSize.x, detailMapSize.y);
 
 const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 60.0f;
 
-const int ReliefGenerator::DETAIL_RESOLUTION = 8;
+const int ReliefGenerator::DETAIL_RESOLUTION = 16;
 
 const int ReliefGenerator::DETAIL_TILE_COUNT = 8;
 
@@ -110,7 +110,7 @@ void ReliefGenerator::Generate(World& world)
 		glFinish();
 	}*/
 
-	Perlin::Generate(detailMapSize, FocusIndex(0.0f));
+	Perlin::Generate(detailMapSize, FocusIndex(0.0f), ContrastThreshold(0.5f), ContrastStrength(1.0f));
 	Perlin::Download(&detailMap);
 
 	auto texture = new Texture(detailMapSize, TextureFormats::ONE_FLOAT, &detailMap);
