@@ -4,6 +4,10 @@
 #include "Camera.hpp"
 #include "Mesh.hpp"
 #include "MeshManager.hpp"
+#include "BufferManager.hpp"
+#include "Light.hpp"
+#include "FrameBuffer.hpp"
+#include "RenderManager.hpp"
 
 #include "Game/SettlementRenderer.hpp"
 #include "Game/WorldScene.hpp"
@@ -14,9 +18,9 @@
 
 SettlementRenderer* SettlementRenderer::instance_ = nullptr;
 
-const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 1048576;
+const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 32768;
 
-enum class Shaders {BUILDING};
+enum class Shaders {BUILDING, BUILDING_SHADOW};
 
 SettlementRenderer* SettlementRenderer::GetInstance()
 {
@@ -28,33 +32,111 @@ SettlementRenderer* SettlementRenderer::GetInstance()
 
 SettlementRenderer::SettlementRenderer()
 {
-	shaders_.Initialize(1);
+	shaders_.Initialize(2);
 
 	auto shader = shaders_.Add(Shaders::BUILDING);
 	*shader = ShaderManager::GetShader("Building");
 
+	shader = shaders_.Add(Shaders::BUILDING_SHADOW);
+	*shader = ShaderManager::GetShader("BuildingShadow");
+
 	buffers_.Initialize(SettlementModelBuffers::COUNT);
 
-	mesh_ = MeshManager::GetMesh("Building");
-
-	auto meshAttributes = mesh_->GetAttributes();
-
-	auto attributeData = meshAttributes.Get("position")->GetData();
-	*buffers_.Add(SettlementModelBuffers::VERTEX_POSITIONS) = new DataBuffer(attributeData->GetMemoryCapacity(), attributeData->GetData());
-
-	attributeData = meshAttributes.Get("normal")->GetData();
-	*buffers_.Add(SettlementModelBuffers::VERTEX_NORMALS) = new DataBuffer(attributeData->GetMemoryCapacity(), attributeData->GetData());
-
-	attributeData = meshAttributes.Get("index")->GetData();
-	*buffers_.Add(SettlementModelBuffers::INDICES) = new DataBuffer(attributeData->GetMemoryCapacity(), attributeData->GetData());
+	AssembleMesh();
 
 	auto buffer = buffers_.Add(SettlementModelBuffers::BUILDING_INDICES);
 	*buffer = new DataBuffer(sizeof(Index) * BUILDING_RENDER_CAPACITY, nullptr);
 
+	textures_.Initialize(SettlementModelTextures::COUNT);
+
+	auto shadowFrameBuffer = BufferManager::GetFrameBuffer("shadow");
+	auto texture = shadowFrameBuffer->GetDepthTexture();
+	*textures_.Add(SettlementModelTextures::SHADOW_MAP) = texture;
+
 	buildingIndices_.Initialize(BUILDING_RENDER_CAPACITY);
 }
 
-void SettlementRenderer::Render(Camera* camera)
+void SettlementRenderer::AssembleMesh()
+{
+	//Mesh* meshes[2] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2")};
+	Mesh* meshes[] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building3")};
+
+	Length positionCapacity = 0;
+	Length normalCapacity = 0;
+	Length indexCapacity = 0;
+	Length textureIndexCapacity = 0;
+
+	defaultMeshSize_ = 0;
+
+	for(auto mesh : meshes)
+	{
+		auto & meshAttributes = mesh->GetAttributes();
+
+		auto attributeData = meshAttributes.Get("position")->GetData();
+		positionCapacity += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("normal")->GetData();
+		normalCapacity += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("index")->GetData();
+		indexCapacity += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("textureIndex")->GetData();
+		textureIndexCapacity += attributeData->GetMemoryCapacity();
+
+		if(mesh->GetIndexCount() > defaultMeshSize_)
+			defaultMeshSize_ = mesh->GetIndexCount();
+	}
+
+	auto positionData = new Byte[positionCapacity];
+	auto normalData = new Byte[normalCapacity];
+	auto indexData = new Byte[indexCapacity];
+	auto textureIndexData = new Byte[textureIndexCapacity];
+
+	Index positionIndex = 0;
+	Index normalIndex = 0;
+	Index indexIndex = 0;
+	Index textureIndexIndex = 0;
+
+	for(auto mesh : meshes)
+	{
+		auto & meshAttributes = mesh->GetAttributes();
+
+		Index lastPositionIndex = positionIndex;
+
+		auto attributeData = meshAttributes.Get("position")->GetData();
+		CopyMemory(positionData + positionIndex, attributeData->GetData(), attributeData->GetMemoryCapacity());
+		positionIndex += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("normal")->GetData();
+		CopyMemory(normalData + normalIndex, attributeData->GetData(), attributeData->GetMemoryCapacity());
+		normalIndex += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("index")->GetData();
+		CopyMemory(indexData + indexIndex, attributeData->GetData(), attributeData->GetMemoryCapacity());
+
+		for(Index* index = (Index*)indexData + indexIndex / 4; index != (Index*)indexData + indexCapacity / 4; index++)
+		{
+			*index = *index + lastPositionIndex / 12;
+		}
+
+		indexIndex += attributeData->GetMemoryCapacity();
+
+		attributeData = meshAttributes.Get("textureIndex")->GetData();
+		CopyMemory(textureIndexData + textureIndexIndex, attributeData->GetData(), attributeData->GetMemoryCapacity());
+		textureIndexIndex += attributeData->GetMemoryCapacity();
+	}
+
+	*buffers_.Add(SettlementModelBuffers::VERTEX_POSITIONS) = new DataBuffer(positionCapacity, positionData);
+
+	*buffers_.Add(SettlementModelBuffers::VERTEX_NORMALS) = new DataBuffer(normalCapacity, normalData);
+
+	*buffers_.Add(SettlementModelBuffers::INDICES) = new DataBuffer(indexCapacity, indexData);
+
+	*buffers_.Add(SettlementModelBuffers::TEXTURE_INDICES) = new DataBuffer(textureIndexCapacity, textureIndexData);
+}
+
+void SettlementRenderer::ProcessData(Camera* camera)
 {
 	auto world = WorldScene::GetWorld();
 
@@ -84,6 +166,64 @@ void SettlementRenderer::Render(Camera* camera)
 		}
 	}
 
+	DataBuffer* buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_INDICES);
+	buffer->Bind(3);
+	buffer->UploadData(buildingIndices_.GetStart(), buildingIndices_.GetMemorySize());
+}
+
+void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
+{
+	auto frameBuffer = BufferManager::GetFrameBuffer("shadow");
+	if(frameBuffer != nullptr)
+	{
+		frameBuffer->BindBuffer();
+	}
+
+	glClearDepth(1.0f);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(2.0f, 4.0f);
+
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+
+	ProcessData(camera);
+
+	auto buildingShader = *shaders_.Get(Shaders::BUILDING_SHADOW);
+	if(buildingShader == nullptr)
+		return;
+
+	buildingShader->Bind();
+
+	DataBuffer* buffer = nullptr;
+
+	buffer = *buffers_.Get(SettlementModelBuffers::VERTEX_POSITIONS);
+	buffer->Bind(0);
+
+	buffer = *buffers_.Get(SettlementModelBuffers::INDICES);
+	buffer->Bind(2);
+
+	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_INDICES);
+	buffer->Bind(3);
+
+	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_DATAS);
+	buffer->Bind(4);
+
+	buildingShader->SetConstant(depthMatrix, "depthMatrix");
+	buildingShader->SetConstant(defaultMeshSize_, "indexCount");
+
+	glDrawArrays(GL_TRIANGLES, 0, buildingIndices_.GetSize() * defaultMeshSize_);
+
+	buildingShader->Unbind();
+
+	frameBuffer = BufferManager::GetFrameBuffer("default");
+	if(frameBuffer != nullptr)
+	{
+		frameBuffer->BindBuffer();
+	}
+}
+
+void SettlementRenderer::Render(Camera* camera, Light* light)
+{
 	auto buildingShader = *shaders_.Get(Shaders::BUILDING);
 	if(buildingShader == nullptr)
 		return;
@@ -103,25 +243,35 @@ void SettlementRenderer::Render(Camera* camera)
 
 	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_INDICES);
 	buffer->Bind(3);
-	buffer->UploadData(buildingIndices_.GetStart(), buildingIndices_.GetMemorySize());
 
 	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_DATAS);
 	buffer->Bind(4);
 
+	buffer = *buffers_.Get(SettlementModelBuffers::TEXTURE_INDICES);
+	buffer->Bind(5);
+
+	Texture* texture = *textures_.Get(SettlementModelTextures::SHADOW_MAP);
+	buildingShader->BindTexture(texture, "shadowMap");
+
 	buildingShader->SetConstant(camera->GetMatrix(), "viewMatrix");
-	buildingShader->SetConstant(mesh_->GetIndexCount(), "indexCount");
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+	buildingShader->SetConstant(depthMatrix, "depthMatrix");
+	buildingShader->SetConstant(defaultMeshSize_, "indexCount");
 	buildingShader->SetConstant(camera->GetPosition(), "cameraPosition");
 
-	//std::cout<<"--------------------------> "<<buildingIndices_.GetSize() * mesh_->GetIndexCount()<<"\n";
-
-	glDrawArrays(GL_TRIANGLES, 0, buildingIndices_.GetSize() * mesh_->GetIndexCount());
+	glDrawArrays(GL_TRIANGLES, 0, buildingIndices_.GetSize() * defaultMeshSize_);
 
 	buildingShader->Unbind();
 }
 
-void SettlementRenderer::Update(Camera* camera)
+void SettlementRenderer::Update(Camera* camera, Light* light)
 {
-	GetInstance()->Render(camera);
+	GetInstance()->Render(camera, light);
+}
+
+void SettlementRenderer::ProjectShadows(Camera* camera, Light* light)
+{
+	GetInstance()->RenderShadows(camera, light);
 }
 
 Array <SettlementRenderData> & SettlementRenderer::GetSettlementDatas()

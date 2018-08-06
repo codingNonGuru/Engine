@@ -37,7 +37,7 @@ void Model::AddTexture(Texture* texture, const char* name)
 	*texturePointer = texture;
 }
 
-void Model::Render(Camera* camera)
+void Model::Render(Camera* camera, Light* light)
 {
 	auto shader = *shaders_.Get(Shaders::GENERIC);
 

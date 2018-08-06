@@ -7,6 +7,7 @@ class DataBuffer;
 class Camera;
 class Texture;
 class Shader;
+class Light;
 
 enum class Shaders;
 
@@ -34,5 +35,5 @@ public:
 
 	void AddTexture(Texture*, const char*);
 
-	virtual void Render(Camera*);
+	virtual void Render(Camera*, Light*);
 };

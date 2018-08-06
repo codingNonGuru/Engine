@@ -2,7 +2,7 @@
 
 layout(location = 0) uniform mat4 projMatrix;
 layout(location = 1) uniform mat4 depthMatrix;
-layout(location = 2) uniform vec3 lightPos;
+layout(location = 2) uniform vec3 lightDirection;
 layout(location = 3) uniform vec3 cameraPos;
 layout(location = 4) uniform vec2 playerPos;
 layout(location = 5) uniform mat4 targetDir;
@@ -61,7 +61,7 @@ void main()
 	
 	vec3 bitangent = cross(normal, tangent);
 	mat3 tbn = transpose(mat3(tangent, bitangent, normal));
-	light = tbn * (inverse(mat4(1.0f)) * vec4(1.0f, 1.0f, 1.0f, 0.0f)).xyz;
+	light = tbn * (inverse(mat4(1.0f)) * vec4(lightDirection.xyz, 0.0f)).xyz;
 	eye = tbn * (cameraPos - vertex);
 	
 	gl_Position = projMatrix * vec4(vertex.xyz, 1.0f);

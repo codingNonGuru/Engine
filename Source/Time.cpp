@@ -31,22 +31,22 @@ float Time::GetDelta()
 void Time::StartClock()
 {
 	using namespace std::chrono;
-	auto timeStamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	auto timeStamp = duration_cast< nanoseconds >(system_clock::now().time_since_epoch());
 
-	clockStart_ = timeStamp.count() / 1000.0;
+	clockStart_ = timeStamp.count();
 }
 
 float Time::GetClock(bool isReset)
 {
 	using namespace std::chrono;
-	auto timeStamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	auto timeStamp = duration_cast< nanoseconds >(system_clock::now().time_since_epoch());
 
-	auto delta = timeStamp.count() / 1000.0 - clockStart_;
+	auto delta = timeStamp.count() - clockStart_;
 
 	if(isReset)
 	{
-		clockStart_ = timeStamp.count() / 1000.0;
+		clockStart_ = timeStamp.count();
 	}
 
-	return (float)delta;
+	return (float)delta / 1000.0f;
 }

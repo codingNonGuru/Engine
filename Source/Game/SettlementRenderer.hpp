@@ -28,14 +28,24 @@ class SettlementRenderer : public Model
 
 	Array <Index> buildingIndices_;
 
+	Length defaultMeshSize_;
+
 	static SettlementRenderer* GetInstance();
 
 	SettlementRenderer();
 
-	virtual void Render(Camera*);
+	virtual void Render(Camera*, Light*);
+
+	virtual void RenderShadows(Camera*, Light*);
+
+	void ProcessData(Camera*);
+
+	void AssembleMesh();
 
 public:
-	static void Update(Camera*);
+	static void Update(Camera*, Light*);
+
+	static void ProjectShadows(Camera*, Light*);
 
 	static Array <SettlementRenderData> & GetSettlementDatas();
 

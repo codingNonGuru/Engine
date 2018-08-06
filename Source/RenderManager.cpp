@@ -28,6 +28,10 @@ Map <Camera*> RenderManager::cameras_ = Map <Camera*> (16);
 
 Color RenderManager::backgroundColor_ = Color();
 
+const Size RenderManager::SHADOW_MAP_SIZE = Size(12288, 12288);
+
+const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.5f;
+
 Word interfaceCameraKey = Word("Interface");
 
 void RenderManager::Initialize()
@@ -47,6 +51,12 @@ void RenderManager::Initialize()
 	if(frameBuffer)
 	{
 		*frameBuffer = new FrameBuffer(screen->GetSize());
+	}
+
+	frameBuffer = BufferManager::GetFrameBuffers().Add("shadow");
+	if(frameBuffer)
+	{
+		*frameBuffer = new FrameBuffer(SHADOW_MAP_SIZE, FrameBufferAttachments::DEPTH, false, true);
 	}
 
 	auto screenTexture = new Texture(screen->GetSize(), TextureFormats::FOUR_BYTE);

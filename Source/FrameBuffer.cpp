@@ -13,20 +13,37 @@ FrameBuffer::FrameBuffer(Size size)
 	bufferKey_ = 0;
 }
 
-void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment, bool isDefault)
+FrameBuffer::FrameBuffer(Size size, FrameBufferAttachments attachment, bool isDefault, bool isShadow)
+{
+	Initialize(size, attachment, isDefault, isShadow);
+}
+
+void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment, bool isDefault, bool isShadow)
 {
     size_ = size;
 
     colorTexture_ = nullptr;
     depthTexture_ = nullptr;
 
-    if(isDefault == false)
+    if(isDefault)
     {
-    	textureType_ = GL_TEXTURE_2D;
+        bufferKey_ = 0;
+        return;
+    }
 
-    	glGenFramebuffers(1, &bufferKey_);
-    	glBindFramebuffer(GL_FRAMEBUFFER, bufferKey_);
+	textureType_ = GL_TEXTURE_2D;
 
+	glGenFramebuffers(1, &bufferKey_);
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferKey_);
+
+    if(isShadow)
+    {
+    	depthTexture_ = new Texture(size_, TextureFormats::DEPTH_BYTE);
+    	depthTexture_->Bind();
+    	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture_->GetKey(), 0);
+    }
+    else
+    {
     	if(attachment == FrameBufferAttachments::COLOR || attachment == FrameBufferAttachments::COLOR_AND_DEPTH)
     	{
 			colorTexture_ = new Texture(size_, TextureFormats::FOUR_FLOAT);
@@ -40,14 +57,11 @@ void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment, bool 
 			depthTexture_ ->Bind();
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureType_, depthTexture_ ->GetKey(), 0);
     	}
+    }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindTexture(textureType_, 0);
-    }
-    else
-    {
-        bufferKey_ = 0;
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(textureType_, 0);
+
 
     DEBUG_OPENGL
 }
@@ -93,6 +107,16 @@ void FrameBuffer::UnbindTexture()
     glBindTexture(textureType_, 0);
 
     DEBUG_OPENGL
+}
+
+Texture* FrameBuffer::GetColorTexture()
+{
+	return colorTexture_;
+}
+
+Texture* FrameBuffer::GetDepthTexture()
+{
+	return depthTexture_;
 }
 
 void FrameBuffer::Clear(Color color)

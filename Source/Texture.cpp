@@ -182,7 +182,12 @@ void Texture::Upload(void* data)
 		case TextureFormats::ONE_INTEGER:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, size_.x, size_.y, 0, GL_RED_INTEGER, GL_INT, data);
 			break;
-
+		case TextureFormats::DEPTH_FLOAT:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size_.x, size_.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, data);
+			break;
+		case TextureFormats::DEPTH_BYTE:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size_.x, size_.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, data);
+			break;
 		}
 
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -214,6 +219,12 @@ void Texture::Upload(void* data)
 			break;
 		case TextureFormats::ONE_INTEGER:
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_RED_INTEGER, GL_INT, data);
+			break;
+		case TextureFormats::DEPTH_FLOAT:
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_DEPTH_COMPONENT, GL_FLOAT, data);
+			break;
+		case TextureFormats::DEPTH_BYTE:
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, data);
 			break;
 		}
 

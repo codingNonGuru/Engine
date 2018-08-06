@@ -39,4 +39,8 @@ public:
 	static void ClearDefaultBuffer();
 
 	static void SetBackgroundColor(Color);
+
+	static const Size SHADOW_MAP_SIZE;
+
+	static const float SHADOW_MAP_SIZE_MODIFIER;
 };

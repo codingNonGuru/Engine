@@ -27,7 +27,9 @@ public:
 
     FrameBuffer(Size);
 
-    void Initialize(Size, FrameBufferAttachments, bool);
+    FrameBuffer(Size, FrameBufferAttachments, bool, bool = false);
+
+    void Initialize(Size, FrameBufferAttachments, bool, bool = false);
 
     void BindBuffer();
 
@@ -38,6 +40,10 @@ public:
     void BindTexture(Shader*, const char*);
 
     void UnbindTexture();
+
+    Texture* GetColorTexture();
+
+    Texture* GetDepthTexture();
 
     void Clear(Color);
 };

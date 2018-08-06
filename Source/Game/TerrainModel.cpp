@@ -1,7 +1,11 @@
 #include "DataBuffer.hpp"
+#include "FrameBuffer.hpp"
+#include "BufferManager.hpp"
 #include "ShaderManager.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
+#include "Light.hpp"
+#include "RenderManager.hpp"
 
 #include "Game/TerrainModel.hpp"
 #include "Game/ReliefGenerator.hpp"
@@ -52,6 +56,10 @@ TerrainModel::TerrainModel()
 
 	texture = ReliefGenerator::GetModelTexture(TerrainModelTextures::DETAIL_HEIGHT);
 	*textures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
+
+	auto shadowFrameBuffer = BufferManager::GetFrameBuffer("shadow");
+	texture = shadowFrameBuffer->GetDepthTexture();
+	*textures_.Add(TerrainModelTextures::SHADOW_MAP) = texture;
 }
 
 void TerrainModel::Initialize()
@@ -59,8 +67,12 @@ void TerrainModel::Initialize()
 
 }
 
-void TerrainModel::Render(Camera* camera)
+#include "Time.hpp"
+
+void TerrainModel::Render(Camera* camera, Light* light)
 {
+	Time::StartClock();
+
 	auto displaceShader = *shaders_.Get(Shaders::DISPLACE);
 	if(displaceShader == nullptr)
 		return;
@@ -137,7 +149,13 @@ void TerrainModel::Render(Camera* camera)
 	buffer = *buffers_.Get(TerrainModelBuffers::TANGENT_OUTPUT);
 	buffer->Bind(3);
 
+	texture = *textures_.Get(TerrainModelTextures::SHADOW_MAP);
+	renderShader->BindTexture(texture, "shadowMap");
+
 	renderShader->SetConstant(camera->GetMatrix(), "projMatrix");
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+	renderShader->SetConstant(depthMatrix, "depthMatrix");
+	renderShader->SetConstant(light->GetDirection(), "lightDirection");
 	renderShader->SetConstant(camera->GetPosition(), "cameraPos");
 	renderShader->SetConstant(ReliefGenerator::SEA_LEVEL, "seaLevel");
 
@@ -146,4 +164,6 @@ void TerrainModel::Render(Camera* camera)
 	DEBUG_OPENGL
 
 	renderShader->Unbind();
+
+	//std::cout<<"------------> CLOCK: "<<Time::GetClock()<<"\n";
 }

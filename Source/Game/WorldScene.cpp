@@ -1,6 +1,7 @@
 #include "RenderManager.hpp"
 #include "InputHandler.hpp"
 #include "Camera.hpp"
+#include "Light.hpp"
 
 #include "Game/WorldScene.hpp"
 #include "Game/World.hpp"
@@ -26,6 +27,8 @@ WorldScene::WorldScene()
 	worldModel_ = nullptr;
 
 	camera_ = RenderManager::GetCamera(Cameras::WORLD);
+
+	light_ = new Light(Float3(1.0f, 1.0f, 1.0f));
 }
 
 void WorldScene::Initialize(File* file)
@@ -39,7 +42,7 @@ void WorldScene::Initialize(const WorldParameterSet& parameterSet)
 
 const float spinModifier = 0.01f;
 
-const float pushModifier = 0.01f;
+const float pushModifier = 0.005f;
 
 const float zoomModifier = 0.01f;
 
@@ -79,12 +82,14 @@ void WorldScene::Render()
 {
 	RenderManager::EnableDepthTesting();
 
+	SettlementRenderer::ProjectShadows(camera_, light_);
+
 	if(worldModel_ != nullptr)
 	{
-		worldModel_->Render(camera_);
+		worldModel_->Render(camera_, light_);
 	}
 
-	SettlementRenderer::Update(camera_);
+	SettlementRenderer::Update(camera_, light_);
 }
 
 World* WorldScene::GetWorld()

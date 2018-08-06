@@ -1,12 +1,13 @@
 #version 450
 
 layout(location = 1) uniform mat4 depthMatrix;
-layout(location = 2) uniform vec3 lightPos;
 layout(location = 3) uniform vec3 cameraPos;
 layout(location = 7) uniform float seaLevel;
 layout(location = 8) uniform vec2 specialTile;
 layout(location = 10) uniform vec2 stencilPosition;
 layout(location = 11) uniform vec2 stencilScale;
+
+uniform sampler2D shadowMap;
 
 in vec3 pos;
 in vec4 shadowCoord;
@@ -16,6 +17,37 @@ in vec3 eye;
 in vec3 normal;
 
 layout (location = 0) out vec4 finalColor;
+
+float computeShadow(vec4 fragPosLightSpace) 
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // Transform to [0,1] range
+    projCoords = projCoords * 0.5f + 0.5f;
+    // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // Get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // Check whether current frag pos is in shadow
+    float bias = 0.000001f;
+	
+	float shadow = 0.0f;
+	vec2 texelSize = 1.0f / textureSize(shadowMap, 0);
+	
+	float sum = 0.0f;
+	for(int x = -2; x <= 2; ++x)
+		for(int y = -2; y <= 2; ++y) 
+		{		
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			float intensity = currentDepth - closestDepth;
+			if(intensity < 0.0f)
+				intensity = 0.0f; 
+			shadow += currentDepth - bias > pcfDepth ? 0.0f : 1.0f;        
+		}    
+	shadow /= 25.0f;
+
+    return shadow;
+}
 
 float atan2(float y, float x) 
 {
@@ -39,6 +71,9 @@ void main()
 	float diffuse = dot(vec3(0.0f, 0.0f, 1.0f), lightDirection);
 	if(diffuse < 0.0f)
 		diffuse = 0.0f;
+		
+	float shadow = computeShadow(shadowCoord);
+	diffuse *= shadow * 0.8f + 0.2f;
 
 	vec4 refAngle = reflect(-vec4(lightDirection, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f));
 	vec3 cameraRay = normalize(eye);
@@ -47,7 +82,7 @@ void main()
 		specular = 0.0f;
 
 	specular = pow(specular, 256.0f) * 0.5f + pow(specular, 64.0f) * 0.25f + pow(specular, 16.0f) * 0.25f;
-	//specular *= 0.5f;
+	specular *= shadow * 0.8f + 0.2f;
 	
 	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
 	color *= diffuse;

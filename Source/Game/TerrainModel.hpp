@@ -3,6 +3,7 @@
 #include "Model.hpp"
 
 class Camera;
+class Light;
 
 class TerrainModel : public Model
 {
@@ -11,5 +12,5 @@ public:
 
 	virtual void Initialize() override;
 
-	virtual void Render(Camera*) override;
+	virtual void Render(Camera*, Light*) override;
 };

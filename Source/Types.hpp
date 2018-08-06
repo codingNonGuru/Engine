@@ -53,7 +53,9 @@ enum class TextureFormats
 	THREE_BYTE,
 	ONE_FLOAT,
 	ONE_BYTE,
-	ONE_INTEGER
+	ONE_INTEGER,
+	DEPTH_FLOAT,
+	DEPTH_BYTE
 };
 
 enum class AnimationValueTypes
