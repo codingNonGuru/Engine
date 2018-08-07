@@ -19,7 +19,7 @@ void CultureModelBuilder::Generate(World& world)
 
 	auto & settlements = world.GetSettlements();
 
-	auto capacity = settlements.GetSize() * 1000;
+	auto capacity = settlements.GetSize() * 200;
 	auto & buildingDatas = SettlementRenderer::GetBuildingDatas();
 	buildingDatas.Initialize(capacity);
 
@@ -55,7 +55,7 @@ void CultureModelBuilder::Generate(World& world)
 
 				Float finalX = (Float(x) + (y % 2 == 0 ? 0.3f : 0.0f) - Float(halfSize)) * 0.2f;
 				Float finalY = (Float(y) + (x % 2 == 0 ? 0.3f : 0.0f) - Float(halfSize)) * 0.2f;
-				float scatterFactor = 2.0f - pow(distanceFactor, 1.5f);
+				float scatterFactor = pow(2.0f - distanceFactor, 1.7f);
 				finalX *= scatterFactor;
 				finalY *= scatterFactor;
 
@@ -71,6 +71,12 @@ void CultureModelBuilder::Generate(World& world)
 
 				heightFactor = exp(-heightFactor / (0.5f * populationFactor * populationFactor));
 				buildingData->MeshIndex_ = heightFactor * 3.5f;
+				if(buildingData->MeshIndex_ == 0)
+					buildingData->MeshIndex_ = utility::GetRandom(0, 2);
+				else if(buildingData->MeshIndex_ == 1)
+					buildingData->MeshIndex_ = utility::GetRandom(3, 4);
+				else
+					buildingData->MeshIndex_ += 3;
 
 				buildingIndex++;
 				buildingCount++;

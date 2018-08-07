@@ -58,8 +58,12 @@ SettlementRenderer::SettlementRenderer()
 
 void SettlementRenderer::AssembleMesh()
 {
-	//Mesh* meshes[2] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2")};
-	Mesh* meshes[] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building3"), MeshManager::GetMesh("Building4")};
+	Mesh* meshes[] = {
+		MeshManager::GetMesh("Building0"), MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building5"),
+		MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building6"),
+		MeshManager::GetMesh("Building3"),
+		MeshManager::GetMesh("Building4")
+	};
 
 	Length positionCapacity = 0;
 	Length normalCapacity = 0;

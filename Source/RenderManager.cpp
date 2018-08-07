@@ -28,9 +28,9 @@ Map <Camera*> RenderManager::cameras_ = Map <Camera*> (16);
 
 Color RenderManager::backgroundColor_ = Color();
 
-const Size RenderManager::SHADOW_MAP_SIZE = Size(12288, 12288);
+const Size RenderManager::SHADOW_MAP_SIZE = Size(6144, 6144);
 
-const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.2f;
+const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.3f;
 
 Word interfaceCameraKey = Word("Interface");
 

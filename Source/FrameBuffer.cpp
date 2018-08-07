@@ -38,7 +38,7 @@ void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment, bool 
 
     if(isShadow)
     {
-    	depthTexture_ = new Texture(size_, TextureFormats::DEPTH_BYTE);
+    	depthTexture_ = new Texture(size_, TextureFormats::DEPTH_FLOAT);
     	depthTexture_->Bind();
     	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture_->GetKey(), 0);
     }

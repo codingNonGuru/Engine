@@ -29,14 +29,14 @@ float computeShadow(vec4 fragPosLightSpace)
     // Get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // Check whether current frag pos is in shadow
-    float bias = 0.000001f;
+    float bias = 0.001f;
 	
 	float shadow = 0.0f;
 	vec2 texelSize = 1.0f / textureSize(shadowMap, 0);
 	
 	float sum = 0.0f;
-	for(int x = -2; x <= 2; ++x)
-		for(int y = -2; y <= 2; ++y) 
+	for(int x = -3; x <= 3; ++x)
+		for(int y = -3; y <= 3; ++y) 
 		{		
 			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
 			float intensity = currentDepth - closestDepth;
@@ -44,7 +44,7 @@ float computeShadow(vec4 fragPosLightSpace)
 				intensity = 0.0f; 
 			shadow += currentDepth - bias > pcfDepth ? 0.0f : 1.0f;        
 		}    
-	shadow /= 25.0f;
+	shadow /= 49.0f;
 
     return shadow;
 }
@@ -71,9 +71,14 @@ void main()
 	float diffuse = dot(vec3(0.0f, 0.0f, 1.0f), lightDirection);
 	if(diffuse < 0.0f)
 		diffuse = 0.0f;
+	//diffuse = diffuse * 0.9f + 0.1f;
+	diffuse = pow(diffuse, 1.5f) * 0.8f + 0.2f;
 		
 	float shadow = computeShadow(shadowCoord);
-	diffuse *= shadow * 0.8f + 0.2f;
+	shadow = shadow * 0.8f + 0.2f;
+	
+	if(shadow < diffuse)
+		diffuse = shadow;
 
 	vec4 refAngle = reflect(-vec4(lightDirection, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f));
 	vec3 cameraRay = normalize(eye);
@@ -82,10 +87,11 @@ void main()
 		specular = 0.0f;
 
 	specular = pow(specular, 256.0f) * 0.5f + pow(specular, 64.0f) * 0.25f + pow(specular, 16.0f) * 0.25f;
-	specular *= shadow * 0.8f + 0.2f;
+	specular *= shadow;
 	
 	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
-	color *= diffuse;
+	//color *= diffuse;
+	color = color * diffuse + vec3(0.0f, 0.0f, 0.05f) * (1.0f - diffuse); 
 	color = color * (1.0f - specular) + vec3(specular);
 
 	finalColor = vec4(color.rgb, 1.0f);
