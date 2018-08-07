@@ -59,7 +59,7 @@ SettlementRenderer::SettlementRenderer()
 void SettlementRenderer::AssembleMesh()
 {
 	//Mesh* meshes[2] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2")};
-	Mesh* meshes[] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building3")};
+	Mesh* meshes[] = {MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building3"), MeshManager::GetMesh("Building4")};
 
 	Length positionCapacity = 0;
 	Length normalCapacity = 0;
@@ -181,8 +181,6 @@ void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 
 	glClearDepth(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(2.0f, 4.0f);
 
 	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 

@@ -81,7 +81,7 @@ void Camera::ComputeMatrix()
 
 		float aspectRatio = screen_->getWidthFloating() / screen_->getHeightFloating();
 
-		Matrix projectionMatrix = glm::perspective<float>(60.0f / 57.297f, aspectRatio, 0.1f, 500.0f);
+		Matrix projectionMatrix = glm::perspective<float>(60.0f / 57.297f, aspectRatio, 1.0f, 500.0f);
 
 		finalMatrix_ = projectionMatrix * viewMatrix * Matrix(1.0f);
 	}
@@ -145,7 +145,7 @@ void Camera::Update()
 		if(viewDistance_ > 600.0f)
 			viewDistance_ = 600.0f;
 
-		scrollImpulse_ *= 0.95f;
+		scrollImpulse_ *= 0.9f;
 	}
 
 	viewDirection_ = glm::vec3(sin(zenith_) * cos(azimuth_), sin(zenith_) * sin(azimuth_), cos(zenith_));

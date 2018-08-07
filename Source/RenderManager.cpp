@@ -30,7 +30,7 @@ Color RenderManager::backgroundColor_ = Color();
 
 const Size RenderManager::SHADOW_MAP_SIZE = Size(12288, 12288);
 
-const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.5f;
+const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.2f;
 
 Word interfaceCameraKey = Word("Interface");
 

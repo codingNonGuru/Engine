@@ -22,7 +22,7 @@ float computeShadow(vec4 fragPosLightSpace)
     // Get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // Check whether current frag pos is in shadow
-    float bias = 0.001f;
+    float bias = 0.0001f;
 	
 	float shadow = 0.0f;
 	vec2 texelSize = 1.0f / textureSize(shadowMap, 0);
@@ -57,7 +57,7 @@ void main()
 		
 	fresnelAngle = pow(1.0f - fresnelAngle, 4.0f);
 		
-	float angle = diffuse * 0.8f + 0.2f;
+	float angle = diffuse * 0.7f + 0.3f;
 	
 	float shadow = computeShadow(shadowCoord);
 	shadow = shadow * 0.8f + 0.2f;
@@ -74,6 +74,7 @@ void main()
 	
 	vec3 roofColor = vec3(0.8f, 0.4f, 0.1f);
 	vec3 wallColor = vec3(1.0f, 0.97f, 0.93f);
+	//vec3 wallColor = vec3(0.0f, 0.0f, 0.0f);
 	vec3 color = (textureIndex > 0.5f ? roofColor : wallColor) * angle;
 	
 	vec3 reflectAngle = reflect(-light, normalize(normal));
@@ -85,7 +86,7 @@ void main()
 	
 	specular = pow(specular, 8.0f) * 0.5f + pow(specular, 64.0f) * 0.5f;
 	
-	specular *= 0.7f;
+	specular *= 0.5f;
 	
 	specular *= shadow;
 	
