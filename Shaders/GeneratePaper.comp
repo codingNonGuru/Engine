@@ -105,7 +105,8 @@ void convertBlurToAlpha()
 	
 	float sum = edgeBlurBuffer[thisIndex];
 	
-	diffuse[thisIndex].a = (sum * 2.5f + perlin[thisIndex] * 1.0f > 1.25f ? 1.0f : 0.0f);
+	//diffuse[thisIndex].a = (sum * 2.5f + perlin[thisIndex] * 1.0f > 1.25f ? 1.0f : 0.0f);
+	diffuse[thisIndex].a = (sum * 0.7f + perlin[thisIndex] * 0.3f > 0.5f ? 1.0f : 0.0f);
 }
 
 void convertBlurToColor()
@@ -123,6 +124,7 @@ void convertBlurToColor()
 	//sum = sum > 0.4f ? 1.0f : 0.0f;
 
 	float alpha = edgeBlurBuffer[thisIndex] < perlin[thisIndex] ? 1.0f : 0.0f;
+	alpha *= edgeBlurBuffer[thisIndex];
 	alpha *= edgeBlurBuffer[thisIndex];
 	
 	diffuse[thisIndex].r = diffuse[thisIndex].r * (1.0f - alpha) + alpha;

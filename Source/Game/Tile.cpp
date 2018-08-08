@@ -27,6 +27,16 @@ void Tile::SetLandRatio(Float landRatio)
 	landRatio_ = landRatio;
 }
 
+Float Tile::GetAverageHeight()
+{
+	return averageHeight_;
+}
+
+void Tile::SetAverageHeight(Float averageHeight)
+{
+	averageHeight_ = averageHeight;
+}
+
 Biome & Tile::GetBiome()
 {
 	return biome_;

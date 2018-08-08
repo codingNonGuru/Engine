@@ -16,6 +16,8 @@ class Text : public Element
 
 	Color color_;
 
+	Float scale_;
+
 	void Assemble();
 
 public:
@@ -23,7 +25,7 @@ public:
 
 	Text(Font*, Color = Color::BLACK);
 
-	void Setup(const char*);
+	void Setup(const char*, Float = 1.0f);
 
 	virtual void Render(Camera*);
 };

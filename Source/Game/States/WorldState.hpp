@@ -3,11 +3,14 @@
 #include "State.hpp"
 
 class Scene;
+class Element;
 
 class WorldState : public State
 {
 private:
 	Scene* worldScene_;
+
+	Element* bottomInfoPanel_;
 
 	void HandleSceneEnable();
 

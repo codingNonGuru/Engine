@@ -2,6 +2,11 @@
 #include "InputHandler.hpp"
 #include "Camera.hpp"
 #include "Light.hpp"
+#include "Engine.hpp"
+#include "Screen.hpp"
+#include "Settlement.hpp"
+#include "Interface/Element.hpp"
+#include "Interface/Interface.hpp"
 
 #include "Game/WorldScene.hpp"
 #include "Game/World.hpp"
@@ -40,11 +45,11 @@ void WorldScene::Initialize(const WorldParameterSet& parameterSet)
 	world_ = new World(parameterSet);
 }
 
-const float spinModifier = 0.01f;
+const float spinModifier = 0.005f;
 
 const float pushModifier = 0.005f;
 
-const float zoomModifier = 0.01f;
+const float zoomModifier = 0.005f;
 
 void WorldScene::Update()
 {
@@ -76,6 +81,41 @@ void WorldScene::Update()
 	{
 		camera_->Zoom(-viewDistance * zoomModifier);
 	}
+
+	ProcessSelection();
+}
+
+WorldObject currentSelection = WorldObject::DEFAULT;
+
+void WorldScene::ProcessSelection()
+{
+	auto screen = Engine::GetScreen();
+
+	auto mouse = InputHandler::GetMouse();
+	auto mousePosition = InputHandler::GetMousePosition(false);
+	float mouseX = ((mousePosition.x / screen->getWidthFloating()) * 2.0f) - 1.0f;
+	float mouseY = 1.0f - ((mousePosition.y / screen->getHeightFloating()) * 2.0f);
+
+	Float4 tempRay = glm::inverse(camera_->GetMatrix()) * Float4(mouseX, mouseY, 1.0f, 1.0f);
+	tempRay /= tempRay.w;
+	Float3 ray(tempRay.x, tempRay.y, tempRay.z);
+
+	auto hoverTarget = world_->ProcessSelection(camera_, ray, Float2(mouseX, mouseY));
+
+	if(mouse.CurrentLeft_)
+	{
+		if(hoverTarget.Object_ != nullptr && hoverTarget.Object_ != currentSelection.Object_)
+		{
+			currentSelection = hoverTarget;
+			bottomInfoPanel_->Open();
+		}
+
+		if(hoverTarget.Object_ == nullptr && currentSelection.Object_ != nullptr)
+		{
+			currentSelection = hoverTarget;
+			bottomInfoPanel_->Close();
+		}
+	}
 }
 
 void WorldScene::Render()
@@ -100,12 +140,16 @@ World* WorldScene::GetWorld()
 	return instance_->world_;
 }
 
+WorldObject* WorldScene::GetSelectedObject()
+{
+	return &currentSelection;
+}
+
 void WorldScene::HandleStartGame()
 {
-	if(worldModel_ == nullptr)
-	{
-		worldModel_ = new TerrainModel();
-	}
+	worldModel_ = new TerrainModel();
+
+	bottomInfoPanel_ = Interface::GetElement(Elements::BOTTOM_INFO_PANEL);
 
 	CultureModelBuilder::Generate(*world_);
 }

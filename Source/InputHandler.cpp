@@ -72,8 +72,11 @@ void InputHandler::UpdateMouse()
 
 	int x, y;
 	unsigned int mouseFlags = SDL_GetMouseState(&x, &y);
-	mouse_.Position_.x = x - Engine::GetScreen()->getWidthInteger() / 2;
-	mouse_.Position_.y = y - Engine::GetScreen()->getHeightInteger() / 2;
+	mouse_.NormalizedPosition_.x = x - Engine::GetScreen()->getWidthInteger() / 2;
+	mouse_.NormalizedPosition_.y = y - Engine::GetScreen()->getHeightInteger() / 2;
+
+	mouse_.UnprocessedPosition_.x = x;
+	mouse_.UnprocessedPosition_.y = y;
 }
 
 const Mouse & InputHandler::GetMouse()
@@ -81,9 +84,9 @@ const Mouse & InputHandler::GetMouse()
 	return mouse_;
 }
 
-Position2 InputHandler::GetMousePosition()
+Position2 InputHandler::GetMousePosition(bool isNormalized)
 {
-	return mouse_.Position_;
+	return isNormalized ? mouse_.NormalizedPosition_ : mouse_.UnprocessedPosition_;
 }
 
 bool InputHandler::IsPressed(int32_t key)

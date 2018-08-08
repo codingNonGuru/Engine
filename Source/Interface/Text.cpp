@@ -17,9 +17,11 @@ Text::Text(Font* font, Color color = Color::BLACK)
 	color_ = color;
 }
 
-void Text::Setup(const char* string)
+void Text::Setup(const char* string, Float scale)
 {
 	string_ = string;
+
+	scale_ = scale;
 }
 
 void Text::Assemble()
@@ -30,7 +32,7 @@ void Text::Assemble()
 
 	auto textPosition = GetGlobalPosition();
 
-	auto startPosition = textPosition;
+	auto startPosition = Float2(0.0f, 0.0f);
 
 	float textWidth = 0.0f;
 
@@ -62,6 +64,13 @@ void Text::Assemble()
 	for(auto glyphData = dataQueue.GetStart(); glyphData != dataQueue.GetEnd(); ++glyphData)
 	{
 		glyphData->Position_.x -= textWidth * 0.5f;
+
+		glyphData->Position_.x *= scale_;
+
+		glyphData->Position_.x += textPosition.x;
+		glyphData->Position_.y += textPosition.y;
+
+		glyphData->Scale_ *= scale_;
 	}
 }
 

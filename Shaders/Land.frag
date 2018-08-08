@@ -116,4 +116,6 @@ void main()
 		finalColor.rgb = finalColor.rgb * (1.0f - cameraFactor);
 		finalColor.rgb += oceanColor.rgb * cameraFactor;
 	}
+
+	finalColor.rgb = int(pos.x) % 2 != int(pos.y) % 2 ? vec3(1.0f) : vec3(0.0f);
 }

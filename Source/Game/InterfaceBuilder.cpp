@@ -24,11 +24,14 @@
 #include "Game/NewWorldMenu.hpp"
 #include "Game/WorldPreviewPanel.hpp"
 #include "Game/WorldPreviewButton.hpp"
+#include "Game/BottomInfoPanel.hpp"
 #include "Game/CloseButton.hpp"
 #include "Game/InterfacePainter.hpp"
 
 Shader* spriteShader = nullptr;
 Shader* shadowShader = nullptr;
+
+Color textColor = Color(0.5f, 0.1f, 0.05f);
 
 void InterfaceBuilder::GenerateInterface()
 {
@@ -48,6 +51,8 @@ void InterfaceBuilder::GenerateInterface()
 	GenerateNewWorldMenu();
 
 	GenerateWorldPreview();
+
+	GenerateBottomInfoPanel();
 
 	auto elements = Interface::GetElements();
 	for(auto elementIterator = elements.GetStart(); elementIterator != elements.GetEnd(); ++elementIterator)
@@ -523,6 +528,42 @@ void InterfaceBuilder::GenerateWorldPreviewViewModeButtons()
 		image->Enable();
 		image->SetParent(button);
 	}
+}
+
+void InterfaceBuilder::GenerateBottomInfoPanel()
+{
+	auto texture = TextureManager::GetTexture("BottomInfoPanel");
+	auto sprite = new Sprite(texture, spriteShader);
+
+	auto panel = Interface::AddElement(Elements::BOTTOM_INFO_PANEL, new BottomInfoPanel());
+	panel->Configure(Size(256, 256), DrawOrder(1), new Transform(Position2(-1044.0f, 420.0f)), sprite, Opacity(1.0f));
+
+	AddOpenAnimation(panel, -1800.0f, -1044.0f);
+
+	AddCloseAnimation(panel, -1800.0f, -1044.0f);
+
+	texture = TextureManager::GetTexture("BottomInfoPanelShadow");
+	sprite = new Sprite(texture, shadowShader);
+
+	auto shadow = Interface::AddElement("Shadow", new Element());
+	shadow->Configure(Size(150, 150), DrawOrder(0), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
+
+	shadow->Enable();
+	shadow->SetParent(panel);
+
+	auto font = FontManager::GetFont("Dominican");
+
+	auto label = Interface::AddElement("PopulationLabel", new Text(font, textColor));
+	label->Configure(Size(256, 256), DrawOrder(2), new Transform(Position2(0.0f, 0.0f)), nullptr);
+
+	label->Enable();
+	label->SetParent(panel);
+
+	label = Interface::AddElement("BuildingLabel", new Text(font, textColor));
+	label->Configure(Size(256, 256), DrawOrder(2), new Transform(Position2(0.0f, 50.0f)), nullptr);
+
+	label->Enable();
+	label->SetParent(panel);
 }
 
 void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, float endHeight)

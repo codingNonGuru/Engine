@@ -1,8 +1,10 @@
 #include "Utility/Utility.hpp"
+#include "Mesh.hpp"
 
 #include "Game/Settlement.hpp"
 #include "Game/World.hpp"
 #include "Game/Tile.hpp"
+#include "Game/SettlementRenderer.hpp"
 
 World* Settlement::world_ = nullptr;
 
@@ -31,6 +33,59 @@ void Settlement::Initialize(Position2 position)
 	latitude_ = (int)position_.y;
 
 	EvaluateFertility();
+}
+
+#define MAXIMUM_VERTEX_COUNT 16384
+
+bool Settlement::CheckCollision(Matrix & matrix, Float2 mouse)
+{
+	Float4 positions[MAXIMUM_VERTEX_COUNT];
+
+	int positionCount = 0;
+	for(auto building = renderData_->Buildings_; building != renderData_->Buildings_ + renderData_->BuildingCount_; ++building)
+	{
+		auto mesh = SettlementRenderer::GetMesh(building->MeshIndex_);
+
+		auto rotation = building->Rotation_;
+		float s = sin(rotation);
+		float c = cos(rotation);
+
+		auto indexAttribute = mesh->GetAttribute("index");
+		auto positionAttribute = mesh->GetAttribute("position");
+
+		auto indexData = indexAttribute->GetData();
+		auto positionData = positionAttribute->GetData();
+
+		for(Index* indexIterator = indexData->GetData(); indexIterator != (Index*)indexData->GetData() + indexAttribute->GetSize(); ++indexIterator, ++positionCount)
+		{
+			auto index = *indexIterator;
+			Float3* position = positionData->GetData() + index;
+
+			Float3 rotatedPosition;
+			rotatedPosition.x = position->x * c - position->y * s;
+			rotatedPosition.y = position->x * s + position->y * c;
+			rotatedPosition.z = position->z;
+
+			positions[positionCount] = matrix * Float4(building->Position_ + rotatedPosition, 1.0f);
+		}
+	}
+
+	Float2 screenPositions[MAXIMUM_VERTEX_COUNT];
+	for(int i = 0; i < positionCount; ++i)
+	{
+		screenPositions[i].x = positions[i].x / positions[i].w;
+		screenPositions[i].y = positions[i].y / positions[i].w;
+	}
+
+	for(int i = 0; i < positionCount; i += 3)
+	{
+		if(utility::IsInsideTriangle(mouse, screenPositions[i], screenPositions[i + 1], screenPositions[i + 2]))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 int Settlement::GetPopulation() const

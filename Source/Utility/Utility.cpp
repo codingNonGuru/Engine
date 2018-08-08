@@ -183,4 +183,20 @@ namespace utility
 			value = minimum;
 		}
 	}
+
+	float ComputeSign(Float2& p1, Float2& p2, Float2& p3)
+	{
+	    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+	}
+
+	bool IsInsideTriangle (Float2& point, Float2& v1, Float2& v2, Float2& v3)
+	{
+	    bool b1, b2, b3;
+
+	    b1 = ComputeSign(point, v1, v2) < 0.0f;
+	    b2 = ComputeSign(point, v2, v3) < 0.0f;
+	    b3 = ComputeSign(point, v3, v1) < 0.0f;
+
+	    return ((b1 == b2) && (b2 == b3));
+	}
 }

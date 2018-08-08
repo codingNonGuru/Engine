@@ -2,10 +2,26 @@
 
 #include "Conventions.hpp"
 
+#include "Game/Types.hpp"
+
 class File;
 struct WorldParameterSet;
 class Tile;
 class Settlement;
+class Camera;
+
+struct WorldObject
+{
+	void* Object_;
+
+	WorldObjects Type_;
+
+	WorldObject() {}
+
+	WorldObject(void* Object, WorldObjects Type) : Object_(Object), Type_(Type) {}
+
+	static WorldObject DEFAULT;
+};
 
 class World
 {
@@ -20,6 +36,8 @@ class World
 	int detailResolution_;
 
 	float resolutionFactor_;
+
+	Array <WorldObject> collisionAttempts_;
 
 public:
 	World();
@@ -41,4 +59,6 @@ public:
 	Grid <Float> & GetHeightMap();
 
 	void SetDetailResolution(int);
+
+	WorldObject ProcessSelection(Camera*, Float3, Float2);
 };

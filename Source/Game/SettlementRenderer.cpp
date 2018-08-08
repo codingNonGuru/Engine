@@ -58,12 +58,15 @@ SettlementRenderer::SettlementRenderer()
 
 void SettlementRenderer::AssembleMesh()
 {
-	Mesh* meshes[] = {
-		MeshManager::GetMesh("Building0"), MeshManager::GetMesh("Building1"), MeshManager::GetMesh("Building5"),
-		MeshManager::GetMesh("Building2"), MeshManager::GetMesh("Building6"),
-		MeshManager::GetMesh("Building3"),
-		MeshManager::GetMesh("Building4")
-	};
+	meshes_.Initialize(7);
+
+	*meshes_.Add(0) = MeshManager::GetMesh("Building0");
+	*meshes_.Add(1) = MeshManager::GetMesh("Building1");
+	*meshes_.Add(2) = MeshManager::GetMesh("Building5");
+	*meshes_.Add(3) = MeshManager::GetMesh("Building2");
+	*meshes_.Add(4) = MeshManager::GetMesh("Building6");
+	*meshes_.Add(5) = MeshManager::GetMesh("Building3");
+	*meshes_.Add(6) = MeshManager::GetMesh("Building4");
 
 	Length positionCapacity = 0;
 	Length normalCapacity = 0;
@@ -72,8 +75,10 @@ void SettlementRenderer::AssembleMesh()
 
 	defaultMeshSize_ = 0;
 
-	for(auto mesh : meshes)
+	for(auto meshIterator = meshes_.GetStart(); meshIterator != meshes_.GetEnd(); ++meshIterator)
 	{
+		auto mesh = *meshIterator;
+
 		auto & meshAttributes = mesh->GetAttributes();
 
 		auto attributeData = meshAttributes.Get("position")->GetData();
@@ -102,8 +107,10 @@ void SettlementRenderer::AssembleMesh()
 	Index indexIndex = 0;
 	Index textureIndexIndex = 0;
 
-	for(auto mesh : meshes)
+	for(auto meshIterator = meshes_.GetStart(); meshIterator != meshes_.GetEnd(); ++meshIterator)
 	{
+		auto mesh = *meshIterator;
+
 		auto & meshAttributes = mesh->GetAttributes();
 
 		Index lastPositionIndex = positionIndex;
@@ -289,4 +296,13 @@ Array <BuildingRenderData> & SettlementRenderer::GetBuildingDatas()
 Map <DataBuffer*> & SettlementRenderer::GetBuffers()
 {
 	return GetInstance()->buffers_;
+}
+
+Mesh* SettlementRenderer::GetMesh(Index index)
+{
+	auto mesh = GetInstance()->meshes_.Get(index);
+	if(mesh == nullptr)
+		return nullptr;
+
+	return *mesh;
 }

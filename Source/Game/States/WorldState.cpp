@@ -1,6 +1,8 @@
 #include "Scene.hpp"
 #include "SceneManager.hpp"
 #include "TaskManager.hpp"
+#include "Interface/Interface.hpp"
+#include "Interface/Element.hpp"
 
 #include "Game/States/WorldState.hpp"
 #include "Game/Types.hpp"
@@ -8,6 +10,8 @@
 WorldState::WorldState()
 {
 	worldScene_ = SceneManager::Get(Scenes::WORLD);
+
+	bottomInfoPanel_ = Interface::GetElement(Elements::BOTTOM_INFO_PANEL);
 }
 
 void WorldState::HandleEnter()
@@ -29,4 +33,9 @@ void WorldState::HandleSceneEnable()
 	{
 		worldScene_->Enable();
 	}
+
+	/*if(bottomInfoPanel_ != nullptr)
+	{
+		bottomInfoPanel_->Open();
+	}*/
 }

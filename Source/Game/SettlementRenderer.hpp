@@ -16,6 +16,8 @@ struct SettlementRenderData
 	Index BuildingIndex_;
 
 	Index BuildingCount_;
+
+	BuildingRenderData* Buildings_;
 };
 
 class SettlementRenderer : public Model
@@ -52,6 +54,8 @@ public:
 	static Array <BuildingRenderData> & GetBuildingDatas();
 
 	static Map <DataBuffer*> & GetBuffers();
+
+	static Mesh* GetMesh(Index);
 
 	static const int BUILDING_RENDER_CAPACITY;
 };

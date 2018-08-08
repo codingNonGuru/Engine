@@ -3,7 +3,10 @@
 #include "Types.hpp"
 #include "Conventions.hpp"
 
-enum class WorldSizeOptions {TINY, SMALL, MEDIUM, LARGE, IMMENSE, COUNT};
+enum class WorldSizeOptions
+{
+	TINY, SMALL, MEDIUM, LARGE, IMMENSE, COUNT
+};
 
 enum class ElementShapes
 {
@@ -33,6 +36,11 @@ enum class States
 enum class Scenes
 {
 	PREGAME, WORLD, BATTLE
+};
+
+enum class WorldObjects
+{
+	TILE, SETTLEMENT, PARTY, NONE
 };
 
 class TerrainModelBuffers
@@ -82,6 +90,7 @@ public:
 	static Word const NEW_GAME_MENU;
 	static Word const NEW_WORLD_MENU;
 	static Word const WORLD_PREVIEW_PANEL;
+	static Word const BOTTOM_INFO_PANEL;
 };
 
 class Cameras

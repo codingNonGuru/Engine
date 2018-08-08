@@ -369,6 +369,10 @@ void InterfacePainter::PaintInterface()
 	TextureManager::AddTexture(baseTexture, "WorldPreviewPanel");
 	TextureManager::AddTexture(shadowTexture, "WorldPreviewPanelShadow");
 
+	GenerateTextures(ElementShapes::SQUARE, Size(512, 640), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "BottomInfoPanel");
+	TextureManager::AddTexture(shadowTexture, "BottomInfoPanelShadow");
+
 	auto textureSetArray = textureSets_.Add(ElementTextureClass(ElementShapes::ROUND, ElementSizes::SMALL));
 	textureSetArray->Initialize(4);
 

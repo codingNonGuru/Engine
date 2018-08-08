@@ -32,6 +32,8 @@ class InterfaceBuilder
 
 	static void GenerateWorldPreviewViewModeButtons();
 
+	static void GenerateBottomInfoPanel();
+
 	static void AddOpenAnimation(Element*, float, float);
 
 	static void AddCloseAnimation(Element*, float, float);

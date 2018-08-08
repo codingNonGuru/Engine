@@ -32,6 +32,8 @@ public:
 
 	void Initialize(Position2);
 
+	bool CheckCollision(Matrix &, Float2);
+
 	int GetPopulation() const;
 
 	Position2 GetPosition() const;

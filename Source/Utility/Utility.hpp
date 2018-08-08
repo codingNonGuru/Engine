@@ -31,4 +31,8 @@ namespace utility
 	float Interpolate(float);
 
 	void Clamp(float &, float = 0.0f, float = 1.0f);
+
+	float ComputeSign(Float2 &, Float2 &, Float2 &);
+
+	bool IsInsideTriangle(Float2 &, Float2 &, Float2 &, Float2 &);
 }

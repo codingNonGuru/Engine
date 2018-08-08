@@ -8,7 +8,9 @@ class Engine;
 
 struct Mouse
 {
-	Position2 Position_;
+	Position2 NormalizedPosition_;
+
+	Position2 UnprocessedPosition_;
 
 	bool CurrentRight_, CurrentLeft_;
 
@@ -16,7 +18,7 @@ struct Mouse
 
 	bool LastRight_, LastLeft_;
 
-	Mouse() : Position_(Position2(0.0f, 0.0f)), CurrentRight_(false), CurrentLeft_(false), LastRight_(false), LastLeft_(false), ScrollUp_(false), ScrollDown_(false) {}
+	Mouse() : NormalizedPosition_(Position2(0.0f, 0.0f)), CurrentRight_(false), CurrentLeft_(false), LastRight_(false), LastLeft_(false), ScrollUp_(false), ScrollDown_(false) {}
 };
 
 class InputHandler
@@ -38,7 +40,7 @@ public:
 
 	static void Initialize();
 
-	static Position2 GetMousePosition();
+	static Position2 GetMousePosition(bool = true);
 
 	static const Mouse & GetMouse();
 };

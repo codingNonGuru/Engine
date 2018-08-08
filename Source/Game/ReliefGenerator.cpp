@@ -195,18 +195,24 @@ void ReliefGenerator::FillWorld(World& world)
 			position.z = *terrain(x, y);
 
 			int landCount = 0;
+			Float heightSum = 0.0f;
 			for(int i = 0; i < DETAIL_RESOLUTION; ++i)
 			{
 				for(int j = 0; j < DETAIL_RESOLUTION; ++j)
 				{
 					auto height = *highDetailTerrain.Get(x * DETAIL_RESOLUTION + i, y * DETAIL_RESOLUTION + j);
+					heightSum += height;
+
 					if(height > SEA_LEVEL)
 						landCount++;
 				}
 			}
-			auto landRatio = Float(landCount) / Float(DETAIL_RESOLUTION * DETAIL_RESOLUTION);
 
+			auto landRatio = Float(landCount) / Float(DETAIL_RESOLUTION * DETAIL_RESOLUTION);
 			tiles(x, y)->SetLandRatio(landRatio);
+
+			auto averageHeight = Float(heightSum) / Float(DETAIL_RESOLUTION * DETAIL_RESOLUTION);
+			tiles(x, y)->SetAverageHeight(averageHeight);
 
 			count += landRatio > 0.5f ? 1 : 0;
 		}
@@ -215,13 +221,11 @@ void ReliefGenerator::FillWorld(World& world)
 	Grid <Byte4> previewData(size.x, size.y);
 	for(int x = 0; x < previewData.GetWidth(); ++x)
 	{
-		int sum = 0;
 		for(int y = 0; y < previewData.GetHeight(); ++y)
 		{
 			auto previewPixel = previewData(x, y);
 			auto height = tiles(x, y)->GetRelief() == ReliefTypes::LAND ? Byte(255) : Byte(0);
 			*previewPixel = Byte4(128, 0, 0, height);
-			//*previewPixel = Byte4(128, 0, 0, *terrain(x, y) * 100.0f);
 		}
 	}
 

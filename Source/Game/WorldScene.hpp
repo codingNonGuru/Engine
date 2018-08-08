@@ -4,9 +4,11 @@
 
 class World;
 struct WorldParameterSet;
+struct WorldObject;
 class File;
 class TerrainModel;
 class SettlementModel;
+class Element;
 
 class WorldScene : public Scene
 {
@@ -16,7 +18,11 @@ class WorldScene : public Scene
 
 	TerrainModel* worldModel_;
 
+	Element* bottomInfoPanel_;
+
 	void HandleStartGame();
+
+	void ProcessSelection();
 
 public:
 	WorldScene();
@@ -30,4 +36,6 @@ public:
 	void Render() override;
 
 	static World* GetWorld();
+
+	static WorldObject* GetSelectedObject();
 };

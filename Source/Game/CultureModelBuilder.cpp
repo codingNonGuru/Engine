@@ -12,9 +12,9 @@ void CultureModelBuilder::Generate(World& world)
 {
 	Grid <Float> buildingMap (64, 64);
 
-	auto noiseMapSize = Size(2048, 2048);
+	auto noiseMapSize = Size(4096, 4096);
 	Grid <Float> noiseMap(noiseMapSize.x, noiseMapSize.y);
-	Perlin::Generate(noiseMapSize, FocusIndex(0.6f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
+	Perlin::Generate(noiseMapSize, FocusIndex(0.9f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
 	Perlin::Download(&noiseMap);
 
 	auto & settlements = world.GetSettlements();
@@ -26,10 +26,11 @@ void CultureModelBuilder::Generate(World& world)
 	auto & settlementDatas = SettlementRenderer::GetSettlementDatas();
 	settlementDatas.Initialize(settlements.GetSize());
 
+	Size offsetLimit = Size(noiseMapSize.x - buildingMap.GetWidth(), noiseMapSize.y - buildingMap.GetHeight());
 	Index buildingIndex = 0;
 	for(auto settlement = settlements.GetStart(); settlement != settlements.GetEnd(); ++settlement)
 	{
-		Size offset = Size(utility::GetRandom(0, noiseMapSize.x), utility::GetRandom(0, noiseMapSize.y));
+		Size offset = Size(utility::GetRandom(0, offsetLimit.x), utility::GetRandom(0, offsetLimit.y));
 
 		auto startIndex = buildingIndex;
 		auto buildingCount = 0;
@@ -39,11 +40,11 @@ void CultureModelBuilder::Generate(World& world)
 		{
 			for(int y = 0; y < buildingMap.GetHeight(); ++y)
 			{
-				float populationFactor = (Float)settlement->GetPopulation() / 120.0f;
+				float populationFactor = (Float)settlement->GetPopulation() / 20.0f;
 
 				float distanceFactor = float(x - halfSize) * float(x - halfSize) + float(y - halfSize) * float(y - halfSize);
 				float heightFactor = distanceFactor;
-				distanceFactor = exp(-distanceFactor / (2.0f * populationFactor * populationFactor));
+				distanceFactor = exp(-distanceFactor / (2.0f * populationFactor));
 
 				float chance = *noiseMap.Get(offset.x + x, offset.y + y);
 				chance = (chance * 0.5f + distanceFactor * 0.5f) * distanceFactor;
@@ -69,7 +70,7 @@ void CultureModelBuilder::Generate(World& world)
 
 				buildingData->Rotation_ = utility::GetRandom(0.0f, 6.2831f);
 
-				heightFactor = exp(-heightFactor / (0.5f * populationFactor * populationFactor));
+				heightFactor = exp(-heightFactor / (0.5f * populationFactor));
 				buildingData->MeshIndex_ = heightFactor * 3.5f;
 				if(buildingData->MeshIndex_ == 0)
 					buildingData->MeshIndex_ = utility::GetRandom(0, 2);
@@ -86,6 +87,7 @@ void CultureModelBuilder::Generate(World& world)
 		auto settlementData = settlementDatas.Allocate();
 		settlementData->BuildingIndex_ = startIndex;
 		settlementData->BuildingCount_ = buildingCount;
+		settlementData->Buildings_ = buildingDatas.GetStart() + startIndex;
 
 		settlement->SetRenderData(settlementData);
 	}

@@ -14,7 +14,7 @@ enum class Shaders;
 class Model
 {
 protected:
-	Mesh* mesh_;
+	Map <Mesh*, Index> meshes_;
 
 	Map <DataBuffer*, Word> buffers_;
 

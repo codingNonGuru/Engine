@@ -15,36 +15,6 @@ Mesh* Mesh::GenerateQuad()
 {
 	auto mesh = new Mesh();
 
-	/*auto positionData = mesh->AddVertexData<Position>("position", 2, false, true);
-
-	*positionData->allocate() = glm::vec2(-0.5f, -0.5f);
-	*positionData->allocate() = glm::vec2(0.5f, -0.5f);
-	*positionData->allocate() = glm::vec2(0.5f, 0.5f);
-	*positionData->allocate() = glm::vec2(-0.5f, 0.5f);*/
-
-	/*mesh->vertexCount_ = 4;
-	mesh->elementCount_ = 6;
-
-	//mesh->vertices_ = (Vertex2*)malloc(sizeof(Vertex2) * mesh->vertexCount_);
-	mesh->positions_.initialize(mesh->vertexCount_);
-	mesh->coordinates_.initialize(mesh->vertexCount_);
-	mesh->weights_.initialize(mesh->vertexCount_);
-
-	mesh->indices_.initialize(mesh->elementCount_);
-
-
-	for(int i = 0; i < mesh->weights_.getCapacity(); ++i)
-	{
-		*mesh->weights_.allocate() = 1.0f;
-	}
-
-	*mesh->indices_.allocate() = 0;
-	*mesh->indices_.allocate() = 1;
-	*mesh->indices_.allocate() = 2;
-	*mesh->indices_.allocate() = 0;
-	*mesh->indices_.allocate() = 2;
-	*mesh->indices_.allocate() = 3;*/
-
 	return mesh;
 }
 
@@ -113,7 +83,7 @@ void Mesh::Initialize(File* file)
 		}
 		else if(CompareStrings(header->Type_, "float") == 0)
 		{
-			attribute->GetData() = new Array <float> (header->ElementCount_);
+			attribute->GetData() = new Array <Float> (header->ElementCount_);
 		}
 		else if(CompareStrings(header->Type_, "uint") == 0)
 		{

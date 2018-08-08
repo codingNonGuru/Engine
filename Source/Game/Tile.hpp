@@ -16,6 +16,8 @@ class Tile
 {
 	Position3 position_;
 
+	Float averageHeight_;
+
 	Float landRatio_;
 
 	Biome biome_;
@@ -34,6 +36,10 @@ public:
 	Float GetLandRatio();
 
 	void SetLandRatio(Float);
+
+	Float GetAverageHeight();
+
+	void SetAverageHeight(Float);
 
 	Biome & GetBiome();
 

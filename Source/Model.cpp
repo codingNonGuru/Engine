@@ -21,7 +21,8 @@ void Model::Initialize() {}
 
 void Model::Initialize(Mesh* mesh, Shader* shader)
 {
-	mesh_ = mesh;
+	meshes_.Initialize(1);
+	*meshes_.Add(0) = mesh;
 
 	shaders_.Initialize(1);
 	*shaders_.Add(Shaders::GENERIC) = shader;
@@ -45,10 +46,12 @@ void Model::Render(Camera* camera, Light* light)
 
 	shader->SetConstant(camera->GetMatrix(), "viewMatrix");
 
-	auto indexCount = mesh_->GetIndexCount();
+	auto mesh = *meshes_.Get(0);
+
+	auto indexCount = mesh->GetIndexCount();
 	shader->SetConstant(indexCount, "indexCount");
 
-	auto vertexCount = mesh_->GetVertexCount();
+	auto vertexCount = mesh->GetVertexCount();
 	shader->SetConstant(vertexCount, "vertexCount");
 
 	auto cameraPosition = camera->GetPosition();
@@ -72,10 +75,12 @@ void Model::Render(Camera* camera, Light* light)
 
 void Model::SetupBuffer()
 {
+	auto mesh = *meshes_.Get(0);
+
 	buffers_.Initialize(4);
 
 	int index = 0;
-	auto meshAttributes = mesh_->GetAttributes();
+	auto meshAttributes = mesh->GetAttributes();
 	auto meshAttributeKey = meshAttributes.GetFirstKey();
 	for(auto meshAttribute = meshAttributes.GetStart(); meshAttribute != meshAttributes.GetEnd(); ++meshAttribute, ++index, ++meshAttributeKey)
 	{
