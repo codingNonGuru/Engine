@@ -87,6 +87,8 @@ void WorldScene::Update()
 
 WorldObject currentSelection = WorldObject::DEFAULT;
 
+WorldObject hoverTarget = WorldObject::DEFAULT;
+
 void WorldScene::ProcessSelection()
 {
 	auto screen = Engine::GetScreen();
@@ -100,7 +102,7 @@ void WorldScene::ProcessSelection()
 	tempRay /= tempRay.w;
 	Float3 ray(tempRay.x, tempRay.y, tempRay.z);
 
-	auto hoverTarget = world_->ProcessSelection(camera_, ray, Float2(mouseX, mouseY));
+	hoverTarget = world_->ProcessSelection(camera_, ray, Float2(mouseX, mouseY));
 
 	if(mouse.CurrentLeft_)
 	{
@@ -115,6 +117,29 @@ void WorldScene::ProcessSelection()
 			currentSelection = hoverTarget;
 			bottomInfoPanel_->Close();
 		}
+	}
+
+	if(currentSelection.Object_ != nullptr && hoverTarget.Object_ != nullptr && currentSelection.Object_ != hoverTarget.Object_)
+	{
+		auto thisSet = (Settlement*)currentSelection.Object_;
+		auto otherSet = (Settlement*)hoverTarget.Object_;
+
+		auto direction = otherSet->GetPosition() - thisSet->GetPosition();
+		std::cout<<glm::length(direction)<<"          ";
+		direction = glm::normalize(direction);
+
+		auto network = thisSet->GetLinkNetwork();
+		for(auto link = network.GetFirst(); link != network.GetLast(); ++link)
+		{
+			auto otherDirection = link->Other_->GetPosition() - thisSet->GetPosition();
+			otherDirection = glm::normalize(otherDirection);
+
+			auto angle = glm::dot(direction, otherDirection);
+			angle = acos(angle);
+
+			std::cout<<angle<<" ";
+		}
+		std::cout<<"\n";
 	}
 }
 
@@ -143,6 +168,11 @@ World* WorldScene::GetWorld()
 WorldObject* WorldScene::GetSelectedObject()
 {
 	return &currentSelection;
+}
+
+WorldObject* WorldScene::GetHoveredObject()
+{
+	return &hoverTarget;
 }
 
 void WorldScene::HandleStartGame()

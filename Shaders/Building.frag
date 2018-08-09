@@ -10,6 +10,7 @@ in vec3 position;
 in vec3 normal;
 in vec4 shadowCoord;
 in float textureIndex;
+in float isConnection;
 
 float computeShadow(vec4 fragPosLightSpace) 
 {
@@ -96,6 +97,11 @@ void main()
 	specular *= shadow;
 	
 	color = color * (1.0f - specular) + vec3(specular);
+
+	if(isConnection > 0.5f)
+	{
+		color = color * 0.5f + vec3(1.0f, 0.0f, 0.0f) * 0.5f;
+	}
 
 	fragment = vec4(color.rgb, 1.0f);
 }

@@ -19,7 +19,8 @@ Word const SettlementModelBuffers::INDICES = Word("Indices");
 Word const SettlementModelBuffers::BUILDING_DATAS = Word("BuildingDatas");
 Word const SettlementModelBuffers::BUILDING_INDICES = Word("BuildingIndices");
 Word const SettlementModelBuffers::TEXTURE_INDICES = Word("TextureIndices");
-int const SettlementModelBuffers::COUNT = 6;
+Word const SettlementModelBuffers::CONNECTION_INDICES = Word("ConnectionIndices");
+int const SettlementModelBuffers::COUNT = 7;
 
 Word const SettlementModelTextures::SHADOW_MAP = Word("ShadowMap");;
 int const SettlementModelTextures::COUNT = 1;

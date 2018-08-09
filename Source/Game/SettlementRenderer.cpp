@@ -20,6 +20,8 @@ SettlementRenderer* SettlementRenderer::instance_ = nullptr;
 
 const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 32768;
 
+const int SettlementRenderer::CONNECTION_RENDER_CAPACITY = 64;
+
 enum class Shaders {BUILDING, BUILDING_SHADOW};
 
 SettlementRenderer* SettlementRenderer::GetInstance()
@@ -47,6 +49,9 @@ SettlementRenderer::SettlementRenderer()
 	auto buffer = buffers_.Add(SettlementModelBuffers::BUILDING_INDICES);
 	*buffer = new DataBuffer(sizeof(Index) * BUILDING_RENDER_CAPACITY, nullptr);
 
+	buffer = buffers_.Add(SettlementModelBuffers::CONNECTION_INDICES);
+	*buffer = new DataBuffer(sizeof(Index) * CONNECTION_RENDER_CAPACITY, nullptr);
+
 	textures_.Initialize(SettlementModelTextures::COUNT);
 
 	auto shadowFrameBuffer = BufferManager::GetFrameBuffer("shadow");
@@ -54,6 +59,8 @@ SettlementRenderer::SettlementRenderer()
 	*textures_.Add(SettlementModelTextures::SHADOW_MAP) = texture;
 
 	buildingIndices_.Initialize(BUILDING_RENDER_CAPACITY);
+
+	connectionIndices_.Initialize(CONNECTION_RENDER_CAPACITY);
 }
 
 void SettlementRenderer::AssembleMesh()
@@ -178,8 +185,24 @@ void SettlementRenderer::ProcessData(Camera* camera)
 	}
 
 	DataBuffer* buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_INDICES);
-	buffer->Bind(3);
 	buffer->UploadData(buildingIndices_.GetStart(), buildingIndices_.GetMemorySize());
+
+	connectionIndices_.Reset();
+
+	auto selection = WorldScene::GetSelectedObject();
+	if(selection->Object_ == nullptr)
+		return;
+
+	auto settlement = (Settlement*)selection->Object_;
+	auto linkNetwork = settlement->GetLinkNetwork();
+
+	for(auto link = linkNetwork.GetFirst(); link != linkNetwork.GetLast(); ++link)
+	{
+		*connectionIndices_.Allocate() = link->Other_->GetKey();
+	}
+
+	buffer = *buffers_.Get(SettlementModelBuffers::CONNECTION_INDICES);
+	buffer->UploadData(connectionIndices_.GetStart(), connectionIndices_.GetMemorySize());
 }
 
 void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
@@ -259,14 +282,22 @@ void SettlementRenderer::Render(Camera* camera, Light* light)
 	buffer = *buffers_.Get(SettlementModelBuffers::TEXTURE_INDICES);
 	buffer->Bind(5);
 
+	buffer = *buffers_.Get(SettlementModelBuffers::CONNECTION_INDICES);
+	buffer->Bind(6);
+
 	Texture* texture = *textures_.Get(SettlementModelTextures::SHADOW_MAP);
 	buildingShader->BindTexture(texture, "shadowMap");
 
 	buildingShader->SetConstant(camera->GetMatrix(), "viewMatrix");
+
 	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 	buildingShader->SetConstant(depthMatrix, "depthMatrix");
+
 	buildingShader->SetConstant(defaultMeshSize_, "indexCount");
+
 	buildingShader->SetConstant(camera->GetPosition(), "cameraPosition");
+
+	buildingShader->SetConstant(connectionIndices_.GetSize(), "connectionCount");
 
 	glDrawArrays(GL_TRIANGLES, 0, buildingIndices_.GetSize() * defaultMeshSize_);
 

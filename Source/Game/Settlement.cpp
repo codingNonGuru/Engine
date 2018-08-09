@@ -93,6 +93,16 @@ int Settlement::GetPopulation() const
 	return population_;
 }
 
+LinkNetwork Settlement::GetLinkNetwork() const
+{
+	return linkNetwork_;
+}
+
+void Settlement::SetLinkNetwork(LinkNetwork linkNetwork)
+{
+	linkNetwork_ = linkNetwork;
+}
+
 Position2 Settlement::GetPosition() const
 {
 	return position_;

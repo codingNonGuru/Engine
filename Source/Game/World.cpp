@@ -41,6 +41,11 @@ Array <Settlement> & World::GetSettlements()
 	return settlements_;
 }
 
+Array <Link> & World::GetLinks()
+{
+	return links_;
+}
+
 Float World::GetHeight(Float x, Float y)
 {
 	return *heightMap_.Get(x * resolutionFactor_, y * resolutionFactor_);

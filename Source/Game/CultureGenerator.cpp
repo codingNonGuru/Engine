@@ -121,6 +121,9 @@ void CultureGenerator::GenerateSettlements(World& world)
 			Position2 position = Position2(x, y) + Position2(utility::GetRandom(0.2f, 0.8f), utility::GetRandom(0.2f, 0.8f));
 			settlement->Initialize(position);
 
+			auto key = settlement - settlements.GetStart();
+			settlement->SetKey(key);
+
 			tile->SetSettlement(settlement);
 
 			globalPopulation += settlement->GetPopulation();
@@ -147,28 +150,50 @@ struct LinkData
 {
 	Settlement* Settlement_;
 
-	container::Block <Settlement*, 16> Links_;
+	container::Block <Settlement*, 64> Links_;
 
-	Index Count_;
+	container::Block <Settlement*, 64> Blocks_;
+
+	Length LinkCount_;
+
+	Length BlockCount_;
 
 	LinkData()
 	{
 		for(auto link = Links_.GetStart(); link != Links_.GetEnd(); ++link)
 			*link = nullptr;
 
-		Count_ = 0;
+		LinkCount_ = 0;
+
+		for(auto block = Blocks_.GetStart(); block != Blocks_.GetEnd(); ++block)
+			*block = nullptr;
+
+		BlockCount_ = 0;
 	}
 
 	void AddLink(Settlement* settlement)
 	{
-		*Links_.Find(Count_) = settlement;
+		*Links_.Find(LinkCount_) = settlement;
 
-		Count_++;
+		LinkCount_++;
+	}
+
+	void BlockLink(Settlement* settlement)
+	{
+		*Blocks_.Find(BlockCount_) = settlement;
+
+		BlockCount_++;
 	}
 
 	bool HasLink(Settlement* settlement)
 	{
-		for(auto link = Links_.GetStart(); link != Links_.GetStart() + Count_; ++link)
+		for(auto block = Blocks_.GetStart(); block != Blocks_.GetStart() + BlockCount_; ++block)
+		{
+			if(settlement == *block)
+				return true;
+		}
+
+		for(auto link = Links_.GetStart(); link != Links_.GetStart() + LinkCount_; ++link)
 		{
 			if(settlement == *link)
 				return true;
@@ -178,13 +203,41 @@ struct LinkData
 	}
 };
 
-#define DEFAULT_MINIMUM_DISTANCE 100.0f
+#define DEFAULT_MINIMUM_DISTANCE 1000.0f
 
-#define MAXIMUM_DISTANCE 15.0f
+#define MAXIMUM_DISTANCE 20.0f
 
 #define MINIMUM_ANGLE 3.1415f / 6.0f
 
-#define ROAD_GENERATION_PASS_COUNT 4
+#define ROAD_GENERATION_PASS_COUNT 24
+
+bool IsTooNarrow(Settlement* thisSettlement, Settlement* otherSettlement, LinkData* thisLinkData, LinkData* otherLinkData)
+{
+	auto directionToClosest = otherSettlement->GetPosition() - thisSettlement->GetPosition();
+	directionToClosest = glm::normalize(directionToClosest);
+	for(auto link = thisLinkData->Links_.GetStart(); link != thisLinkData->Links_.GetStart() + thisLinkData->LinkCount_; ++link)
+	{
+		auto linkedSettlement = *link;
+		if(linkedSettlement == nullptr)
+			continue;
+
+		auto directionToLinked = linkedSettlement->GetPosition() - thisSettlement->GetPosition();
+		directionToLinked = glm::normalize(directionToLinked);
+
+		auto angle = glm::dot(directionToLinked, directionToClosest);
+		angle = acos(angle);
+
+		if(angle > MINIMUM_ANGLE)
+			continue;
+
+		thisLinkData->BlockLink(otherSettlement);
+		otherLinkData->BlockLink(thisSettlement);
+
+		return true;
+	}
+
+	return false;
+}
 
 void CultureGenerator::GenerateRoads(World& world)
 {
@@ -194,8 +247,8 @@ void CultureGenerator::GenerateRoads(World& world)
 	Array <LinkData> linkDatas(settlements.GetSize());
 	linkDatas.AllocateFully();
 
-	int searchRange = 15;
-
+	int searchRange = 21;
+	Length linkCount = 0;
 	for(int pass = 0; pass < ROAD_GENERATION_PASS_COUNT; ++pass)
 	{
 		auto linkData = linkDatas.GetStart();
@@ -214,6 +267,9 @@ void CultureGenerator::GenerateRoads(World& world)
 					if(otherSettlement == nullptr || otherSettlement == settlement)
 						continue;
 
+					if(linkData->HasLink(otherSettlement))
+						continue;
+
 					float distance = settlement->GetDistance(otherSettlement);
 					if(distance > minimumDistance || distance > MAXIMUM_DISTANCE)
 						continue;
@@ -226,48 +282,39 @@ void CultureGenerator::GenerateRoads(World& world)
 			if(closestSettlement == nullptr)
 				continue;
 
-			if(linkData->HasLink(closestSettlement) == true)
+			auto otherLinkData = linkDatas.GetStart() + closestSettlement->GetKey();
+
+			bool isTooNarrow = IsTooNarrow(settlement, closestSettlement, linkData, otherLinkData);
+			if(isTooNarrow)
 				continue;
 
-			bool isTooNarrow = false;
-
-			auto directionToClosest = closestSettlement->GetPosition() - settlement->GetPosition();
-			directionToClosest = glm::normalize(directionToClosest);
-			for(auto link = linkData->Links_.GetStart(); link != linkData->Links_.GetStart() + linkData->Count_; ++link)
-			{
-				auto linkedSettlement = *link;
-				if(linkedSettlement == nullptr)
-					continue;
-
-				auto directionToLinked = linkedSettlement->GetPosition() - settlement->GetPosition();
-				directionToLinked = glm::normalize(directionToLinked);
-
-				auto angle = glm::dot(directionToLinked, directionToClosest);
-				angle = acos(angle);
-
-				if(angle > MINIMUM_ANGLE)
-					continue;
-
-				isTooNarrow = true;
-				break;
-			}
-
-			if(isTooNarrow == true)
+			isTooNarrow = IsTooNarrow(closestSettlement, settlement, otherLinkData, linkData);
+			if(isTooNarrow)
 				continue;
-
-			auto otherSettlementIndex = closestSettlement - settlements.GetStart();
-			auto otherLinkData = linkDatas.GetStart() + otherSettlementIndex;
 
 			linkData->AddLink(closestSettlement);
 			otherLinkData->AddLink(settlement);
+
+			linkCount += 2;
+		}
+		std::cout<<"LINKS "<<linkCount<<"\n";
+	}
+
+	auto & links = world.GetLinks();
+	links.Initialize(linkCount);
+
+	auto linkData = linkDatas.GetStart();
+	for(auto settlement = settlements.GetStart(); settlement != settlements.GetEnd(); ++settlement, ++linkData)
+	{
+		auto firstLink = links.GetEnd();
+		settlement->SetLinkNetwork(LinkNetwork(firstLink, linkData->LinkCount_));
+		for(auto linkIterator = linkData->Links_.GetStart(); linkIterator != linkData->Links_.GetStart() + linkData->LinkCount_; ++linkIterator)
+		{
+			auto link = *linkIterator;
+			*links.Allocate() = Link(link);
 		}
 	}
 
-	int linkCount = 0;
-	for(auto linkData = linkDatas.GetStart(); linkData != linkDatas.GetEnd(); ++linkData)
-	{
-		linkCount += linkData->Count_;
-	}
 	std::cout<<"TOTAL NUMBER OF LINKS BETWEEN SETTLEMENTS --------> "<<linkCount<<"\n";
 }
 

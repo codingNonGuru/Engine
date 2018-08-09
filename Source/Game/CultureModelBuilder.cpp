@@ -79,6 +79,8 @@ void CultureModelBuilder::Generate(World& world)
 				else
 					buildingData->MeshIndex_ += 3;
 
+				buildingData->SettlementIndex_ = settlement->GetKey();
+
 				buildingIndex++;
 				buildingCount++;
 			}

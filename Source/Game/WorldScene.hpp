@@ -38,4 +38,6 @@ public:
 	static World* GetWorld();
 
 	static WorldObject* GetSelectedObject();
+
+	static WorldObject* GetHoveredObject();
 };

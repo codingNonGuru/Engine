@@ -9,6 +9,7 @@ struct WorldParameterSet;
 class Tile;
 class Settlement;
 class Camera;
+struct Link;
 
 struct WorldObject
 {
@@ -30,6 +31,8 @@ class World
 	Grid <Tile> tiles_;
 
 	Array <Settlement> settlements_;
+
+	Array <Link> links_;
 
 	Grid <Float> heightMap_;
 
@@ -53,6 +56,8 @@ public:
 	void SetSize(Size);
 
 	Array <Settlement> & GetSettlements();
+
+	Array <Link> & GetLinks();
 
 	Float GetHeight(Float, Float);
 

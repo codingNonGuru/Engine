@@ -12,6 +12,8 @@ struct BuildingData
 	float Rotation_;
 
 	uint MeshIndex_;
+
+	uint SettlementIndex_;
 };
 
 // CONSTANT ATTRIBUTES

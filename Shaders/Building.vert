@@ -12,6 +12,8 @@ struct BuildingData
 	float Rotation_;
 
 	uint MeshIndex_;
+
+	uint SettlementIndex_;
 };
 
 // CONSTANT ATTRIBUTES
@@ -21,6 +23,8 @@ layout (location = 0) uniform mat4 viewMatrix;
 layout (location = 1) uniform mat4 depthMatrix;
 
 layout (location = 2) uniform uint indexCount;
+
+layout (location = 4) uniform uint connectionCount;
 
 // DATA BUFFERS
 
@@ -54,10 +58,16 @@ layout (std430, binding = 5) buffer TEXTURE_INDICES
 	float textureIndices[];
 };
 
+layout (std430, binding = 6) buffer CONNECTION_INDICES
+{
+	uint connectionIndices[];
+};
+
 out vec3 position;
 out vec3 normal;
 out vec4 shadowCoord;
 out float textureIndex;
+out float isConnection;
 
 void main()
 {
@@ -88,4 +98,11 @@ void main()
 
 	gl_Position = viewMatrix * vec4(position.x, position.y, position.z, 1.0f);
 	shadowCoord = depthMatrix * vec4(position.xyz, 1.0f);
+
+	isConnection = 0.0f;
+	for(int connectionIndex = 0; connectionIndex < connectionCount; ++connectionIndex)
+	{
+		if(connectionIndices[connectionIndex] == buildingDatas[buildingIndex].SettlementIndex_)
+			isConnection = 1.0f;
+	}
 }

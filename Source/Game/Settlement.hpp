@@ -3,13 +3,44 @@
 #include "Conventions.hpp"
 #include "Utility/Color.hpp"
 
+class Settlement;
+
 class Tile;
 class World;
 struct SettlementRenderData;
 
+struct Link
+{
+	Settlement* Other_;
+
+	Float Distance_;
+
+	Link() {}
+
+	Link(Settlement* Other, Float Distance = 0.0f) : Other_(Other), Distance_(Distance) {}
+};
+
+struct LinkNetwork
+{
+	Link* Links_;
+
+	Length Count_;
+
+public:
+	Link* GetFirst() {return Links_;}
+
+	Link* GetLast() {return Links_ + Count_;}
+
+	LinkNetwork() {}
+
+	LinkNetwork(Link* Links, Length Count) : Links_(Links), Count_(Count) {}
+};
+
 class Settlement
 {
 	static World* world_;
+
+	Index key_;
 
 	Tile* tile_;
 
@@ -18,6 +49,8 @@ class Settlement
 	int latitude_, longitude_;
 
 	int population_;
+
+	LinkNetwork linkNetwork_;
 
 	Color banner_;
 
@@ -34,9 +67,17 @@ public:
 
 	bool CheckCollision(Matrix &, Float2);
 
+	void SetKey(Index key) {key_ = key;}
+
+	Index GetKey() const {return key_;}
+
 	int GetPopulation() const;
 
 	Position2 GetPosition() const;
+
+	LinkNetwork GetLinkNetwork() const;
+
+	void SetLinkNetwork(LinkNetwork);
 
 	float GetDistance(Settlement*) const;
 

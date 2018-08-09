@@ -90,7 +90,10 @@ void main()
 	specular *= shadow;
 	
 	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
-	//color *= diffuse;
+
+	vec3 checkerPattern = int(pos.x) % 2 != int(pos.y) % 2 ? vec3(1.0f) : vec3(0.0f);	
+	color.rgb = color.rgb * 0.7f + checkerPattern * 0.3f;
+	
 	color = color * diffuse + vec3(0.0f, 0.0f, 0.05f) * (1.0f - diffuse); 
 	color = color * (1.0f - specular) + vec3(specular);
 
@@ -116,6 +119,4 @@ void main()
 		finalColor.rgb = finalColor.rgb * (1.0f - cameraFactor);
 		finalColor.rgb += oceanColor.rgb * cameraFactor;
 	}
-
-	finalColor.rgb = int(pos.x) % 2 != int(pos.y) % 2 ? vec3(1.0f) : vec3(0.0f);
 }

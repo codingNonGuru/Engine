@@ -73,6 +73,7 @@ public:
 	static Word const TEXTURE_INDICES;
 	static Word const BUILDING_DATAS;
 	static Word const BUILDING_INDICES;
+	static Word const CONNECTION_INDICES;
 	static int const COUNT;
 };
 

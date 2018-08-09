@@ -9,6 +9,8 @@ struct BuildingRenderData
 	Float Rotation_;
 
 	Index MeshIndex_;
+
+	Index SettlementIndex_;
 };
 
 struct SettlementRenderData
@@ -29,6 +31,8 @@ class SettlementRenderer : public Model
 	Array <SettlementRenderData> settlementDatas_;
 
 	Array <Index> buildingIndices_;
+
+	Array <Index> connectionIndices_;
 
 	Length defaultMeshSize_;
 
@@ -58,4 +62,6 @@ public:
 	static Mesh* GetMesh(Index);
 
 	static const int BUILDING_RENDER_CAPACITY;
+
+	static const int CONNECTION_RENDER_CAPACITY;
 };
