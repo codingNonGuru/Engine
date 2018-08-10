@@ -43,6 +43,14 @@ enum class WorldObjects
 	TILE, SETTLEMENT, PARTY, NONE
 };
 
+class FrameBuffers
+{
+public:
+	static Word const DEFAULT;
+	static Word const SHADOW_MAP;
+	static Word const STENCIL;
+};
+
 class TerrainModelBuffers
 {
 public:

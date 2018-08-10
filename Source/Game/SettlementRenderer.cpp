@@ -7,7 +7,7 @@
 #include "BufferManager.hpp"
 #include "Light.hpp"
 #include "FrameBuffer.hpp"
-#include "RenderManager.hpp"
+#include "RenderBuilder.hpp"
 
 #include "Game/SettlementRenderer.hpp"
 #include "Game/WorldScene.hpp"
@@ -54,7 +54,7 @@ SettlementRenderer::SettlementRenderer()
 
 	textures_.Initialize(SettlementModelTextures::COUNT);
 
-	auto shadowFrameBuffer = BufferManager::GetFrameBuffer("shadow");
+	auto shadowFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	auto texture = shadowFrameBuffer->GetDepthTexture();
 	*textures_.Add(SettlementModelTextures::SHADOW_MAP) = texture;
 
@@ -205,9 +205,14 @@ void SettlementRenderer::ProcessData(Camera* camera)
 	buffer->UploadData(connectionIndices_.GetStart(), connectionIndices_.GetMemorySize());
 }
 
+void SettlementRenderer::RenderStencils(Camera* camera)
+{
+
+}
+
 void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 {
-	auto frameBuffer = BufferManager::GetFrameBuffer("shadow");
+	auto frameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	if(frameBuffer != nullptr)
 	{
 		frameBuffer->BindBuffer();
@@ -216,7 +221,7 @@ void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 	glClearDepth(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderBuilder::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 
 	ProcessData(camera);
 
@@ -247,7 +252,7 @@ void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 
 	buildingShader->Unbind();
 
-	frameBuffer = BufferManager::GetFrameBuffer("default");
+	frameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::DEFAULT);
 	if(frameBuffer != nullptr)
 	{
 		frameBuffer->BindBuffer();
@@ -290,7 +295,7 @@ void SettlementRenderer::Render(Camera* camera, Light* light)
 
 	buildingShader->SetConstant(camera->GetMatrix(), "viewMatrix");
 
-	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderBuilder::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 	buildingShader->SetConstant(depthMatrix, "depthMatrix");
 
 	buildingShader->SetConstant(defaultMeshSize_, "indexCount");

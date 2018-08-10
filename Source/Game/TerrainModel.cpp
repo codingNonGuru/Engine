@@ -5,7 +5,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Light.hpp"
-#include "RenderManager.hpp"
+#include "RenderBuilder.hpp"
 
 #include "Game/TerrainModel.hpp"
 #include "Game/ReliefGenerator.hpp"
@@ -57,7 +57,7 @@ TerrainModel::TerrainModel()
 	texture = ReliefGenerator::GetModelTexture(TerrainModelTextures::DETAIL_HEIGHT);
 	*textures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
 
-	auto shadowFrameBuffer = BufferManager::GetFrameBuffer("shadow");
+	auto shadowFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	texture = shadowFrameBuffer->GetDepthTexture();
 	*textures_.Add(TerrainModelTextures::SHADOW_MAP) = texture;
 }
@@ -153,7 +153,7 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	renderShader->BindTexture(texture, "shadowMap");
 
 	renderShader->SetConstant(camera->GetMatrix(), "projMatrix");
-	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderManager::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
+	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderBuilder::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 	renderShader->SetConstant(depthMatrix, "depthMatrix");
 	renderShader->SetConstant(light->GetDirection(), "lightDirection");
 	renderShader->SetConstant(camera->GetPosition(), "cameraPos");

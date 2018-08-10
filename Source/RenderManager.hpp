@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Conventions.hpp"
+#include "Delegate.hpp"
 #include "Utility/Color.hpp"
 
 class Camera;
 class Window;
+class FrameBuffer;
 
 class RenderManager
 {
@@ -14,6 +16,10 @@ private:
 	static Map <Camera*> cameras_;
 
 	static Color backgroundColor_;
+
+	static FrameBuffer* defaultFrameBuffer_;
+
+	static Delegate* onInitialize_;
 
 public:
 	static void Initialize();
@@ -36,11 +42,13 @@ public:
 
 	static Camera* GetInterfaceCamera();
 
-	static void ClearDefaultBuffer();
-
 	static void SetBackgroundColor(Color);
 
-	static const Size SHADOW_MAP_SIZE;
+	static Color GetBackgroundColor();
 
-	static const float SHADOW_MAP_SIZE_MODIFIER;
+	static void SetDefaultFrameBuffer(FrameBuffer*);
+
+	static void ClearDefaultBuffer();
+
+	static Delegate* OnInitialize();
 };

@@ -42,7 +42,9 @@ class SettlementRenderer : public Model
 
 	virtual void Render(Camera*, Light*);
 
-	virtual void RenderShadows(Camera*, Light*);
+	void RenderShadows(Camera*, Light*);
+
+	void RenderStencils(Camera*);
 
 	void ProcessData(Camera*);
 

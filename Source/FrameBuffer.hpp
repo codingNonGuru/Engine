@@ -9,7 +9,7 @@ class Texture;
 
 class FrameBuffer
 {
-private:
+protected:
 	FrameBufferTypes type_;
 
 	Size size_;
@@ -22,14 +22,16 @@ private:
 
 	GLenum textureType_;
 
+	virtual void HandleInitialize(FrameBufferAttachments);
+
 public:
 	FrameBuffer();
 
     FrameBuffer(Size);
 
-    FrameBuffer(Size, FrameBufferAttachments, bool, bool = false);
+    FrameBuffer(Size, FrameBufferAttachments);
 
-    void Initialize(Size, FrameBufferAttachments, bool, bool = false);
+    void Initialize(Size, FrameBufferAttachments);
 
     void BindBuffer();
 

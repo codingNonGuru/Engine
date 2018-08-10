@@ -1,5 +1,9 @@
 #include "Game/Types.hpp"
 
+Word const FrameBuffers::DEFAULT = Word("Default");
+Word const FrameBuffers::SHADOW_MAP = Word("ShadowMap");
+Word const FrameBuffers::STENCIL = Word("Stencil");
+
 Word const TerrainModelBuffers::INDEX_LINKS = Word("IndexLinks");
 Word const TerrainModelBuffers::POSITION_INPUT = Word("PositionInput");
 Word const TerrainModelBuffers::POSITION_OUTPUT = Word("PositionOutput");

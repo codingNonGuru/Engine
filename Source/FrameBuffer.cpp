@@ -5,7 +5,10 @@
 #include "Texture.hpp"
 #include "Shader.hpp"
 
-FrameBuffer::FrameBuffer() {}
+FrameBuffer::FrameBuffer()
+{
+	bufferKey_ = 0;
+}
 
 FrameBuffer::FrameBuffer(Size size)
 {
@@ -13,57 +16,46 @@ FrameBuffer::FrameBuffer(Size size)
 	bufferKey_ = 0;
 }
 
-FrameBuffer::FrameBuffer(Size size, FrameBufferAttachments attachment, bool isDefault, bool isShadow)
+FrameBuffer::FrameBuffer(Size size, FrameBufferAttachments attachment)
 {
-	Initialize(size, attachment, isDefault, isShadow);
+	Initialize(size, attachment);
 }
 
-void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment, bool isDefault, bool isShadow)
+void FrameBuffer::Initialize(Size size, FrameBufferAttachments attachment)
 {
     size_ = size;
 
     colorTexture_ = nullptr;
     depthTexture_ = nullptr;
 
-    if(isDefault)
-    {
-        bufferKey_ = 0;
-        return;
-    }
-
 	textureType_ = GL_TEXTURE_2D;
 
-	glGenFramebuffers(1, &bufferKey_);
-	glBindFramebuffer(GL_FRAMEBUFFER, bufferKey_);
-
-    if(isShadow)
-    {
-    	depthTexture_ = new Texture(size_, TextureFormats::DEPTH_FLOAT);
-    	depthTexture_->Bind();
-    	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture_->GetKey(), 0);
-    }
-    else
-    {
-    	if(attachment == FrameBufferAttachments::COLOR || attachment == FrameBufferAttachments::COLOR_AND_DEPTH)
-    	{
-			colorTexture_ = new Texture(size_, TextureFormats::FOUR_FLOAT);
-			colorTexture_->Bind();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType_, colorTexture_->GetKey(), 0);
-    	}
-
-    	if(attachment == FrameBufferAttachments::DEPTH || attachment == FrameBufferAttachments::COLOR_AND_DEPTH)
-    	{
-			depthTexture_ = new Texture(size_, TextureFormats::ONE_FLOAT);
-			depthTexture_ ->Bind();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureType_, depthTexture_ ->GetKey(), 0);
-    	}
-    }
+	HandleInitialize(attachment);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(textureType_, 0);
 
-
     DEBUG_OPENGL
+}
+
+void FrameBuffer::HandleInitialize(FrameBufferAttachments attachment)
+{
+	glGenFramebuffers(1, &bufferKey_);
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferKey_);
+
+	if(attachment == FrameBufferAttachments::COLOR || attachment == FrameBufferAttachments::COLOR_AND_DEPTH)
+	{
+		colorTexture_ = new Texture(size_, TextureFormats::FOUR_FLOAT);
+		colorTexture_->Bind();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType_, colorTexture_->GetKey(), 0);
+	}
+
+	if(attachment == FrameBufferAttachments::DEPTH || attachment == FrameBufferAttachments::COLOR_AND_DEPTH)
+	{
+		depthTexture_ = new Texture(size_, TextureFormats::ONE_FLOAT);
+		depthTexture_ ->Bind();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureType_, depthTexture_ ->GetKey(), 0);
+	}
 }
 
 void FrameBuffer::BindBuffer()

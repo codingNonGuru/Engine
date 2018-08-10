@@ -7,18 +7,14 @@
 #include "Screen.hpp"
 #include "Window.hpp"
 #include "ModelManager.hpp"
-#include "Model.hpp"
 #include "BufferManager.hpp"
 #include "FrameBuffer.hpp"
-#include "Interface/Sprite.hpp"
-#include "Shader.hpp"
 #include "ShaderManager.hpp"
 #include "Interface/Interface.hpp"
 #include "Interface/Element.hpp"
 #include "TextureManager.hpp"
 #include "Texture.hpp"
 #include "Render/FilterManager.hpp"
-#include "Render/Filter.hpp"
 #include "Utility/Color.hpp"
 #include "SceneManager.hpp"
 
@@ -28,9 +24,9 @@ Map <Camera*> RenderManager::cameras_ = Map <Camera*> (16);
 
 Color RenderManager::backgroundColor_ = Color();
 
-const Size RenderManager::SHADOW_MAP_SIZE = Size(6144, 6144);
+FrameBuffer* RenderManager::defaultFrameBuffer_ = nullptr;
 
-const float RenderManager::SHADOW_MAP_SIZE_MODIFIER = 1.3f;
+Delegate* RenderManager::onInitialize_ = nullptr;
 
 Word interfaceCameraKey = Word("Interface");
 
@@ -47,27 +43,13 @@ void RenderManager::Initialize()
 
 	glEnable(GL_DEBUG_OUTPUT);
 
-	auto frameBuffer = BufferManager::GetFrameBuffers().Add("default");
-	if(frameBuffer)
-	{
-		*frameBuffer = new FrameBuffer(screen->GetSize());
-	}
-
-	frameBuffer = BufferManager::GetFrameBuffers().Add("shadow");
-	if(frameBuffer)
-	{
-		*frameBuffer = new FrameBuffer(SHADOW_MAP_SIZE, FrameBufferAttachments::DEPTH, false, true);
-	}
-
-	auto screenTexture = new Texture(screen->GetSize(), TextureFormats::FOUR_BYTE);
-	TextureManager::AddTexture(screenTexture, "Screen");
-
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_SAMPLE_SHADING);
 
-	DEBUG_OPENGL
-
-	backgroundColor_ = Color(0.0f, 0.2f, 0.7f, 1.0f);
+	if(onInitialize_ != nullptr)
+	{
+		onInitialize_->Invoke();
+	}
 }
 
 void RenderManager::Update()
@@ -161,15 +143,32 @@ Camera* RenderManager::GetInterfaceCamera()
 
 void RenderManager::ClearDefaultBuffer()
 {
-	auto defaultFrameBuffer = BufferManager::GetFrameBuffer("default");
-	if(defaultFrameBuffer == nullptr)
+	if(defaultFrameBuffer_ == nullptr)
 		return;
 
-	defaultFrameBuffer->BindBuffer();
-	defaultFrameBuffer->Clear(backgroundColor_);
+	defaultFrameBuffer_->BindBuffer();
+	defaultFrameBuffer_->Clear(backgroundColor_);
 }
 
 void RenderManager::SetBackgroundColor(Color color)
 {
 	backgroundColor_ = color;
+}
+
+Color RenderManager::GetBackgroundColor()
+{
+	return backgroundColor_;
+}
+
+void RenderManager::SetDefaultFrameBuffer(FrameBuffer* defaultFrameBuffer)
+{
+	defaultFrameBuffer_ = defaultFrameBuffer;
+}
+
+Delegate* RenderManager::OnInitialize()
+{
+	if(onInitialize_ == nullptr)
+		onInitialize_ = new Delegate();
+
+	return onInitialize_;
 }

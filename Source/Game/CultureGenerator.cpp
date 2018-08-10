@@ -207,7 +207,7 @@ struct LinkData
 
 #define MAXIMUM_DISTANCE 20.0f
 
-#define MINIMUM_ANGLE 3.1415f / 6.0f
+#define MINIMUM_ANGLE 3.1415f / 8.0f
 
 #define ROAD_GENERATION_PASS_COUNT 24
 

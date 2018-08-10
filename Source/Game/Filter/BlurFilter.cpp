@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include "BlurFilter.hpp"
-
 #include "Engine.hpp"
 #include "Screen.hpp"
 #include "BufferManager.hpp"
@@ -12,12 +10,15 @@
 #include "DataBuffer.hpp"
 #include "Utility/Kernel.hpp"
 
+#include "Game/Filter/BlurFilter.hpp"
+#include "Game/Types.hpp"
+
 void BlurFilter::HandleInitialize() 
 {
 	auto screen = Engine::GetScreen();
 
 	swapBuffer_ = new FrameBuffer();
-	swapBuffer_->Initialize(screen->GetSize(), FrameBufferAttachments::COLOR, false);
+	swapBuffer_->Initialize(screen->GetSize(), FrameBufferAttachments::COLOR);
 
 	kernel_ = new Kernel(60);
 	kernel_->Initialize(KernelTypes::GAUSS, 0.0f);
@@ -72,8 +73,7 @@ void BlurFilter::ApplySecondPass(Camera* camera)
 {
 	shader_->SetConstant(1, "mode");
 
-	auto defaultRenderTarget = BufferManager::GetFrameBuffer("default");
-
+	auto defaultRenderTarget = BufferManager::GetFrameBuffer(FrameBuffers::DEFAULT);
 	defaultRenderTarget->BindBuffer();
 
 	swapBuffer_->BindTexture(shader_, "source");
