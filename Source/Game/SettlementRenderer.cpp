@@ -1,3 +1,5 @@
+#include <glm/gtx/transform.hpp>
+
 #include "DataBuffer.hpp"
 #include "ShaderManager.hpp"
 #include "Shader.hpp"
@@ -8,6 +10,7 @@
 #include "Light.hpp"
 #include "FrameBuffer.hpp"
 #include "RenderBuilder.hpp"
+#include "TextureManager.hpp"
 
 #include "Game/SettlementRenderer.hpp"
 #include "Game/WorldScene.hpp"
@@ -18,11 +21,15 @@
 
 SettlementRenderer* SettlementRenderer::instance_ = nullptr;
 
+StencilData SettlementRenderer::stencilData_ = StencilData();
+
 const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 32768;
 
 const int SettlementRenderer::CONNECTION_RENDER_CAPACITY = 64;
 
-enum class Shaders {BUILDING, BUILDING_SHADOW};
+const float SettlementRenderer::ROAD_STENCIL_CAMERA_MODIFIER = 4.0f;
+
+enum class Shaders {BUILDING, BUILDING_SHADOW, ROAD_STENCIL, COUNT};
 
 SettlementRenderer* SettlementRenderer::GetInstance()
 {
@@ -34,13 +41,18 @@ SettlementRenderer* SettlementRenderer::GetInstance()
 
 SettlementRenderer::SettlementRenderer()
 {
-	shaders_.Initialize(2);
+	isInitialized_ = false;
+
+	shaders_.Initialize((int)Shaders::COUNT);
 
 	auto shader = shaders_.Add(Shaders::BUILDING);
 	*shader = ShaderManager::GetShader("Building");
 
 	shader = shaders_.Add(Shaders::BUILDING_SHADOW);
 	*shader = ShaderManager::GetShader("BuildingShadow");
+
+	shader = shaders_.Add(Shaders::ROAD_STENCIL);
+	*shader = ShaderManager::GetShader("Road");
 
 	buffers_.Initialize(SettlementModelBuffers::COUNT);
 
@@ -54,13 +66,24 @@ SettlementRenderer::SettlementRenderer()
 
 	textures_.Initialize(SettlementModelTextures::COUNT);
 
+	buildingIndices_.Initialize(BUILDING_RENDER_CAPACITY);
+
+	connectionIndices_.Initialize(CONNECTION_RENDER_CAPACITY);
+}
+
+void SettlementRenderer::Initialize()
+{
+	if(isInitialized_)
+		return;
+
 	auto shadowFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	auto texture = shadowFrameBuffer->GetDepthTexture();
 	*textures_.Add(SettlementModelTextures::SHADOW_MAP) = texture;
 
-	buildingIndices_.Initialize(BUILDING_RENDER_CAPACITY);
+	texture = TextureManager::GetTexture("RoadAlpha");
+	*textures_.Add(SettlementModelTextures::ROAD_ALPHA) = texture;
 
-	connectionIndices_.Initialize(CONNECTION_RENDER_CAPACITY);
+	isInitialized_ = true;
 }
 
 void SettlementRenderer::AssembleMesh()
@@ -207,16 +230,53 @@ void SettlementRenderer::ProcessData(Camera* camera)
 
 void SettlementRenderer::RenderStencils(Camera* camera)
 {
+	Initialize();
 
+	BufferManager::BindFrameBuffer(FrameBuffers::STENCIL);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto roadShader = *shaders_.Get(Shaders::ROAD_STENCIL);
+	if(roadShader == nullptr)
+		return;
+
+	roadShader->Bind();
+
+	auto buffer = *buffers_.Get(SettlementModelBuffers::LINK_DATAS);
+	buffer->Bind(0);
+
+	stencilData_.Scale_ = Float2(camera->GetViewDistance(), camera->GetViewDistance()) * ROAD_STENCIL_CAMERA_MODIFIER;
+
+	auto target = camera->GetTarget();
+	stencilData_.Offset_ = Float2(target.x - stencilData_.Scale_.x * 0.5f, target.y - stencilData_.Scale_.y * 0.5f);
+
+	Matrix projectionMatrix = glm::ortho<float> (0.0f, stencilData_.Scale_.x, stencilData_.Scale_.y, 0.0f, 0.1f, 10.0f);
+	Matrix viewMatrix = glm::lookAt<float> (Float3(0.0f, 0.0f, 1.0f), Float3(0.0f), Float3(0.0f, 1.0f, 0.0f));
+	Matrix finalMatrix = projectionMatrix * viewMatrix;
+
+	roadShader->SetConstant(finalMatrix, "viewMatrix");
+
+	roadShader->SetConstant(stencilData_.Offset_, "stencilOffset");
+
+	roadShader->SetConstant(stencilData_.Scale_, "stencilScale");
+
+	Texture* texture = *textures_.Get(SettlementModelTextures::ROAD_ALPHA);
+	roadShader->BindTexture(texture, "roadAlpha");
+
+	glDrawArrays(GL_TRIANGLES, 0, linkDatas_.GetSize() * 6);
+
+	roadShader->Unbind();
+
+	BufferManager::BindFrameBuffer(FrameBuffers::DEFAULT);
 }
 
 void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 {
-	auto frameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
-	if(frameBuffer != nullptr)
-	{
-		frameBuffer->BindBuffer();
-	}
+	Initialize();
+
+	BufferManager::BindFrameBuffer(FrameBuffers::SHADOW_MAP);
 
 	glClearDepth(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -252,15 +312,13 @@ void SettlementRenderer::RenderShadows(Camera* camera, Light* light)
 
 	buildingShader->Unbind();
 
-	frameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::DEFAULT);
-	if(frameBuffer != nullptr)
-	{
-		frameBuffer->BindBuffer();
-	}
+	BufferManager::BindFrameBuffer(FrameBuffers::DEFAULT);
 }
 
 void SettlementRenderer::Render(Camera* camera, Light* light)
 {
+	Initialize();
+
 	auto buildingShader = *shaders_.Get(Shaders::BUILDING);
 	if(buildingShader == nullptr)
 		return;
@@ -319,6 +377,11 @@ void SettlementRenderer::ProjectShadows(Camera* camera, Light* light)
 	GetInstance()->RenderShadows(camera, light);
 }
 
+void SettlementRenderer::UpdateStencils(Camera* camera)
+{
+	GetInstance()->RenderStencils(camera);
+}
+
 Array <SettlementRenderData> & SettlementRenderer::GetSettlementDatas()
 {
 	return GetInstance()->settlementDatas_;
@@ -329,9 +392,19 @@ Array <BuildingRenderData> & SettlementRenderer::GetBuildingDatas()
 	return GetInstance()->buildingDatas_;
 }
 
+Array <LinkRenderData> & SettlementRenderer::GetLinkDatas()
+{
+	return GetInstance()->linkDatas_;
+}
+
 Map <DataBuffer*> & SettlementRenderer::GetBuffers()
 {
 	return GetInstance()->buffers_;
+}
+
+StencilData SettlementRenderer::GetStencilData()
+{
+	return stencilData_;
 }
 
 Mesh* SettlementRenderer::GetMesh(Index index)

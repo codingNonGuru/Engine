@@ -57,3 +57,12 @@ FrameBuffer* BufferManager::GetFrameBuffer(const char* name)
 
 	return *buffer;
 }
+
+void BufferManager::BindFrameBuffer(Word name)
+{
+	auto buffer = frameBuffers_.Get(name);
+	if(buffer == nullptr)
+		return;
+
+	(*buffer)->BindBuffer();
+}

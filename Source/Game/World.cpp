@@ -5,6 +5,7 @@
 #include "Game/WorldGenerator.hpp"
 #include "Game/WorldParameterSet.hpp"
 #include "Game/Settlement.hpp"
+#include "Game/Road.hpp"
 
 WorldObject WorldObject::DEFAULT = WorldObject(nullptr, WorldObjects::NONE);
 
@@ -44,6 +45,11 @@ Array <Settlement> & World::GetSettlements()
 Array <Link> & World::GetLinks()
 {
 	return links_;
+}
+
+Array <Road> & World::GetRoads()
+{
+	return roads_;
 }
 
 Float World::GetHeight(Float x, Float y)

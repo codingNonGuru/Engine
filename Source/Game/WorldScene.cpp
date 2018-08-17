@@ -149,6 +149,8 @@ void WorldScene::Render()
 
 	SettlementRenderer::ProjectShadows(camera_, light_);
 
+	SettlementRenderer::UpdateStencils(camera_);
+
 	if(worldModel_ != nullptr)
 	{
 		worldModel_->Render(camera_, light_);

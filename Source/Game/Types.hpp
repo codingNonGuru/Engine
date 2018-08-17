@@ -69,6 +69,7 @@ public:
 	static Word const BASE_HEIGHT;
 	static Word const DETAIL_HEIGHT;
 	static Word const SHADOW_MAP;
+	static Word const ROAD_STENCIL;
 	static int const COUNT;
 };
 
@@ -82,6 +83,7 @@ public:
 	static Word const BUILDING_DATAS;
 	static Word const BUILDING_INDICES;
 	static Word const CONNECTION_INDICES;
+	static Word const LINK_DATAS;
 	static int const COUNT;
 };
 
@@ -89,6 +91,7 @@ class SettlementModelTextures
 {
 public:
 	static Word const SHADOW_MAP;
+	static Word const ROAD_ALPHA;
 	static int const COUNT;
 };
 

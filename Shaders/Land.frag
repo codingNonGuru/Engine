@@ -4,10 +4,11 @@ layout(location = 1) uniform mat4 depthMatrix;
 layout(location = 3) uniform vec3 cameraPos;
 layout(location = 7) uniform float seaLevel;
 layout(location = 8) uniform vec2 specialTile;
-layout(location = 10) uniform vec2 stencilPosition;
+layout(location = 10) uniform vec2 stencilOffset;
 layout(location = 11) uniform vec2 stencilScale;
 
 uniform sampler2D shadowMap;
+uniform sampler2D roadStencil;
 
 in vec3 pos;
 in vec4 shadowCoord;
@@ -66,6 +67,11 @@ float atan2(float y, float x)
 
 void main() 
 {
+	vec2 stencilCoords = pos.xy - stencilOffset.xy;
+	stencilCoords.x /= stencilScale.x;
+	stencilCoords.y /= stencilScale.y;
+	float roadStencilAlpha = texture(roadStencil, stencilCoords).r;
+
 	vec3 lightDirection = normalize(light);
 
 	float diffuse = dot(vec3(0.0f, 0.0f, 1.0f), lightDirection);
@@ -90,9 +96,8 @@ void main()
 	specular *= shadow;
 	
 	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
-
-	vec3 checkerPattern = int(pos.x) % 2 != int(pos.y) % 2 ? vec3(1.0f) : vec3(0.0f);	
-	color.rgb = color.rgb * 0.7f + checkerPattern * 0.3f;
+	
+	color.rgb = color.rgb * 0.7f + vec3(1.0f) * roadStencilAlpha;
 	
 	color = color * diffuse + vec3(0.0f, 0.0f, 0.05f) * (1.0f - diffuse); 
 	color = color * (1.0f - specular) + vec3(specular);

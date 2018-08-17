@@ -27,4 +27,6 @@ public:
 	static DataBuffer* GetDataBuffer(const char*);
 
 	static FrameBuffer* GetFrameBuffer(const char*);
+
+	static void BindFrameBuffer(Word);
 };

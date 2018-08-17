@@ -1,4 +1,9 @@
-#include "Tile.hpp"
+#include "Game/Tile.hpp"
+#include "Game/Road.hpp"
+
+Road* RoadData::GetFirst() {return FirstRoad_;}
+
+Road* RoadData::GetLast() {return FirstRoad_ + RoadCount_;}
 
 Tile::Tile()
 {
@@ -60,4 +65,14 @@ Settlement* Tile::GetDomain()
 void Tile::SetDomain(Settlement* domain)
 {
 	domain_ = domain;
+}
+
+RoadData Tile::GetRoads() const
+{
+	return roads_;
+}
+
+void Tile::SetRoads(RoadData roads)
+{
+	roads_ = roads;
 }

@@ -1,12 +1,15 @@
 #include "DataBuffer.hpp"
 #include "Utility/Utility.hpp"
 #include "Utility/Perlin.hpp"
+#include "Texture.hpp"
+#include "TextureManager.hpp"
 
 #include "Game/CultureModelBuilder.hpp"
 #include "Game/SettlementRenderer.hpp"
 #include "Game/World.hpp"
 #include "Game/Settlement.hpp"
 #include "Game/Types.hpp"
+#include "Game/Road.hpp"
 
 void CultureModelBuilder::Generate(World& world)
 {
@@ -98,4 +101,91 @@ void CultureModelBuilder::Generate(World& world)
 
 	auto buffer = modelBuffers.Add(SettlementModelBuffers::BUILDING_DATAS);
 	*buffer = new DataBuffer(buildingDatas.GetMemorySize(), buildingDatas.GetStart());
+
+	GenerateRoads(world);
+}
+
+void CultureModelBuilder::GenerateRoads(World& world)
+{
+	auto & roads = world.GetRoads();
+
+	auto & linkDatas = SettlementRenderer::GetLinkDatas();
+	linkDatas.Initialize(roads.GetSize());
+
+	for(auto road = roads.GetStart(); road != roads.GetEnd(); ++road)
+	{
+		auto position = road->Start_->GetPosition() * 0.5f + road->End_->GetPosition() * 0.5f;
+
+		auto direction = road->Start_->GetPosition() - road->End_->GetPosition();
+		auto rotation = atan2(direction.y, direction.x);
+
+		auto length = road->Start_->GetDistance(road->End_);
+
+		auto textureIndex = utility::GetRandom(0, 15);
+
+		*linkDatas.Allocate() = LinkRenderData(position, rotation, length, textureIndex);
+	}
+
+	auto & modelBuffers = SettlementRenderer::GetBuffers();
+
+	auto buffer = modelBuffers.Add(SettlementModelBuffers::LINK_DATAS);
+	*buffer = new DataBuffer(linkDatas.GetMemorySize(), linkDatas.GetStart());
+
+	GenerateTextures(world);
+}
+
+void CultureModelBuilder::GenerateTextures(World& world)
+{
+	Size textureSize = Size(2048, 2048);
+
+	Grid <Float> allRoadAlphas(textureSize.x, textureSize.y);
+	Grid <Float> roadAlpha(textureSize.x, 128);
+	Grid <Float> roadAlphaBuffer(textureSize.x, 128);
+	Grid <Float> distortionAngles(textureSize.x, textureSize.y);
+	Grid <Float> distortionRanges(textureSize.x, textureSize.y);
+
+	Perlin::Generate(textureSize, 0.0f, 0.5f, 1.0f);
+	Perlin::Download(&distortionAngles);
+
+	Perlin::Generate(textureSize, 0.15f, 0.5f, 1.0f);
+	Perlin::Download(&distortionRanges);
+
+	for(Index textureIndex = 0; textureIndex < 16; ++textureIndex)
+	{
+		int roadWidth = roadAlpha.GetHeight();
+		for(int x = 0; x < roadAlpha.GetWidth(); ++x)
+			for(int y = 0; y < roadAlpha.GetHeight(); ++y)
+			{
+				*roadAlpha(x, y) = exp(-pow(float(y - roadWidth / 2), 2.0f) / 16.0f);
+				*roadAlphaBuffer(x, y) = 0.0f;
+			}
+
+		auto verticalOffset = textureIndex * roadAlpha.GetHeight();
+
+		const float DIRECTION_MODIFIER = 30.0f;
+		for(int x = 0; x < roadAlpha.GetWidth(); ++x)
+			for(int y = 0; y < roadAlpha.GetHeight(); ++y)
+			{
+				float angle = *distortionAngles(x, y + verticalOffset) * 6.2831f;
+				Float2 direction(cos(angle), sin(angle));
+				float range = 1.0f - abs(glm::dot(direction, Float2(1.0f, 0.0f)));
+				direction *= DIRECTION_MODIFIER;
+
+				Float2 from(float(x) + direction.x, float(y) + direction.y);
+				float topLeft = *roadAlpha(from.x, from.y);
+				float topRight = *roadAlpha(from.x + 1.0f, from.y);
+				float bottomLeft = *roadAlpha(from.x, from.y + 1.0f);
+				float bottomRight = *roadAlpha(from.x + 1.0f, from.y + 1.0f);
+
+				Float2 dif(abs(float(int(from.x)) - from.x), abs(float(int(from.y)) - from.y));
+				*roadAlphaBuffer(x, y) += (1.0f - dif.x) * (1.0f - dif.y) * topLeft + dif.x * (1.0f - dif.y) * topRight + (1.0f - dif.x) * dif.y * bottomLeft + dif.x * dif.y * bottomRight;
+			}
+
+		for(int x = 0; x < roadAlphaBuffer.GetWidth(); ++x)
+			for(int y = 0; y < roadAlphaBuffer.GetHeight(); ++y)
+				*allRoadAlphas(x, y + verticalOffset) = *roadAlphaBuffer(x, y);
+	}
+
+	auto texture = new Texture(textureSize, TextureFormats::ONE_FLOAT, &allRoadAlphas);
+	TextureManager::AddTexture(texture, "RoadAlpha");
 }

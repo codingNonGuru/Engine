@@ -6,6 +6,7 @@
 #include "RenderManager.hpp"
 #include "FrameBuffer.hpp"
 #include "Render/ShadowFrameBuffer.hpp"
+#include "Render/StencilFrameBuffer.hpp"
 
 #include "Game/RenderBuilder.hpp"
 #include "Game/Types.hpp"
@@ -13,6 +14,8 @@
 const Size RenderBuilder::SHADOW_MAP_SIZE = Size(6144, 6144);
 
 const float RenderBuilder::SHADOW_MAP_SIZE_MODIFIER = 1.3f;
+
+const Size RenderBuilder::ROAD_STENCIL_SIZE = Size(3072, 3072);
 
 RenderBuilder* RenderBuilder::instance_ = new RenderBuilder();
 
@@ -33,6 +36,13 @@ void RenderBuilder::Initialize()
 	{
 		*frameBuffer = new ShadowFrameBuffer();
 		(*frameBuffer)->Initialize(SHADOW_MAP_SIZE, FrameBufferAttachments::DEPTH);
+	}
+
+	frameBuffer = BufferManager::GetFrameBuffers().Add(FrameBuffers::STENCIL);
+	if(frameBuffer)
+	{
+		*frameBuffer = new StencilFrameBuffer();
+		(*frameBuffer)->Initialize(ROAD_STENCIL_SIZE, FrameBufferAttachments::COLOR_AND_DEPTH);
 	}
 
 	auto screenTexture = new Texture(screen->GetSize(), TextureFormats::FOUR_BYTE);

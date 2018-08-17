@@ -10,6 +10,7 @@ class Tile;
 class Settlement;
 class Camera;
 struct Link;
+struct Road;
 
 struct WorldObject
 {
@@ -33,6 +34,8 @@ class World
 	Array <Settlement> settlements_;
 
 	Array <Link> links_;
+
+	Array <Road> roads_;
 
 	Grid <Float> heightMap_;
 
@@ -58,6 +61,8 @@ public:
 	Array <Settlement> & GetSettlements();
 
 	Array <Link> & GetLinks();
+
+	Array <Road> & GetRoads();
 
 	Float GetHeight(Float, Float);
 

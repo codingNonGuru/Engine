@@ -9,6 +9,8 @@ class CultureGenerator
 {
 	static void GenerateSettlements(World&);
 
+	static void GenerateLinks(World&);
+
 	static void GenerateRoads(World&);
 
 	static void GenerateDomains(World&);

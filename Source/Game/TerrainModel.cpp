@@ -11,6 +11,7 @@
 #include "Game/ReliefGenerator.hpp"
 #include "Game/Types.hpp"
 #include "Game/WorldScene.hpp"
+#include "Game/SettlementRenderer.hpp"
 
 enum class Shaders {DISPLACE, RENDER};
 
@@ -60,6 +61,10 @@ TerrainModel::TerrainModel()
 	auto shadowFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	texture = shadowFrameBuffer->GetDepthTexture();
 	*textures_.Add(TerrainModelTextures::SHADOW_MAP) = texture;
+
+	auto stencilFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::STENCIL);
+	texture = stencilFrameBuffer->GetColorTexture();
+	*textures_.Add(TerrainModelTextures::ROAD_STENCIL) = texture;
 }
 
 void TerrainModel::Initialize()
@@ -152,12 +157,19 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	texture = *textures_.Get(TerrainModelTextures::SHADOW_MAP);
 	renderShader->BindTexture(texture, "shadowMap");
 
+	texture = *textures_.Get(TerrainModelTextures::ROAD_STENCIL);
+	renderShader->BindTexture(texture, "roadStencil");
+
 	renderShader->SetConstant(camera->GetMatrix(), "projMatrix");
 	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderBuilder::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 	renderShader->SetConstant(depthMatrix, "depthMatrix");
 	renderShader->SetConstant(light->GetDirection(), "lightDirection");
 	renderShader->SetConstant(camera->GetPosition(), "cameraPos");
 	renderShader->SetConstant(ReliefGenerator::SEA_LEVEL, "seaLevel");
+
+	auto stencilData = SettlementRenderer::GetStencilData();
+	renderShader->SetConstant(stencilData.Offset_, "stencilOffset");
+	renderShader->SetConstant(stencilData.Scale_, "stencilScale");
 
 	glDrawArrays(GL_TRIANGLES, 0, indexCount);
 

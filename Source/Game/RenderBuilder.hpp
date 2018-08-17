@@ -12,4 +12,6 @@ public:
 	static const Size SHADOW_MAP_SIZE;
 
 	static const float SHADOW_MAP_SIZE_MODIFIER;
+
+	static const Size ROAD_STENCIL_SIZE;
 };
