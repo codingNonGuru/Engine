@@ -52,6 +52,21 @@ void DataBuffer::Download(Container * container)
 	Unbind();
 }
 
+void DataBuffer::Download(void * data, Length size)
+{
+	if(data == nullptr)
+	{
+		std::cout<<"Buffer Data is not initialized.\n";
+		return;
+	}
+
+	Bind();
+
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, size, data);
+
+	Unbind();
+}
+
 void DataBuffer::Bind()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);

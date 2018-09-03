@@ -16,7 +16,8 @@ Word const TerrainModelTextures::BASE_HEIGHT = Word("BaseHeight");
 Word const TerrainModelTextures::DETAIL_HEIGHT = Word("DetailHeight");
 Word const TerrainModelTextures::SHADOW_MAP = Word("ShadowMap");
 Word const TerrainModelTextures::ROAD_STENCIL = Word("RoadStencil");
-int const TerrainModelTextures::COUNT = 4;
+Word const TerrainModelTextures::ROAD_DETAIL = Word("RoadDetail");
+int const TerrainModelTextures::COUNT = 5;
 
 Word const SettlementModelBuffers::VERTEX_POSITIONS = Word("VertexPositions");
 Word const SettlementModelBuffers::VERTEX_NORMALS = Word("VertexNormals");

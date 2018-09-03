@@ -478,4 +478,10 @@ void ReliefGenerator::GenerateModel(World& world)
 
 	auto texture = new Texture(world.GetSize(), TextureFormats::ONE_FLOAT, &heightMap);
 	*modelTextures_.Add(TerrainModelTextures::BASE_HEIGHT) = texture;
+
+	Size detailSize(4096, 4096);
+	Perlin::Generate(detailSize, FocusIndex(0.7f), ContrastThreshold(0.5f), ContrastStrength(2.0f));
+
+	texture = new Texture(detailSize, TextureFormats::ONE_FLOAT, *Perlin::GetResultBuffer());
+	*modelTextures_.Add(TerrainModelTextures::ROAD_DETAIL) = texture;
 }

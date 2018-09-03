@@ -89,6 +89,7 @@ void main()
 	
 	position.z = vertexPositions[index].z;
 	position.z += buildingPosition.z;
+	position.z += 0.03f;
 	
 	normal.x = vertexNormals[index].x * c - vertexNormals[index].y * s;
 	normal.y = vertexNormals[index].x * s + vertexNormals[index].y * c;

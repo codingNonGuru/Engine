@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Conventions.hpp"
 #include "Container/Container.hpp"
 
 typedef unsigned int GLuint;
@@ -27,6 +28,8 @@ public:
 	void UploadData(void*, GLuint);
 
 	void Download(container::Container *);
+
+	void Download(void *, Length);
 
 	void Bind();
 

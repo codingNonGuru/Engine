@@ -70,6 +70,7 @@ public:
 	static Word const DETAIL_HEIGHT;
 	static Word const SHADOW_MAP;
 	static Word const ROAD_STENCIL;
+	static Word const ROAD_DETAIL;
 	static int const COUNT;
 };
 

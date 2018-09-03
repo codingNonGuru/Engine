@@ -59,7 +59,7 @@ void CultureModelBuilder::Generate(World& world)
 
 				Float finalX = (Float(x) + (y % 2 == 0 ? 0.3f : 0.0f) - Float(halfSize)) * 0.2f;
 				Float finalY = (Float(y) + (x % 2 == 0 ? 0.3f : 0.0f) - Float(halfSize)) * 0.2f;
-				float scatterFactor = pow(2.0f - distanceFactor, 1.7f);
+				float scatterFactor = pow(2.0f - distanceFactor, 1.7f) * 0.85f;
 				finalX *= scatterFactor;
 				finalY *= scatterFactor;
 
@@ -142,13 +142,13 @@ void CultureModelBuilder::GenerateTextures(World& world)
 	Grid <Float> roadAlpha(textureSize.x, 128);
 	Grid <Float> roadAlphaBuffer(textureSize.x, 128);
 	Grid <Float> distortionAngles(textureSize.x, textureSize.y);
-	Grid <Float> distortionRanges(textureSize.x, textureSize.y);
+	//Grid <Float> distortionRanges(textureSize.x, textureSize.y);
 
-	Perlin::Generate(textureSize, 0.0f, 0.5f, 1.0f);
+	Perlin::Generate(textureSize, -0.1f, 0.5f, 1.0f);
 	Perlin::Download(&distortionAngles);
 
-	Perlin::Generate(textureSize, 0.15f, 0.5f, 1.0f);
-	Perlin::Download(&distortionRanges);
+	//Perlin::Generate(textureSize, 0.15f, 0.5f, 1.0f);
+	//Perlin::Download(&distortionRanges);
 
 	for(Index textureIndex = 0; textureIndex < 16; ++textureIndex)
 	{
@@ -156,13 +156,13 @@ void CultureModelBuilder::GenerateTextures(World& world)
 		for(int x = 0; x < roadAlpha.GetWidth(); ++x)
 			for(int y = 0; y < roadAlpha.GetHeight(); ++y)
 			{
-				*roadAlpha(x, y) = exp(-pow(float(y - roadWidth / 2), 2.0f) / 16.0f);
+				*roadAlpha(x, y) = exp(-pow(float(y - roadWidth / 2), 2.0f) / 256.0f);
 				*roadAlphaBuffer(x, y) = 0.0f;
 			}
 
 		auto verticalOffset = textureIndex * roadAlpha.GetHeight();
 
-		const float DIRECTION_MODIFIER = 30.0f;
+		const float DIRECTION_MODIFIER = 100.0f;
 		for(int x = 0; x < roadAlpha.GetWidth(); ++x)
 			for(int y = 0; y < roadAlpha.GetHeight(); ++y)
 			{

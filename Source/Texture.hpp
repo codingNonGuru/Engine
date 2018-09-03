@@ -8,6 +8,7 @@ typedef unsigned int GLenum;
 
 class Shader;
 class File;
+class DataBuffer;
 
 class Texture
 {
@@ -27,6 +28,8 @@ public:
 	Texture();
 
 	Texture(Size, TextureFormats, container::Matrix* = nullptr);
+
+	Texture(Size, TextureFormats, DataBuffer &);
 
 	Texture(File*);
 

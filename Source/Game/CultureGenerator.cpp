@@ -151,7 +151,7 @@ void CultureGenerator::GenerateSettlements(World& world)
 
 #define DEFAULT_MINIMUM_DISTANCE 1000.0f
 
-#define MAXIMUM_DISTANCE 20.0f
+#define MAXIMUM_DISTANCE 25.0f
 
 #define MINIMUM_ANGLE 3.1415f / 6.0f
 
@@ -184,7 +184,7 @@ struct LinkData
 {
 	Settlement* Settlement_;
 
-	container::Block <Neighbour, 64> Neighbours_;
+	container::Block <Neighbour, 128> Neighbours_;
 
 	Length NeighbourCount_;
 
@@ -478,7 +478,7 @@ void CultureGenerator::GenerateLinks(World& world)
 		*linkCounts.Allocate() = linkCount;
 		std::cout<<"LINKS "<<linkCount<<"\n";
 
-		if(succesiveMatches > 2)
+		if(succesiveMatches > 0)
 		{
 			break;
 		}

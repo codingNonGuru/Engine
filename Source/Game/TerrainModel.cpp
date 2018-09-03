@@ -58,6 +58,9 @@ TerrainModel::TerrainModel()
 	texture = ReliefGenerator::GetModelTexture(TerrainModelTextures::DETAIL_HEIGHT);
 	*textures_.Add(TerrainModelTextures::DETAIL_HEIGHT) = texture;
 
+	texture = ReliefGenerator::GetModelTexture(TerrainModelTextures::ROAD_DETAIL);
+	*textures_.Add(TerrainModelTextures::ROAD_DETAIL) = texture;
+
 	auto shadowFrameBuffer = BufferManager::GetFrameBuffer(FrameBuffers::SHADOW_MAP);
 	texture = shadowFrameBuffer->GetDepthTexture();
 	*textures_.Add(TerrainModelTextures::SHADOW_MAP) = texture;
@@ -110,6 +113,9 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	texture = *textures_.Get(TerrainModelTextures::DETAIL_HEIGHT);
 	displaceShader->BindTexture(texture, "reliefDetailMap");
 
+	texture = *textures_.Get(TerrainModelTextures::ROAD_STENCIL);
+	displaceShader->BindTexture(texture, "roadStencil");
+
 	auto viewDistance = camera->GetViewDistance();
 	displaceShader->SetConstant(viewDistance, "size");
 
@@ -124,6 +130,10 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	displaceShader->SetConstant(ReliefGenerator::DETAIL_STRENGTH, "strength");
 
 	displaceShader->SetConstant(ReliefGenerator::DETAIL_TILE_COUNT, "detailTileCount");
+
+	auto stencilData = SettlementRenderer::GetStencilData();
+	displaceShader->SetConstant(stencilData.Offset_, "stencilPosition");
+	displaceShader->SetConstant(stencilData.Scale_, "stencilScale");
 
 	Length workSize = vertexCount / 32 + 1;
 
@@ -160,6 +170,9 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	texture = *textures_.Get(TerrainModelTextures::ROAD_STENCIL);
 	renderShader->BindTexture(texture, "roadStencil");
 
+	texture = *textures_.Get(TerrainModelTextures::ROAD_DETAIL);
+	renderShader->BindTexture(texture, "roadDetail");
+
 	renderShader->SetConstant(camera->GetMatrix(), "projMatrix");
 	auto depthMatrix = light->GetShadowMatrix(camera->GetViewDistance() * RenderBuilder::SHADOW_MAP_SIZE_MODIFIER, camera->GetTarget());
 	renderShader->SetConstant(depthMatrix, "depthMatrix");
@@ -167,7 +180,7 @@ void TerrainModel::Render(Camera* camera, Light* light)
 	renderShader->SetConstant(camera->GetPosition(), "cameraPos");
 	renderShader->SetConstant(ReliefGenerator::SEA_LEVEL, "seaLevel");
 
-	auto stencilData = SettlementRenderer::GetStencilData();
+	stencilData = SettlementRenderer::GetStencilData();
 	renderShader->SetConstant(stencilData.Offset_, "stencilOffset");
 	renderShader->SetConstant(stencilData.Scale_, "stencilScale");
 

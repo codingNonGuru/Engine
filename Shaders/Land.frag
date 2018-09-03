@@ -9,6 +9,7 @@ layout(location = 11) uniform vec2 stencilScale;
 
 uniform sampler2D shadowMap;
 uniform sampler2D roadStencil;
+uniform sampler2D roadDetail;
 
 in vec3 pos;
 in vec4 shadowCoord;
@@ -95,11 +96,19 @@ void main()
 	specular = pow(specular, 256.0f) * 0.5f + pow(specular, 64.0f) * 0.25f + pow(specular, 16.0f) * 0.25f;
 	specular *= shadow;
 	
-	vec3 color = pos.z > seaLevel + 0.2f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
+	vec3 color = pos.z > seaLevel + 0.1f ? vec3(0.4f, 0.5f, 0.1f) : vec3(1.0f, 0.95f, 0.8f);
 	
-	color.rgb = color.rgb * 0.7f + vec3(1.0f) * roadStencilAlpha;
+	if(roadStencilAlpha > 1.0f)
+		roadStencilAlpha = 1.0f;
+	float alphaBuffer = roadStencilAlpha;
+	roadStencilAlpha = roadStencilAlpha * 0.95f + texture(roadDetail, pos.xy / 192.0f).r * 0.05f;
+
+	roadStencilAlpha = roadStencilAlpha > 0.9f ? 1.0f : 0.0f;
+	//roadStencilAlpha = pow(roadStencilAlpha, 4.0f);
+	//roadStencilAlpha *= alphaBuffer;
+	color.rgb = color.rgb * (1.0f - roadStencilAlpha) + vec3(1.0f, 0.95f, 0.8f) * roadStencilAlpha;
 	
-	color = color * diffuse + vec3(0.0f, 0.0f, 0.05f) * (1.0f - diffuse); 
+	color = color * diffuse + vec3(0.0f, 0.0f, 0.0f) * (1.0f - diffuse); 
 	color = color * (1.0f - specular) + vec3(specular);
 
 	finalColor = vec4(color.rgb, 1.0f);

@@ -68,6 +68,23 @@ vec3 interpolate(ivec2 coords, float x, float y)
 	return vec3(x, y, sum / weights);
 }
 
+float getPaveHeight(float x, float y)
+{
+	vec2 stencilCoord = vec2(x, y) - stencilPosition.xy;
+	stencilCoord.x /= stencilScale.x;
+	stencilCoord.y /= stencilScale.y;
+	
+	float height = texture(roadStencil, stencilCoord).r;
+	if(height > 1.0f)
+		height = 1.0f;
+
+	return height * 0.03f;
+
+	//float paveHeight = texture(pavementStencil, stencilCoord).r;
+	//float roadHeight = pow(texture(roadStencil, stencilCoord).r, 0.2f) * (1.0f - paveHeight) * 0.65f;
+	//float totalHeight = paveHeight + roadHeight;
+}
+
 void main() 
 {
 	uint index = gl_GlobalInvocationID.x;
@@ -87,18 +104,8 @@ void main()
 		ivec2 terrainSize = textureSize(reliefHeightMap, 0);
 		vec2 sizeModifier = vec2(float(terrainSize.x), float(terrainSize.y)) / float(detailTileCount);
 		position.z += (texture(reliefDetailMap, vec2(x / sizeModifier.x, y / sizeModifier.y)).r - 0.5f) * strength;
-		
-		/*vec2 stencilCoord = vec2(x, y) - stencilPosition.xy;
-		stencilCoord.x /= stencilScale.x;
-		stencilCoord.y /= stencilScale.y;
-		
-		float paveHeight = texture(pavementStencil, stencilCoord).r;
-		float roadHeight = pow(texture(roadStencil, stencilCoord).r, 0.2f) * (1.0f - paveHeight) * 0.65f;
-		float totalHeight = paveHeight + roadHeight;
-		
-		if(totalHeight > paveHeight)
-			paveHeight = totalHeight;
-		position.z += paveHeight * 0.0f;*/
+				
+		position.z += getPaveHeight(x, y);
 		
 		positionResult[index].x = x;
 		positionResult[index].y = y;

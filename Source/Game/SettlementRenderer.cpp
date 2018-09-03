@@ -23,13 +23,13 @@ SettlementRenderer* SettlementRenderer::instance_ = nullptr;
 
 StencilData SettlementRenderer::stencilData_ = StencilData();
 
-const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 32768;
+const int SettlementRenderer::BUILDING_RENDER_CAPACITY = 65536;
 
 const int SettlementRenderer::CONNECTION_RENDER_CAPACITY = 64;
 
-const float SettlementRenderer::ROAD_STENCIL_CAMERA_MODIFIER = 4.0f;
+const float SettlementRenderer::ROAD_STENCIL_CAMERA_MODIFIER = 3.0f;
 
-enum class Shaders {BUILDING, BUILDING_SHADOW, ROAD_STENCIL, COUNT};
+enum class Shaders {BUILDING, BUILDING_SHADOW, ROAD_STENCIL, BUILDING_PAVE, COUNT};
 
 SettlementRenderer* SettlementRenderer::GetInstance()
 {
@@ -53,6 +53,9 @@ SettlementRenderer::SettlementRenderer()
 
 	shader = shaders_.Add(Shaders::ROAD_STENCIL);
 	*shader = ShaderManager::GetShader("Road");
+
+	shader = shaders_.Add(Shaders::BUILDING_PAVE);
+	*shader = ShaderManager::GetShader("BuildingPave");
 
 	buffers_.Initialize(SettlementModelBuffers::COUNT);
 
@@ -234,7 +237,7 @@ void SettlementRenderer::RenderStencils(Camera* camera)
 
 	BufferManager::BindFrameBuffer(FrameBuffers::STENCIL);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -250,7 +253,7 @@ void SettlementRenderer::RenderStencils(Camera* camera)
 	stencilData_.Scale_ = Float2(camera->GetViewDistance(), camera->GetViewDistance()) * ROAD_STENCIL_CAMERA_MODIFIER;
 
 	auto target = camera->GetTarget();
-	stencilData_.Offset_ = Float2(target.x - stencilData_.Scale_.x * 0.5f, target.y - stencilData_.Scale_.y * 0.5f);
+	stencilData_.Offset_ = Float2(target.x, target.y) - stencilData_.Scale_ * 0.5f;
 
 	Matrix projectionMatrix = glm::ortho<float> (0.0f, stencilData_.Scale_.x, stencilData_.Scale_.y, 0.0f, 0.1f, 10.0f);
 	Matrix viewMatrix = glm::lookAt<float> (Float3(0.0f, 0.0f, 1.0f), Float3(0.0f), Float3(0.0f, 1.0f, 0.0f));
@@ -268,6 +271,28 @@ void SettlementRenderer::RenderStencils(Camera* camera)
 	glDrawArrays(GL_TRIANGLES, 0, linkDatas_.GetSize() * 6);
 
 	roadShader->Unbind();
+
+	auto paveShader = *shaders_.Get(Shaders::BUILDING_PAVE);
+	if(paveShader == nullptr)
+		return;
+
+	paveShader->Bind();
+
+	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_INDICES);
+	buffer->Bind(0);
+
+	buffer = *buffers_.Get(SettlementModelBuffers::BUILDING_DATAS);
+	buffer->Bind(1);
+
+	paveShader->SetConstant(finalMatrix, "viewMatrix");
+
+	paveShader->SetConstant(stencilData_.Offset_, "stencilOffset");
+
+	paveShader->SetConstant(stencilData_.Scale_, "stencilScale");
+
+	glDrawArrays(GL_TRIANGLES, 0, buildingIndices_.GetSize() * 6);
+
+	paveShader->Unbind();
 
 	BufferManager::BindFrameBuffer(FrameBuffers::DEFAULT);
 }

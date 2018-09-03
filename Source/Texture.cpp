@@ -7,10 +7,51 @@
 #include "Texture.hpp"
 #include "Shader.hpp"
 #include "File.hpp"
+#include "DataBuffer.hpp"
+
+void * reusableData = new Byte[4096 * 4096 * 16];
 
 Texture::Texture()
 {
 	key_ = 0;
+}
+
+Texture::Texture(Size size, TextureFormats format, DataBuffer & buffer)
+{
+	key_ = 0;
+
+	size_ = size;
+
+	format_ = format;
+
+	Length memorySize;
+	switch(format_)
+	{
+	case TextureFormats::FOUR_BYTE:
+		memorySize = 4;
+		break;
+	case TextureFormats::FOUR_FLOAT:
+		memorySize = 16;
+		break;
+	case TextureFormats::THREE_BYTE:
+		memorySize = 3;
+		break;
+	case TextureFormats::THREE_FLOAT:
+		memorySize = 12;
+		break;
+	case TextureFormats::ONE_BYTE:
+		memorySize = 1;
+		break;
+	case TextureFormats::ONE_FLOAT:
+		memorySize = 4;
+		break;
+	case TextureFormats::ONE_INTEGER:
+		memorySize = 4;
+		break;
+	}
+
+	buffer.Download(reusableData, memorySize * size.x * size.y);
+	Upload(reusableData);
 }
 
 Texture::Texture(Size size, TextureFormats format, container::Matrix* grid = nullptr)
