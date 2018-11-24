@@ -45,6 +45,8 @@ class World
 
 	Array <WorldObject> collisionAttempts_;
 
+	void UpdateSettlements();
+
 public:
 	World();
 
@@ -71,4 +73,6 @@ public:
 	void SetDetailResolution(int);
 
 	WorldObject ProcessSelection(Camera*, Float3, Float2);
+
+	void Update();
 };

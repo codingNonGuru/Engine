@@ -86,4 +86,6 @@ public:
 	SettlementRenderData* GetRenderData();
 
 	void SetRenderData(SettlementRenderData*);
+
+	void Update();
 };

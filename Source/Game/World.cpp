@@ -119,3 +119,16 @@ WorldObject World::ProcessSelection(Camera* camera, Float3 to, Float2 mouse)
 
 	return WorldObject::DEFAULT;
 }
+
+void World::Update()
+{
+	UpdateSettlements();
+}
+
+void World::UpdateSettlements()
+{
+	for(auto settlement = settlements_.GetStart(); settlement != settlements_.GetEnd(); ++settlement)
+	{
+		settlement->Update();
+	}
+}

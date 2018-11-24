@@ -83,6 +83,8 @@ void WorldScene::Update()
 	}
 
 	ProcessSelection();
+
+	world_->Update();
 }
 
 WorldObject currentSelection = WorldObject::DEFAULT;

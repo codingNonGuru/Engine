@@ -129,6 +129,11 @@ float Settlement::GetDistance(Settlement* settlement) const
 	return glm::length(direction);
 }
 
+void Settlement::Update()
+{
+
+}
+
 void Settlement::EvaluateFertility()
 {
 	float productivity = 0.0f;
