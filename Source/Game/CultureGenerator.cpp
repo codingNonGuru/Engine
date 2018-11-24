@@ -9,6 +9,7 @@
 #include "Game/Settlement.hpp"
 #include "Game/Tile.hpp"
 #include "Game/Road.hpp"
+#include "Game/Economy.hpp"
 
 #define MAXIMUM_SETTLEMENT_COUNT 65536
 
@@ -74,7 +75,11 @@ void CultureGenerator::GenerateSettlements(World& world)
 
 	auto & settlements = world.GetSettlements();
 
+	auto & economies = world.GetEconomies();
+
 	settlements.Initialize(MAXIMUM_SETTLEMENT_COUNT);
+
+	economies.Initialize(MAXIMUM_SETTLEMENT_COUNT);
 
 	Settlement::SetWorld(&world);
 

@@ -5,6 +5,7 @@
 
 class Settlement;
 
+class Economy;
 class Tile;
 class World;
 struct SettlementRenderData;
@@ -55,6 +56,8 @@ class Settlement
 	Color banner_;
 
 	SettlementRenderData* renderData_;
+
+	Economy* economy_;
 
 	void EvaluateFertility();
 

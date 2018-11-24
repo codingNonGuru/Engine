@@ -8,6 +8,7 @@ class File;
 struct WorldParameterSet;
 class Tile;
 class Settlement;
+class Economy;
 class Camera;
 struct Link;
 struct Road;
@@ -32,6 +33,8 @@ class World
 	Grid <Tile> tiles_;
 
 	Array <Settlement> settlements_;
+
+	Array <Economy> economies_;
 
 	Array <Link> links_;
 
@@ -61,6 +64,8 @@ public:
 	void SetSize(Size);
 
 	Array <Settlement> & GetSettlements();
+
+	Array <Economy> & GetEconomies();
 
 	Array <Link> & GetLinks();
 

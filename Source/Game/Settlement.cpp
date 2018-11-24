@@ -5,6 +5,7 @@
 #include "Game/World.hpp"
 #include "Game/Tile.hpp"
 #include "Game/SettlementRenderer.hpp"
+#include "Game/Economy.hpp"
 
 World* Settlement::world_ = nullptr;
 
@@ -33,6 +34,10 @@ void Settlement::Initialize(Position2 position)
 	latitude_ = (int)position_.y;
 
 	EvaluateFertility();
+
+	auto & economies = world_->GetEconomies();
+	auto economy = economies.Allocate();
+	*economy = Economy(this);
 }
 
 #define MAXIMUM_VERTEX_COUNT 16384
@@ -131,7 +136,7 @@ float Settlement::GetDistance(Settlement* settlement) const
 
 void Settlement::Update()
 {
-
+	economy_->Update();
 }
 
 void Settlement::EvaluateFertility()

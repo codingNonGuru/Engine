@@ -6,6 +6,7 @@
 #include "Game/WorldParameterSet.hpp"
 #include "Game/Settlement.hpp"
 #include "Game/Road.hpp"
+#include "Game/Economy.hpp"
 
 WorldObject WorldObject::DEFAULT = WorldObject(nullptr, WorldObjects::NONE);
 
@@ -40,6 +41,11 @@ void World::SetSize(Size size)
 Array <Settlement> & World::GetSettlements()
 {
 	return settlements_;
+}
+
+Array <Economy> & World::GetEconomies()
+{
+	return economies_;
 }
 
 Array <Link> & World::GetLinks()
