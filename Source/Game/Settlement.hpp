@@ -39,6 +39,8 @@ public:
 
 class Settlement
 {
+	friend class Economy;
+
 	static World* world_;
 
 	Index key_;
@@ -58,8 +60,6 @@ class Settlement
 	SettlementRenderData* renderData_;
 
 	Economy* economy_;
-
-	void EvaluateFertility();
 
 public:
 	static void SetWorld(World*);
