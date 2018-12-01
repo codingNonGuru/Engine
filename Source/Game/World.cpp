@@ -133,7 +133,6 @@ void World::Update()
 	if(isUpdating_ == false)
 		return;
 
-	std::cout<<"WORLD UPDATE\n";
 	UpdateSettlements();
 }
 

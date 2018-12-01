@@ -133,7 +133,7 @@ void WorldScene::ProcessSelection()
 		}
 	}
 
-	if(currentSelection.Object_ != nullptr && hoverTarget.Object_ != nullptr && currentSelection.Object_ != hoverTarget.Object_)
+	/*if(currentSelection.Object_ != nullptr && hoverTarget.Object_ != nullptr && currentSelection.Object_ != hoverTarget.Object_)
 	{
 		auto thisSet = (Settlement*)currentSelection.Object_;
 		auto otherSet = (Settlement*)hoverTarget.Object_;
@@ -154,7 +154,7 @@ void WorldScene::ProcessSelection()
 			std::cout<<angle<<" ";
 		}
 		std::cout<<"\n";
-	}
+	}*/
 }
 
 void WorldScene::Render()
