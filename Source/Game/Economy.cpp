@@ -5,9 +5,23 @@
 #include "Game/World.hpp"
 #include "Game/Tile.hpp"
 
-#define BASE_DEVELOPMENT_RATE 0.01f
+#define BASE_DEVELOPMENT_RATE 0.005f
 
 #define BASE_DECAY_RATE 0.001f
+
+#define WORKFORCE_FACTOR 0.01f
+
+void GrowthTrend::Update(const Economy& economy)
+{
+	if(Time_ >= Length_)
+	{
+		Factor_ = utility::GetRandom(-0.5f, 1.5f);
+
+		Time_ = 0;
+	}
+
+	Time_++;
+}
 
 Economy::Economy() {}
 
@@ -43,23 +57,32 @@ Economy::Economy(Settlement* settlement) : settlement_(settlement)
 
 	float potentialDevelopment = resource_ * technology_;
 
-	development_ = potentialDevelopment * utility::GetRandom(0.2f, 0.5f);
+	development_ = potentialDevelopment * utility::GetRandom(0.1f, 0.4f);
+
+	growthTrends_.Initialize(3);
+	*growthTrends_.Allocate() = GrowthTrend(30);
+	*growthTrends_.Allocate() = GrowthTrend(100);
+	*growthTrends_.Allocate() = GrowthTrend(250);
 }
 
 void Economy::Update()
 {
-	float potentialDevelopment = resource_ * technology_;
-
-	if(development_ > potentialDevelopment)
+	float growthFactor = 0.0f;
+	const float trendWeight = 1.0f / (float)growthTrends_.GetSize();
+	for(auto trend = growthTrends_.GetStart(); trend != growthTrends_.GetEnd(); ++trend)
 	{
-		float developmentDelta = potentialDevelopment - development_;
-		float overshootModifier = exp(-pow(developmentDelta, 2.0f) / pow(potentialDevelopment * 0.1f, 2.0f));
-		development_ *= 1.0f + BASE_DEVELOPMENT_RATE * overshootModifier;
-	}
-	else
-	{
-		development_ *= 1.0f + BASE_DEVELOPMENT_RATE;
-	}
+		trend->Update(*this);
 
-	development_ *= 1.0f - BASE_DECAY_RATE;
+		growthFactor += trend->Factor_ * trendWeight;
+	}
+	growthFactor *= exp(-pow(development_, 2.0f) / (0.7f * pow(GetPotential(), 2.0f)));
+
+	development_ *= 1.0f + BASE_DEVELOPMENT_RATE * growthFactor;
+
+	development_ *= 1.0f - BASE_DECAY_RATE * pow(development_ / GetPotential(), 2.0f);
+}
+
+int Economy::GetNecessaryWorkforce()
+{
+	return development_ / WORKFORCE_FACTOR;
 }

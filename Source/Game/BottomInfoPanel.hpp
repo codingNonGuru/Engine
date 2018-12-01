@@ -12,6 +12,10 @@ class BottomInfoPanel : public Element
 
 	Text* developmentLabel_;
 
+	Text* technologyLabel_;
+
+	Text* resourceLabel_;
+
 protected:
 	virtual void HandleInitialize() override;
 

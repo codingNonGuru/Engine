@@ -1,6 +1,11 @@
 #include "Interface/Text.hpp"
+#include "Interface/Interface.hpp"
+#include "Interface/Font.hpp"
+#include "Interface/FontManager.hpp"
+#include "Transform.hpp"
 
 #include "Game/BottomInfoPanel.hpp"
+#include "Game/InterfaceBuilder.hpp"
 #include "Game/WorldScene.hpp"
 #include "Game/World.hpp"
 #include "Game/Settlement.hpp"
@@ -9,16 +14,33 @@
 
 void BottomInfoPanel::HandleInitialize()
 {
+	auto font = FontManager::GetFont("Dominican");
+	auto textColor = InterfaceBuilder::GetTextColor();
+
 	populationLabel_ = (Text*)GetChild("PopulationLabel");
 
 	buildingLabel_ = (Text*)GetChild("BuildingLabel");
 
 	developmentLabel_ = (Text*)GetChild("DevelopmentLabel");
+
+	technologyLabel_ = Interface::AddElement("TechnologyLabel", new Text(font, textColor));
+	technologyLabel_->Configure(Size(256, 256), DrawOrder(2), new Transform(Position2(0.0f, 150.0f)), nullptr);
+
+	technologyLabel_->Enable();
+	technologyLabel_->SetParent(this);
+
+	resourceLabel_ = Interface::AddElement("PotentialLabel", new Text(font, textColor));
+	resourceLabel_->Configure(Size(256, 256), DrawOrder(2), new Transform(Position2(0.0f, 200.0f)), nullptr);
+
+	resourceLabel_->Enable();
+	resourceLabel_->SetParent(this);
 }
 
 Word populationString;
 Word buildingString;
 Word developmentString;
+Word technologyString;
+Word resourceString;
 
 void BottomInfoPanel::HandleUpdate()
 {
@@ -46,6 +68,14 @@ void BottomInfoPanel::HandleUpdate()
 	const Economy& economy = settlement->GetEconomy();
 
 	developmentString = Word("Development: ");
-	sprintf(developmentString.GetEnd(), "%f", economy.GetDevelopment());
+	sprintf(developmentString.GetEnd(), "%d", int(economy.GetDevelopment() * 100.0f));
 	developmentLabel_->Setup(developmentString, 0.5f);
+
+	technologyString = Word("Technology: ");
+	sprintf(technologyString .GetEnd(), "%f", economy.GetTechnology());
+	technologyLabel_->Setup(technologyString, 0.5f);
+
+	resourceString = Word("Resource: ");
+	sprintf(resourceString .GetEnd(), "%d", int(economy.GetPotential() * 100.0f));
+	resourceLabel_->Setup(resourceString, 0.5f);
 }
