@@ -564,6 +564,12 @@ void InterfaceBuilder::GenerateBottomInfoPanel()
 
 	label->Enable();
 	label->SetParent(panel);
+
+	label = Interface::AddElement("DevelopmentLabel", new Text(font, textColor));
+	label->Configure(Size(256, 256), DrawOrder(2), new Transform(Position2(0.0f, 100.0f)), nullptr);
+
+	label->Enable();
+	label->SetParent(panel);
 }
 
 void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, float endHeight)

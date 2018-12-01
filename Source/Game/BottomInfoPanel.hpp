@@ -10,6 +10,8 @@ class BottomInfoPanel : public Element
 
 	Text* buildingLabel_;
 
+	Text* developmentLabel_;
+
 protected:
 	virtual void HandleInitialize() override;
 

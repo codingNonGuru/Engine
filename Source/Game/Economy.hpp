@@ -20,4 +20,6 @@ public:
 	Economy(Settlement*);
 
 	void Update();
+
+	float GetDevelopment() const {return development_;}
 };

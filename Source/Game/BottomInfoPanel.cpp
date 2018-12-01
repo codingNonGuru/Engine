@@ -5,16 +5,20 @@
 #include "Game/World.hpp"
 #include "Game/Settlement.hpp"
 #include "Game/SettlementRenderer.hpp"
+#include "Game/Economy.hpp"
 
 void BottomInfoPanel::HandleInitialize()
 {
 	populationLabel_ = (Text*)GetChild("PopulationLabel");
 
 	buildingLabel_ = (Text*)GetChild("BuildingLabel");
+
+	developmentLabel_ = (Text*)GetChild("DevelopmentLabel");
 }
 
 Word populationString;
 Word buildingString;
+Word developmentString;
 
 void BottomInfoPanel::HandleUpdate()
 {
@@ -38,4 +42,10 @@ void BottomInfoPanel::HandleUpdate()
 	buildingString = Word("Buildings: ");
 	sprintf(buildingString.GetEnd(), "%d", buildingCount);
 	buildingLabel_->Setup(buildingString, 0.5f);
+
+	const Economy& economy = settlement->GetEconomy();
+
+	developmentString = Word("Development: ");
+	sprintf(developmentString.GetEnd(), "%f", economy.GetDevelopment());
+	developmentLabel_->Setup(developmentString, 0.5f);
 }
