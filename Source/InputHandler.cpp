@@ -100,13 +100,18 @@ bool InputHandler::IsPressed(int32_t key)
 
 bool InputHandler::WasPressed(int32_t key)
 {
-	int i = 0;
-	for(auto formKey = formerKeys_.GetStart(); formKey != formerKeys_.GetEnd(); ++formKey, ++i)
+	for(auto currentKey = currentKeys_.GetStart(); currentKey != currentKeys_.GetEnd(); ++currentKey)
 	{
-		if(*formKey == key && *formKey == *(currentKeys_.GetStart() + i))
-			return true;
-		else if(*formKey == key)
-			return false;
+		if(*currentKey != key)
+			continue;
+
+		for(auto formKey = formerKeys_.GetStart(); formKey != formerKeys_.GetEnd(); ++formKey)
+		{
+			if(*formKey == key)
+				return false;
+		}
+
+		return true;
 	}
 
 	return false;
