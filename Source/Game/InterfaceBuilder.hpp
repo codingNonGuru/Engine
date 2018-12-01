@@ -1,6 +1,7 @@
 #pragma once
 
 class Element;
+class Color;
 
 class InterfaceBuilder
 {
@@ -40,4 +41,6 @@ class InterfaceBuilder
 
 public:
 	static void GenerateInterface();
+
+	static Color& GetTextColor();
 };

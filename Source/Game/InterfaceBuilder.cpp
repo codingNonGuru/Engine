@@ -65,6 +65,11 @@ void InterfaceBuilder::GenerateInterface()
 	}
 }
 
+Color& InterfaceBuilder::GetTextColor()
+{
+	return textColor;
+}
+
 void InterfaceBuilder::GenerateMainMenu()
 {
 	auto texture = TextureManager::GetTexture("MainMenu");
