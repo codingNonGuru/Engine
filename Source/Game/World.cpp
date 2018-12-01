@@ -21,6 +21,8 @@ World::World(const WorldParameterSet& parameterSet)
 	WorldGenerator::Generate(*this, parameterSet);
 
 	collisionAttempts_.Initialize(256);
+
+	isUpdating_ = false;
 }
 
 Grid <Tile> & World::GetTiles()
@@ -128,6 +130,10 @@ WorldObject World::ProcessSelection(Camera* camera, Float3 to, Float2 mouse)
 
 void World::Update()
 {
+	if(isUpdating_ == false)
+		return;
+
+	std::cout<<"WORLD UPDATE\n";
 	UpdateSettlements();
 }
 

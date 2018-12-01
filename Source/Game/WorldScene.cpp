@@ -53,6 +53,18 @@ const float zoomModifier = 0.005f;
 
 void WorldScene::Update()
 {
+	if(InputHandler::WasPressed(SDL_SCANCODE_SPACE))
+	{
+		if(world_->IsUpdating())
+		{
+			world_->Stop();
+		}
+		else
+		{
+			world_->Start();
+		}
+	}
+
 	if(InputHandler::IsPressed(SDL_SCANCODE_A))
 	{
 		camera_->Spin(-spinModifier);

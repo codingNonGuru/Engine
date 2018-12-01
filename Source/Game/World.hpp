@@ -28,6 +28,8 @@ struct WorldObject
 
 class World
 {
+	bool isUpdating_;
+
 	Size size_;
 
 	Grid <Tile> tiles_;
@@ -80,4 +82,10 @@ public:
 	WorldObject ProcessSelection(Camera*, Float3, Float2);
 
 	void Update();
+
+	bool IsUpdating() {return isUpdating_;}
+
+	void Start() {isUpdating_ = true;}
+
+	void Stop() {isUpdating_ = false;}
 };

@@ -34,8 +34,8 @@ void Settlement::Initialize(Position2 position)
 	latitude_ = (int)position_.y;
 
 	auto & economies = world_->GetEconomies();
-	auto economy = economies.Allocate();
-	*economy = Economy(this);
+	economy_ = economies.Allocate();
+	*economy_ = Economy(this);
 }
 
 #define MAXIMUM_VERTEX_COUNT 16384

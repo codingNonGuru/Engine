@@ -82,6 +82,8 @@ public:
 
 	void SetLinkNetwork(LinkNetwork);
 
+	const Economy& GetEconomy() {return *economy_;}
+
 	float GetDistance(Settlement*) const;
 
 	Color & GetBanner();
