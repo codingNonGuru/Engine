@@ -2,6 +2,7 @@
 
 class Element;
 class Color;
+enum class InterfaceElementParameters;
 
 class InterfaceBuilder
 {
@@ -35,9 +36,11 @@ class InterfaceBuilder
 
 	static void GenerateBottomInfoPanel();
 
-	static void AddOpenAnimation(Element*, float, float);
+	static void GenerateTopBar();
 
-	static void AddCloseAnimation(Element*, float, float);
+	static void AddOpenAnimation(Element*, float, float, InterfaceElementParameters);
+
+	static void AddCloseAnimation(Element*, float, float, InterfaceElementParameters);
 
 public:
 	static void GenerateInterface();

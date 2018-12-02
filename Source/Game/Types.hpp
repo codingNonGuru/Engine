@@ -104,6 +104,7 @@ public:
 	static Word const NEW_WORLD_MENU;
 	static Word const WORLD_PREVIEW_PANEL;
 	static Word const BOTTOM_INFO_PANEL;
+	static Word const TOP_BAR;
 };
 
 class Cameras

@@ -12,11 +12,13 @@ WorldState::WorldState()
 	worldScene_ = SceneManager::Get(Scenes::WORLD);
 
 	bottomInfoPanel_ = Interface::GetElement(Elements::BOTTOM_INFO_PANEL);
+
+	topBar_ = Interface::GetElement(Elements::TOP_BAR);
 }
 
 void WorldState::HandleEnter()
 {
-	TaskManager::Add()->Initialize(this, &WorldState::HandleSceneEnable, 0.5f);
+	TaskManager::Add()->Initialize(this, &WorldState::HandleSceneEnable, 2.0f);
 }
 
 void WorldState::HandleExit()
@@ -25,6 +27,8 @@ void WorldState::HandleExit()
 	{
 		worldScene_->Disable();
 	}
+
+	topBar_->Close();
 }
 
 void WorldState::HandleSceneEnable()
@@ -34,8 +38,5 @@ void WorldState::HandleSceneEnable()
 		worldScene_->Enable();
 	}
 
-	/*if(bottomInfoPanel_ != nullptr)
-	{
-		bottomInfoPanel_->Open();
-	}*/
+	topBar_->Open();
 }

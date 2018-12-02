@@ -390,4 +390,8 @@ void InterfacePainter::PaintInterface()
 		GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
 		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
 	}
+
+	GenerateTextures(ElementShapes::SQUARE, Size(2560, 256), baseTexture, shadowTexture);
+	TextureManager::AddTexture(baseTexture, "TopBar");
+	TextureManager::AddTexture(shadowTexture, "TopBarShadow");
 }

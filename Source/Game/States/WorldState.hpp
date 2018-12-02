@@ -12,6 +12,8 @@ private:
 
 	Element* bottomInfoPanel_;
 
+	Element* topBar_;
+
 	void HandleSceneEnable();
 
 protected:

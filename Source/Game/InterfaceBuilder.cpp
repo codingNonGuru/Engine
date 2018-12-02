@@ -26,6 +26,7 @@
 #include "Game/WorldPreviewButton.hpp"
 #include "Game/BottomInfoPanel.hpp"
 #include "Game/CloseButton.hpp"
+#include "Game/Interface/TopBar.hpp"
 #include "Game/InterfacePainter.hpp"
 
 Shader* spriteShader = nullptr;
@@ -54,6 +55,8 @@ void InterfaceBuilder::GenerateInterface()
 
 	GenerateBottomInfoPanel();
 
+	GenerateTopBar();
+
 	auto elements = Interface::GetElements();
 	for(auto elementIterator = elements.GetStart(); elementIterator != elements.GetEnd(); ++elementIterator)
 	{
@@ -80,9 +83,9 @@ void InterfaceBuilder::GenerateMainMenu()
 
 	auto animator = mainMenu->GetAnimator();
 
-	AddOpenAnimation(mainMenu, 1800.0f, 0.0f);
+	AddOpenAnimation(mainMenu, 1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
-	AddCloseAnimation(mainMenu, -1800.0f, 0.0f);
+	AddCloseAnimation(mainMenu, -1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
 	texture = TextureManager::GetTexture("MainMenuShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -139,9 +142,9 @@ void InterfaceBuilder::GenerateNewGameMenu()
 
 	auto animator = menu->GetAnimator();
 
-	AddOpenAnimation(menu, 1800.0f, 0.0f);
+	AddOpenAnimation(menu, 1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
-	AddCloseAnimation(menu, -1800.0f, 0.0f);
+	AddCloseAnimation(menu, -1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
 	texture = TextureManager::GetTexture("NewGameMenuShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -231,9 +234,9 @@ void InterfaceBuilder::GenerateNewWorldMenu()
 	auto menu = Interface::AddElement(Elements::NEW_WORLD_MENU, new NewWorldMenu());
 	menu->Configure(Size(400, 400), DrawOrder(-1), new Transform(Position2(0.0f, 0.0f)), sprite);
 
-	AddOpenAnimation(menu, 1800.0f, 0.0f);
+	AddOpenAnimation(menu, 1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
-	AddCloseAnimation(menu, -1800.0f, 0.0f);
+	AddCloseAnimation(menu, -1800.0f, 0.0f, InterfaceElementParameters::POSITION_X);
 
 	texture = TextureManager::GetTexture("NewWorldMenuShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -468,9 +471,9 @@ void InterfaceBuilder::GenerateWorldPreview()
 	auto panel = Interface::AddElement(Elements::WORLD_PREVIEW_PANEL, new WorldPreviewPanel());
 	panel->Configure(Size(256, 256), DrawOrder(1), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
 
-	AddOpenAnimation(panel, 1800.0f, 800.0f);
+	AddOpenAnimation(panel, 1800.0f, 800.0f, InterfaceElementParameters::POSITION_X);
 
-	AddCloseAnimation(panel, 1800.0f, 800.0f);
+	AddCloseAnimation(panel, 1800.0f, 800.0f, InterfaceElementParameters::POSITION_X);
 
 	texture = TextureManager::GetTexture("WorldPreviewPanelShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -543,9 +546,9 @@ void InterfaceBuilder::GenerateBottomInfoPanel()
 	auto panel = Interface::AddElement(Elements::BOTTOM_INFO_PANEL, new BottomInfoPanel());
 	panel->Configure(Size(256, 256), DrawOrder(1), new Transform(Position2(-1044.0f, 420.0f)), sprite, Opacity(1.0f));
 
-	AddOpenAnimation(panel, -1800.0f, -1044.0f);
+	AddOpenAnimation(panel, -1800.0f, -1044.0f, InterfaceElementParameters::POSITION_X);
 
-	AddCloseAnimation(panel, -1800.0f, -1044.0f);
+	AddCloseAnimation(panel, -1800.0f, -1044.0f, InterfaceElementParameters::POSITION_X);
 
 	texture = TextureManager::GetTexture("BottomInfoPanelShadow");
 	sprite = new Sprite(texture, shadowShader);
@@ -577,7 +580,29 @@ void InterfaceBuilder::GenerateBottomInfoPanel()
 	label->SetParent(panel);
 }
 
-void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, float endHeight)
+void InterfaceBuilder::GenerateTopBar()
+{
+	auto texture = TextureManager::GetTexture("TopBar");
+	auto sprite = new Sprite(texture, spriteShader);
+
+	auto panel = Interface::AddElement(Elements::TOP_BAR, new TopBar());
+	panel->Configure(Size(2560, 256), DrawOrder(1), new Transform(Position2(0.0f, -640.0f)), sprite, Opacity(1.0f));
+
+	AddOpenAnimation(panel, -848.0f, -688.0f, InterfaceElementParameters::POSITION_Y);
+
+	AddCloseAnimation(panel, -848.0f, -688.0f, InterfaceElementParameters::POSITION_Y);
+
+	texture = TextureManager::GetTexture("TopBarShadow");
+	sprite = new Sprite(texture, shadowShader);
+
+	auto shadow = Interface::AddElement("Shadow", new Element());
+	shadow->Configure(Size(150, 150), DrawOrder(0), new Transform(Position2(0.0f, 0.0f)), sprite, Opacity(1.0f));
+
+	shadow->Enable();
+	shadow->SetParent(panel);
+}
+
+void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, float endHeight, InterfaceElementParameters parameter)
 {
 	auto animator = element->GetAnimator();
 	if(animator == nullptr)
@@ -585,7 +610,7 @@ void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, flo
 
 	auto animation = animator->AddAnimation(new Animation(0.5f), "Open");
 	{
-		auto property = element->AddAnimationProperty("Open", InterfaceElementParameters::POSITION_X);
+		auto property = element->AddAnimationProperty("Open", parameter);
 		property->AddKey()->Initialize(0.0f, startHeight);
 		property->AddKey()->Initialize(animation->GetLength(), endHeight);
 	}
@@ -596,7 +621,7 @@ void InterfaceBuilder::AddOpenAnimation(Element* element, float startHeight, flo
 	}
 }
 
-void InterfaceBuilder::AddCloseAnimation(Element* element, float startHeight, float endHeight)
+void InterfaceBuilder::AddCloseAnimation(Element* element, float startHeight, float endHeight, InterfaceElementParameters parameter)
 {
 	auto animator = element->GetAnimator();
 	if(animator == nullptr)
@@ -604,7 +629,7 @@ void InterfaceBuilder::AddCloseAnimation(Element* element, float startHeight, fl
 
 	auto animation = animator->AddAnimation(new Animation(0.5f), "Close");
 	{
-		auto property = element->AddAnimationProperty("Close", InterfaceElementParameters::POSITION_X);
+		auto property = element->AddAnimationProperty("Close", parameter);
 		property->AddKey()->Initialize(0.0f, endHeight);
 		property->AddKey()->Initialize(animation->GetLength(), startHeight);
 	}
