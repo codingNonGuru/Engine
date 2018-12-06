@@ -481,7 +481,6 @@ void CultureGenerator::GenerateLinks(World& world)
 		}
 
 		*linkCounts.Allocate() = linkCount;
-		std::cout<<"LINKS "<<linkCount<<"\n";
 
 		if(succesiveMatches > 0)
 		{

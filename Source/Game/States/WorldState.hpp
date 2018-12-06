@@ -10,7 +10,7 @@ class WorldState : public State
 private:
 	Scene* worldScene_;
 
-	Element* bottomInfoPanel_;
+	Element* topPanel_;
 
 	Element* topBar_;
 

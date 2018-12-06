@@ -39,6 +39,7 @@ Word const Elements::NEW_WORLD_MENU = Word("NewWorldMenu");
 Word const Elements::WORLD_PREVIEW_PANEL = Word("WorldPreviewPanel");
 Word const Elements::BOTTOM_INFO_PANEL = Word("BottomInfoPanel");
 Word const Elements::TOP_BAR = Word("TopBar");
+Word const Elements::TOP_PANEL = Word("TopPanel");
 
 Word const Cameras::PREGAME = Word("Pregame");
 Word const Cameras::WORLD = Word("World");

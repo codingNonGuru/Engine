@@ -105,6 +105,7 @@ public:
 	static Word const WORLD_PREVIEW_PANEL;
 	static Word const BOTTOM_INFO_PANEL;
 	static Word const TOP_BAR;
+	static Word const TOP_PANEL;
 };
 
 class Cameras

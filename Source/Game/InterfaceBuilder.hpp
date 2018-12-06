@@ -38,6 +38,8 @@ class InterfaceBuilder
 
 	static void GenerateTopBar();
 
+	static void GenerateTopPanel();
+
 	static void AddOpenAnimation(Element*, float, float, InterfaceElementParameters);
 
 	static void AddCloseAnimation(Element*, float, float, InterfaceElementParameters);
