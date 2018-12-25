@@ -7,7 +7,7 @@
 
 Shader* Perlin::shader_ = nullptr;
 
-Map <DataBuffer> Perlin::buffers_ = Map <DataBuffer> (3);
+Map <DataBuffer> Perlin::buffers_ = Map <DataBuffer> (2);
 
 DataBuffer* Perlin::targetBuffer_ = nullptr;
 
@@ -15,11 +15,9 @@ bool Perlin::isInitialized_ = false;
 
 enum class Stages
 {
-	SET_LATTICE_CORE,
-	SET_LATTICE_EDGES,
+	SET_LATTICE,
 	FILL_LATTICE,
-	ADD_OCTAVES,
-	CLEAR
+	ADD_OCTAVES
 };
 
 void Perlin::Initialize()
@@ -44,7 +42,6 @@ void Perlin::Initialize()
 		*pixel = utility::GetRandom(0.0f, 1.0f);
 	}
 
-	*buffers_.Add("octaves") = DataBuffer(pixelCount * sizeof(float));
 	*buffers_.Add("result") = DataBuffer(pixelCount * sizeof(float));
 	*buffers_.Add("stream") = DataBuffer(stream.GetMemoryCapacity(), stream.GetStart());
 
@@ -77,22 +74,18 @@ DataBuffer* Perlin::Generate(Size size, FocusIndex focusIndex, ContrastThreshold
 
 	shader_->Bind();
 
-	buffers_.Get("octaves")->Bind(0);
 	if(targetBuffer_ != nullptr)
 	{
-		targetBuffer_->Bind(1);
+		targetBuffer_->Bind(0);
 		targetBuffer_ = nullptr;
 	}
 	else
 	{
-		buffers_.Get("result")->Bind(1);
+		buffers_.Get("result")->Bind(0);
 	}
-	buffers_.Get("stream")->Bind(2);
+	buffers_.Get("stream")->Bind(1);
 
 	shader_->SetConstant(size, "size");
-	auto stage = (int)Stages::CLEAR;
-	shader_->SetConstant(stage, "stage");
-	shader_->DispatchCompute(computeSize);
 
 	auto side = size.x;
 	int horizontalExponent = 0;
@@ -111,34 +104,15 @@ DataBuffer* Perlin::Generate(Size size, FocusIndex focusIndex, ContrastThreshold
 	}
 
 	int exponent = verticalExponent > horizontalExponent ? horizontalExponent : verticalExponent;
+	shader_->SetConstant(exponent, "exponent");
 
-	//Generate layers and add them to result
-	unsigned int order = pow(2, exponent);
 	unsigned int octaveCount = exponent;
 	shader_->SetConstant(octaveCount, "octaveCount");
 
-	for(int tier = octaveCount; tier >= 0; --tier, order /= 2)
-	{
-		shader_->SetConstant(order, "order");
+	unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
+	shader_->SetConstant(timeSeed, "timeSeed");
 
-		shader_->SetConstant(tier, "octaveIndex");
-
-		unsigned int timeSeed = utility::GetRandom(0, pow(2, 24));
-		shader_->SetConstant(timeSeed, "timeSeed");
-
-		shader_->SetConstant(focusIndex, "strongestOctave");
-
-		for(Index stage = 0; stage < 3; ++stage)
-		{
-			shader_->SetConstant(stage, "stage");
-			shader_->DispatchCompute(computeSize);
-		}
-	}
-
-	//Finish result
-	stage = (int)Stages::ADD_OCTAVES;
-	shader_->SetConstant(stage, "stage");
-	shader_->SetConstant(octaveCount, "octaveCount");
+	shader_->SetConstant(focusIndex, "strongestOctave");
 	shader_->SetConstant(range, "range");
 	shader_->SetConstant(contrastThreshold, "contrast");
 	shader_->SetConstant(contrastStrength, "contrastStrength");
