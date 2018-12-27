@@ -67,6 +67,17 @@ void DataBuffer::Download(void * data, Length size)
 	Unbind();
 }
 
+void DataBuffer::Copy(DataBuffer* destination)
+{
+	glBindBuffer(GL_COPY_READ_BUFFER, key_);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, destination->key_);
+
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, memorySize_);
+
+	glBindBuffer(GL_COPY_READ_BUFFER, 0);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+}
+
 void DataBuffer::Bind()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, key_);

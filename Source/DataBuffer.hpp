@@ -31,6 +31,8 @@ public:
 
 	void Download(void *, Length);
 
+	void Copy(DataBuffer*);
+
 	void Bind();
 
 	void Bind(GLuint);
