@@ -39,41 +39,50 @@ void main()
 	
 	bool isOutbounded = false;
 	int baseX = int(x) + offset.x;
-	if(baseX >= int(baseSize.x)) {
+	if(baseX >= int(baseSize.x)) 
+	{
 		baseX -= int(baseSize.x);
 		isOutbounded = true;
-	} else if(baseX < 0) {
+	} 
+	else if(baseX < 0) 
+	{
 		baseX += int(baseSize.x);
 		isOutbounded = true;
 	}
 	
 	int baseY = int(y) + offset.y;
-	if(baseY >= int(baseSize.y)) {
+	if(baseY >= int(baseSize.y)) 
+	{
 		baseY -= int(baseSize.y);
 		isOutbounded = true;
-	} else if(baseY < 0) {
+	} 
+	else if(baseY < 0) 
+	{
 		baseY += int(baseSize.y);
 		isOutbounded = true;
 	}
 	uint baseIndex = uint(baseY) * baseSize.x + uint(baseX);
 	
 	float finalAlpha = stencil[index] * alpha;
-	if(isOutbounded == true)
+	if(isOutbounded)
 		finalAlpha = 0.0f;
-	else
-		finalAlpha = finalAlpha;
 		
-	if(mode == 0) { //COLOR MODE
+	if(mode == 0) 
+	{ //COLOR MODE
 		colorBase[baseIndex].r = finalAlpha * color.r + colorBase[baseIndex].r * (1.0f - finalAlpha);
 		colorBase[baseIndex].g = finalAlpha * color.g + colorBase[baseIndex].g * (1.0f - finalAlpha);
 		colorBase[baseIndex].b = finalAlpha * color.b + colorBase[baseIndex].b * (1.0f - finalAlpha);
-	} else if(mode == 1) { //ALPHA MODE
+	} 
+	else if(mode == 1) 
+	{ //ALPHA MODE
 		alphaBase[baseIndex] = finalAlpha * color.r + alphaBase[baseIndex] * (1.0f - finalAlpha);
-	} else if(mode == 2) { //RGBA MODE
+	} 
+	else if(mode == 2) 
+	{ //RGBA MODE
 		rgbaBase[baseIndex].r = finalAlpha * color.r + rgbaBase[baseIndex].r * (1.0f - finalAlpha);
 		rgbaBase[baseIndex].g = finalAlpha * color.g + rgbaBase[baseIndex].g * (1.0f - finalAlpha);
 		rgbaBase[baseIndex].b = finalAlpha * color.b + rgbaBase[baseIndex].b * (1.0f - finalAlpha);
-	}  
+	}
 	
 	/*rgbaBase[baseIndex].r = 1.0f;
 	rgbaBase[baseIndex].g = 0.5f;

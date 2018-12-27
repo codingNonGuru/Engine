@@ -29,6 +29,10 @@ Shader * InterfacePainter::shader_ = nullptr;
 
 Shader * paperGenerationShader = nullptr;
 
+Shader * cropShader = nullptr;
+
+Color baseColor = Color(0.95f, 0.81f, 0.72f);
+
 struct KernelBuffer
 {
 	Kernel* Kernel_;
@@ -46,16 +50,15 @@ KernelBuffer* currentKernel = nullptr;
 
 void InterfacePainter::Initialize()
 {
-	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.7f, -0.2f), Range(0.3f, 1.0f), Weight(0.5f));
-	basePalette.Add(Color(1.0f, 0.5f, 0.0f), Range(-0.8f, -0.2f), Range(0.0f, 1.0f), Weight(1.0f));
-	basePalette.Add(Color(0.0f, 0.5f, 1.0f), Range(-0.7f, -0.2f), Range(0.3f, 1.0f), Weight(0.1f));
-
-	//lightPalette.Add(Color(1.0f, 0.8f, 0.5f), Range(0.5f, 1.0f), Range(0.0f, 1.0f), Weight(1.0f));
+	basePalette.Add(baseColor, Range(0.0f, 0.0f), Range(0.0f, 0.0f), Weight(1.5f));
+	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, -0.0f), Range(0.3f, 1.0f), Weight(1.0f));
+	basePalette.Add(Color(1.0f, 0.3f, 0.0f), Range(-0.6f, -0.0f), Range(0.0f, 1.0f), Weight(0.5f));
 
 	Size canvasSize(2048, 2048);
 	int pixelCount = canvasSize.x * canvasSize.y;
 
 	*buffers_.Add("diffuse") = DataBuffer(pixelCount * 16);
+	*buffers_.Add("cache") = DataBuffer(pixelCount * 16);
 	*buffers_.Add("edgeBlur") = DataBuffer(pixelCount * 4);
 	*buffers_.Add("edgeBlurSwap") = DataBuffer(pixelCount * 4);
 
@@ -64,6 +67,8 @@ void InterfacePainter::Initialize()
 	GenerateStencils();
 
 	paperGenerationShader = ShaderManager::GetShaderMap().Get("GeneratePaper");
+
+	cropShader = ShaderManager::GetShaderMap().Get("Crop");
 }
 
 void InterfacePainter::SetupKernels()
@@ -123,8 +128,7 @@ void InterfacePainter::GenerateStencils()
 {
 	Size sourceSize(2048, 2048);
 
-	Perlin::Generate(sourceSize, FocusIndex(0.5f), 0.53f, 16.0f);
-	perlinBuffer = Perlin::GetResultBuffer();
+	perlinBuffer = Perlin::Generate(sourceSize, FocusIndex(0.5f), 0.51f, 16.0f);
 
 	container::LayeredGrid<float> stencils(512, 512, 16);
 
@@ -152,7 +156,7 @@ void InterfacePainter::GenerateStencils()
 		shader->SetConstant(offset, "offset");
 		shader->SetConstant(index, "stencilIndex");
 
-		shader->DispatchCompute(Size(128, 128));
+		shader->DispatchCompute(stencilSize / 4);
 
 		x++;
 		if(x == sourceSize.x / stencils.GetWidth())
@@ -167,7 +171,7 @@ void InterfacePainter::GenerateStencils()
 
 void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 {
-	Perlin::Generate(size, FocusIndex(0.3f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
+	Perlin::Generate(size, FocusIndex(0.2f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
 
 	Size computeSize(size.x / 16, size.y / 16);
 
@@ -177,31 +181,38 @@ void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 
 	currentKernel = kernelBuffers.Get("tiny");
 
-	Blur(paperGenerationShader, computeSize);
+	Blur(computeSize);
 
-	ConvertBlurToAlpha(paperGenerationShader, computeSize);
+	ConvertBlurToAlpha(computeSize);
 }
 
-void InterfacePainter::GenerateShadow(Size size, Size computeSize)
+void InterfacePainter::GenerateShadow(Size size, Texture*& texture)
 {
 	SetupPaperGenerator(size);
 
 	currentKernel = kernelBuffers.Get("small");
 
-	Blur(paperGenerationShader, computeSize);
+	Blur(size / 16);
+
+	Grid <float> shadowMap(size.x, size.y);
+	buffers_.Get("edgeBlurSwap")->Download(&shadowMap);
+
+	shadowMap *= 0.7f;
+
+	texture = new Texture(size, TextureFormats::ONE_FLOAT, &shadowMap);
 }
 
-void InterfacePainter::HighlightEdges(Size size, Size computeSize, const char* kernelName)
+void InterfacePainter::HighlightEdges(Size size, const char* kernelName)
 {
-	Perlin::Generate(size, FocusIndex(1.0f), 0.53f, 8.0f);
+	Perlin::Generate(size, FocusIndex(0.9f), 0.49f, 8.0f);
 
 	SetupPaperGenerator(size);
 
 	currentKernel = kernelBuffers.Get(kernelName);
 
-	Blur(paperGenerationShader, computeSize);
+	Blur(size / 16);
 
-	ConvertBlurToColor(paperGenerationShader, computeSize);
+	ConvertBlurToColor(paperGenerationShader, size / 16);
 }
 
 void InterfacePainter::SetupPaperGenerator(Size size)
@@ -220,7 +231,6 @@ void InterfacePainter::Clear(Shader* shader, Size computeSize, ElementShapes sha
 {
 	SetStage(Stages::CLEAR);
 
-	Float4 baseColor = Color(0.95f, 0.81f, 0.72f, 1.0f);
 	shader->SetConstant(baseColor, "baseColor");
 
 	shader->SetConstant((int)shape, "shape");
@@ -228,30 +238,47 @@ void InterfacePainter::Clear(Shader* shader, Size computeSize, ElementShapes sha
 	shader->DispatchCompute(computeSize);
 }
 
-void InterfacePainter::Blur(Shader* shader, Size computeSize)
+void InterfacePainter::Crop(Size size, Size sourceSize, Size offset, ElementShapes shape)
+{
+	cropShader->Bind();
+
+	buffers_.Get("diffuse")->Bind(0);
+	buffers_.Get("cache")->Bind(1);
+
+	cropShader->SetConstant(size, "destinationSize");
+	cropShader->SetConstant(sourceSize, "sourceSize");
+	cropShader->SetConstant(offset, "offset");
+	cropShader->SetConstant((int)shape, "shape");
+
+	cropShader->DispatchCompute(size / 4);
+
+	cropShader->Unbind();
+}
+
+void InterfacePainter::Blur(Size computeSize)
 {
 	currentKernel->Buffer_->Bind(4);
 
 	SetStage(Stages::BLUR_HORIZONTALLY);
 
 	int filterSize = currentKernel->Kernel_->GetSide();
-	shader->SetConstant(filterSize, "filterSize");
+	paperGenerationShader->SetConstant(filterSize, "filterSize");
 
-	shader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(computeSize);
 
 	SetStage(Stages::BLUR_VERTICALLY);
 
 	filterSize = currentKernel->Kernel_->GetSide();
-	shader->SetConstant(filterSize, "filterSize");
+	paperGenerationShader->SetConstant(filterSize, "filterSize");
 
-	shader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(computeSize);
 }
 
-void InterfacePainter::ConvertBlurToAlpha(Shader* shader, Size computeSize)
+void InterfacePainter::ConvertBlurToAlpha(Size computeSize)
 {
 	SetStage(Stages::CONVERT_BLUR_TO_ALPHA);
 
-	shader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(computeSize);
 }
 
 void InterfacePainter::ConvertBlurToColor(Shader* shader, Size computeSize)
@@ -263,8 +290,6 @@ void InterfacePainter::ConvertBlurToColor(Shader* shader, Size computeSize)
 
 void InterfacePainter::ApplyBrushes(Size size)
 {
-	Size computeSize(size.x / 4, size.y / 4);
-
 	auto shader = ShaderManager::GetShaderMap().Get("ApplyStencil");
 
 	if(shader)
@@ -279,13 +304,15 @@ void InterfacePainter::ApplyBrushes(Size size)
 	shader->SetConstant(stencilSize, "stencilSize");
 	shader->SetConstant(size, "baseSize");
 
-	for(int pass = 0; pass < 100; ++pass)
+	for(int pass = 0; pass < 512; ++pass)
 	{
-		float alpha = utility::GetRandom(0.05f, 0.1f);
+		float alphaModifier = exp(-(float)pass / 300.0f);
+		float alpha = utility::GetRandom(0.2f, 0.3f) * alphaModifier + 0.02f;
 		shader->SetConstant(alpha, "alpha");
 
 		//glm::vec3 color = palette.Get(utility::GetRandom(0, 1), false, true); //Utility::throwChance(0.5f) ? glm::vec3(0.7f, 0.3f, 0.1f) : glm::vec3(1.0f, 1.0f, 1.0f);
-		Size offset(utility::GetRandom(0, size.x) - size.x / 2, utility::GetRandom(0, size.y) - size.y / 2);
+		Size offset(utility::GetRandom(0, size.x) - stencilSize.x / 2, utility::GetRandom(0, size.y) - stencilSize.y / 2);
+		//Size offset(0, 0);
 		shader->SetConstant(offset, "offset");
 
 		//glm::vec3 color = utility::RollDice(0.5f) ? glm::vec3(1.0f, 0.5f, 0.0f) : glm::vec3(0.95f, 0.81f, 0.72f);
@@ -293,13 +320,13 @@ void InterfacePainter::ApplyBrushes(Size size)
 		Color color = basePalette.GetColor();
 		shader->SetConstant(color, "color");
 
-		Index stencilIndex = utility::GetRandom(0, 3);
+		Index stencilIndex = utility::GetRandom(0, 15);
 		shader->SetConstant(stencilIndex, "stencilIndex");
 
 		Index mode = 2;
 		shader->SetConstant(mode, "mode");
 
-		shader->DispatchCompute(computeSize);
+		shader->DispatchCompute(stencilSize / 4);
 	}
 
 	shader->Unbind();
@@ -310,7 +337,7 @@ void InterfacePainter::SetStage(Stages stage)
 	paperGenerationShader->SetConstant((int)stage, "stage");
 }
 
-void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*& baseTexture, Texture*& shadowTexture)
+void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*& baseTexture)
 {
 	GeneratePaper(size, shape);
 
@@ -318,23 +345,49 @@ void InterfacePainter::GenerateTextures(ElementShapes shape, Size size, Texture*
 
 	//HighlightEdges(size, size / 16, "large");
 
-	HighlightEdges(size, size / 16, "medium");
+	HighlightEdges(size, "medium");
 
 	//HighlightEdges(size, size / 16, "tiny");
-
-	GenerateShadow(size, size / 16);
 
 	Grid <Color> diffuseMap(size.x, size.y);
 	buffers_.Get("diffuse")->Download(&diffuseMap);
 
-	baseTexture = new Texture(Size(diffuseMap.GetWidth(), diffuseMap.GetHeight()), TextureFormats::FOUR_FLOAT, &diffuseMap);
+	baseTexture = new Texture(size, TextureFormats::FOUR_FLOAT, &diffuseMap);
+}
 
-	Grid <float> shadowMap(size.x, size.y);
-	buffers_.Get("edgeBlurSwap")->Download(&shadowMap);
+void InterfacePainter::GeneratePaperBase(Size size)
+{
+	Size computeSize(size.x / 16, size.y / 16);
 
-	shadowMap *= 0.7f;
+	SetupPaperGenerator(size);
 
-	shadowTexture = new Texture(Size(shadowMap.GetWidth(), shadowMap.GetHeight()), TextureFormats::ONE_FLOAT, &shadowMap);
+	Clear(paperGenerationShader, computeSize, ElementShapes::SQUARE);
+
+	ApplyBrushes(size);
+
+	buffers_.Get("diffuse")->Copy(buffers_.Get("cache"));
+}
+
+Texture* InterfacePainter::GenerateBaseTexture(Size size, Size sourceSize, Size offset, ElementShapes shape)
+{
+	Crop(size, sourceSize, offset, shape);
+
+	Perlin::Generate(size, FocusIndex(0.2f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
+
+	SetupPaperGenerator(size);
+
+	currentKernel = kernelBuffers.Get("tiny");
+
+	Blur(size / 16);
+
+	ConvertBlurToAlpha(size / 16);
+
+	HighlightEdges(size, "medium");
+
+	Grid <Color> diffuseMap(size.x, size.y);
+	buffers_.Get("diffuse")->Download(&diffuseMap);
+
+	return new Texture(size, TextureFormats::FOUR_FLOAT, &diffuseMap);
 }
 
 ElementTextureSet* InterfacePainter::GetTextureSet(ElementShapes shape, ElementSizes size, Index index)
@@ -353,32 +406,46 @@ void InterfacePainter::PaintInterface()
 	Texture* baseTexture = nullptr;
 	Texture* shadowTexture = nullptr;
 
-	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	Size size = Size(768, 1024);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "MainMenu");
 	TextureManager::AddTexture(shadowTexture, "MainMenuShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	size = Size(768, 1024);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "NewGameMenu");
 	TextureManager::AddTexture(shadowTexture, "NewGameMenuShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(768, 1024), baseTexture, shadowTexture);
+	size = Size(768, 1024);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "NewWorldMenu");
 	TextureManager::AddTexture(shadowTexture, "NewWorldMenuShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(768, 768), baseTexture, shadowTexture);
+	size = Size(768, 768);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "WorldPreviewPanel");
 	TextureManager::AddTexture(shadowTexture, "WorldPreviewPanelShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 640), baseTexture, shadowTexture);
+	size = Size(512, 640);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "BottomInfoPanel");
 	TextureManager::AddTexture(shadowTexture, "BottomInfoPanelShadow");
+
+	GeneratePaperBase(Size(1024, 1024));
 
 	auto textureSetArray = textureSets_.Add(ElementTextureClass(ElementShapes::ROUND, ElementSizes::SMALL));
 	textureSetArray->Initialize(4);
 
 	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
 	{
-		GenerateTextures(ElementShapes::ROUND, Size(224, 224), baseTexture, shadowTexture);
+		size = Size(224, 224);
+		baseTexture = GenerateBaseTexture(size, Size(1024, 1024), Size(0, (index % 4) * size.y), ElementShapes::ROUND);
+		GenerateShadow(size, shadowTexture);
 		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
 	}
 
@@ -387,15 +454,21 @@ void InterfacePainter::PaintInterface()
 
 	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
 	{
-		GenerateTextures(ElementShapes::SQUARE, Size(512, 256), baseTexture, shadowTexture);
+		size = Size(512, 256);
+		baseTexture = GenerateBaseTexture(size, Size(1024, 1024), Size((index / 2) * size.x, (index % 4) * size.y), ElementShapes::SQUARE);
+		GenerateShadow(size, shadowTexture);
 		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);
 	}
 
-	GenerateTextures(ElementShapes::SQUARE, Size(2688, 256), baseTexture, shadowTexture);
+	size = Size(2688, 256);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "TopBar");
 	TextureManager::AddTexture(shadowTexture, "TopBarShadow");
 
-	GenerateTextures(ElementShapes::SQUARE, Size(512, 640), baseTexture, shadowTexture);
+	size = Size(512, 640);
+	GenerateTextures(ElementShapes::SQUARE, size, baseTexture);
+	GenerateShadow(size, shadowTexture);
 	TextureManager::AddTexture(baseTexture, "TopPanel");
 	TextureManager::AddTexture(shadowTexture, "TopPanelShadow");
 }

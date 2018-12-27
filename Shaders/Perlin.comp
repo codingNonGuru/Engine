@@ -50,14 +50,15 @@ float getRandomValue(uint seed_x, float min, float max)
 
 const float octaveFalloff = 0.25f;
 
-vec2 getGradient(uint x, uint y)
+vec2 getGradient(uint x, uint y, int order)
 {
 	if(x == size.x)
 		x = 0;
 	if(y == size.y)
 		y = 0; 
 
-	uint shrinkedIndex = y * size.x + x;
+	//uint shrinkedIndex = y * size.x + x;
+	uint shrinkedIndex = (y / order) * (((size.x - 1) / order) + 1) + x / order;
 
 	float angle = getRandomValue(timeSeed + shrinkedIndex, 0.0f, 6.2831f * 2.0f);
 	float radius = 1.0f; 
@@ -81,10 +82,10 @@ float getOctave(int order)
 	vec2 lowerLeftDirection = vec2(x % order, order - (y % order)) / modifier;
 	vec2 lowerRightDirection = vec2(x % order - order, order - (y % order)) / modifier;
 	
-	vec2 upperLeft = getGradient(x - (x % order), y - (y % order));
-	vec2 upperRight = getGradient(order + x - (x % order), y - (y % order));
-	vec2 lowerLeft = getGradient(x - (x % order), order + y - (y % order));
-	vec2 lowerRight = getGradient(order + x - (x % order), order + y - (y % order));
+	vec2 upperLeft = getGradient(x - (x % order), y - (y % order), order);
+	vec2 upperRight = getGradient(order + x - (x % order), y - (y % order), order);
+	vec2 lowerLeft = getGradient(x - (x % order), order + y - (y % order), order);
+	vec2 lowerRight = getGradient(order + x - (x % order), order + y - (y % order), order);
 
 	float upperLeftResult = dot(upperLeft, upperLeftDirection);
 	float upperRightResult = dot(upperRight, upperRightDirection);
@@ -127,7 +128,7 @@ void main()
 	sum = sum * 0.5f + 0.5f;
 
 	sum = clamp(sum, 0.0f, 1.0f);
-	sum = pow(sum, pow(contrastStrength, 16.0f * contrast - 16.0f * sum));
+	sum = pow(sum, pow(contrastStrength, 32.0f * contrast - 32.0f * sum));
 	//sum = sum * (range.y - range.x) + range.x;
 
 	result[index] = sum;

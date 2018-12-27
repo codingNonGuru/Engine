@@ -106,7 +106,7 @@ void convertBlurToAlpha()
 	float sum = edgeBlurBuffer[thisIndex];
 	
 	//diffuse[thisIndex].a = (sum * 2.5f + perlin[thisIndex] * 1.0f > 1.25f ? 1.0f : 0.0f);
-	diffuse[thisIndex].a = (sum * 0.7f + perlin[thisIndex] * 0.3f > 0.5f ? 1.0f : 0.0f);
+	diffuse[thisIndex].a = (sum * 0.5f + perlin[thisIndex] * 0.5f > 0.5f ? 1.0f : 0.0f);
 }
 
 void convertBlurToColor()
@@ -114,18 +114,12 @@ void convertBlurToColor()
 	uint x = gl_GlobalInvocationID.x;
 	uint y = gl_GlobalInvocationID.y;
 	uint thisIndex = y * size.x + x;
-	
-	//float sum = edgeBlurBuffer[thisIndex];// * perlin[thisIndex];
-	//sum = 1.0f - sum;
-	//sum *= 1.5f;
-	
-	//sum *= perlin[thisIndex];
-	
-	//sum = sum > 0.4f ? 1.0f : 0.0f;
 
-	float alpha = edgeBlurBuffer[thisIndex] < perlin[thisIndex] ? 1.0f : 0.0f;
-	alpha *= edgeBlurBuffer[thisIndex];
-	alpha *= edgeBlurBuffer[thisIndex];
+	//float alpha = edgeBlurBuffer[thisIndex] < perlin[thisIndex] ? 1.0f : 0.0f;
+	//alpha *= edgeBlurBuffer[thisIndex];
+	float alpha = edgeBlurBuffer[thisIndex] * perlin[thisIndex];
+	alpha = 1.0f - pow(alpha, pow(4.0f, 32.0f * 0.5f - 32.0f * alpha));
+	alpha *= pow(1.0f - edgeBlurBuffer[thisIndex], 0.8f);
 	
 	diffuse[thisIndex].r = diffuse[thisIndex].r * (1.0f - alpha) + alpha;
 	diffuse[thisIndex].g = diffuse[thisIndex].g * (1.0f - alpha) + alpha;

@@ -23,7 +23,11 @@ void main()
 	uint index = stencilIndex * stencilSize.x * stencilSize.y + y * stencilSize.x + x;
 	
 	float excentricity = pow(float(x) - float(stencilSize.x) / 2.0f, 2.0f) + pow(float(y) - float(stencilSize.y) / 2.0f, 2.0f);
-	excentricity = pow(excentricity, 1.5f);
-	float c = 2.0f * pow(250.0f, 3.0f); 
-	stencil[index] = source[(y + offset.y) * sourceSize.x + x + offset.x] * exp(-excentricity / c);
+	//excentricity = pow(excentricity, 2.0f);
+	float c = 2.0f * pow(150.0f, 2.0f); 
+
+	float baseValue = source[(y + offset.y) * sourceSize.x + x + offset.x];
+	float newValue = baseValue * exp(-excentricity / c);
+	//stencil[index] = baseValue < newValue ? baseValue : newValue;
+	stencil[index] = pow(newValue, pow(8.0f, 32.0f * 0.5f - 32.0f * newValue));
 }

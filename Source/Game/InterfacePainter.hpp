@@ -60,23 +60,27 @@ class InterfacePainter
 
 	static void Clear(Shader*, Size, ElementShapes);
 
-	static void Blur(Shader*, Size);
+	static void Blur(Size);
 
-	static void ConvertBlurToAlpha(Shader*, Size);
+	static void Crop(Size, Size, Size, ElementShapes);
+
+	static void ConvertBlurToAlpha(Size);
 
 	static void ConvertBlurToColor(Shader*, Size);
 
-	static void HighlightEdges(Size, Size, const char*);
+	static void HighlightEdges(Size, const char*);
 
 	static void ApplyBrushes(Size);
 
-	static void GenerateShadow(Size, Size);
+	static void GenerateShadow(Size, Texture*&);
 
 	static void GeneratePaper(Size, ElementShapes);
 
-	static Texture* GenerateBaseTexture(Size);
+	static Texture* GenerateBaseTexture(Size, Size, Size, ElementShapes);
 
 	static Texture* GenerateShadowTexture(Size);
+
+	static void GeneratePaperBase(Size);
 
 	static void SetStage(Stages);
 
@@ -85,7 +89,7 @@ public:
 
 	static void PaintInterface();
 
-	static void GenerateTextures(ElementShapes, Size, Texture*&, Texture*&);
+	static void GenerateTextures(ElementShapes, Size, Texture*&);
 
 	static void GenerateStencils();
 

@@ -31,7 +31,7 @@ Size detailMapSize = Size(4096, 4096);
 
 Grid <Float> detailMap = Grid <Float> (detailMapSize.x, detailMapSize.y);
 
-const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 60.0f;
+const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 100.0f;
 
 const int ReliefGenerator::DETAIL_RESOLUTION = 16;
 
@@ -75,19 +75,19 @@ void ReliefGenerator::Generate(World& world)
 	position = (Float2)size * Float2(0.4f, 0.75f);
 	LiftTerrain(position, islandLift, computeSize);
 
-	for(int i = 0; i < 24; ++i)
+	for(int i = 0; i < 30; ++i)
 	{
 		shader->SetConstant(2, "mode");
 		shader->DispatchCompute(computeSize);
 	}
 
-	Perlin::GetResultBuffer()->Bind(1);
+	/*Perlin::GetResultBuffer()->Bind(1);
 
 	for(int i = 0; i < 0; ++i)
 	{
 		shader->SetConstant(2, "mode");
 		shader->DispatchCompute(computeSize);
-	}
+	}*/
 
 	shader->SetConstant(3, "mode");
 	shader->DispatchCompute(computeSize);
@@ -306,9 +306,9 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(area * sizeof(Float));
 
 		Perlin::SetTargetBuffer(buffer);
-		Perlin::Generate(size, FocusIndex(0.0f), ContrastThreshold(0.5f), ContrastStrength(2.0f));
+		Perlin::Generate(size, FocusIndex(0.0f), ContrastThreshold(0.5f), ContrastStrength(8.0f));
 
-		Perlin::Generate(size, FocusIndex(0.5f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
+		//Perlin::Generate(size, FocusIndex(0.0f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
 	}
 
 	auto highDetailArea = area * DETAIL_RESOLUTION * DETAIL_RESOLUTION;
