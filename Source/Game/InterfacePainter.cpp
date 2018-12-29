@@ -16,6 +16,8 @@
 #include "Utility/Kernel.hpp"
 #include "Utility/Utility.hpp"
 #include "Utility/Palette.hpp"
+#include "Stencil.hpp"
+#include "StencilManager.hpp"
 
 Map <DataBuffer, Word> InterfacePainter::buffers_ = Map <DataBuffer, Word> (16);
 
@@ -50,7 +52,7 @@ KernelBuffer* currentKernel = nullptr;
 
 void InterfacePainter::Initialize()
 {
-	basePalette.Add(baseColor, Range(0.0f, 0.0f), Range(0.0f, 0.0f), Weight(1.5f));
+	basePalette.Add(baseColor, Range(0.0f, 0.0f), Range(0.0f, 0.5f), Weight(1.5f));
 	basePalette.Add(Color(1.0f, 0.0f, 0.0f), Range(-0.5f, -0.0f), Range(0.3f, 1.0f), Weight(1.0f));
 	basePalette.Add(Color(1.0f, 0.3f, 0.0f), Range(-0.6f, -0.0f), Range(0.0f, 1.0f), Weight(0.5f));
 
@@ -130,43 +132,24 @@ void InterfacePainter::GenerateStencils()
 
 	perlinBuffer = Perlin::Generate(sourceSize, FocusIndex(0.5f), 0.51f, 16.0f);
 
-	container::LayeredGrid<float> stencils(512, 512, 16);
+	Size stencilSize(512, 512);
 
-	*buffers_.Add("stencil") = DataBuffer(stencils.GetMemorySize());
-
-	auto shader = ShaderManager::GetShaderMap().Get("GenerateStencil");
-	if(shader)
-	{
-		shader->Bind();
-	}
-
-	buffers_.Get("stencil")->Bind(0);
-	perlinBuffer->Bind(1);
-
-	Size stencilSize(stencils.GetWidth(), stencils.GetHeight());
-	shader->SetConstant(stencilSize, "stencilSize");
-	shader->SetConstant(sourceSize, "sourceSize");
-	//shader->SetConstant(&glm::uvec2(stencilSize), "stencilSize");
-	//shader->SetConstant(&glm::uvec2(sourceSize), "sourceSize");
-
+	Length stencilCount = 16;
 	unsigned int x = 0, y = 0;
-	for(Index index = 0; index < stencils.GetDepth(); ++index)
+	for(Index index = 0; index < stencilCount; ++index)
 	{
-		glm::uvec2 offset(x * stencils.GetWidth(), y * stencils.GetHeight());
-		shader->SetConstant(offset, "offset");
-		shader->SetConstant(index, "stencilIndex");
+		glm::uvec2 offset(x * stencilSize.x, y * stencilSize.y);
 
-		shader->DispatchCompute(stencilSize / 4);
+		auto stencil = new Stencil(stencilSize, perlinBuffer, sourceSize, offset);
+		StencilManager::Add(stencil, "Paper", index);
 
 		x++;
-		if(x == sourceSize.x / stencils.GetWidth())
+		if(x == sourceSize.x / stencilSize.x)
 		{
 			x = 0;
 			y++;
 		}
 	}
-
-	shader->Unbind();
 }
 
 void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
@@ -290,46 +273,23 @@ void InterfacePainter::ConvertBlurToColor(Shader* shader, Size computeSize)
 
 void InterfacePainter::ApplyBrushes(Size size)
 {
-	auto shader = ShaderManager::GetShaderMap().Get("ApplyStencil");
-
-	if(shader)
+	Length passCount = (size.x * size.y) / 800;
+	for(Index pass = 0; pass < passCount; ++pass)
 	{
-		shader->Bind();
-	}
-
-	buffers_.Get("stencil")->Bind(0);
-	buffers_.Get("diffuse")->Bind(3);
-
-	Size stencilSize(512, 512);
-	shader->SetConstant(stencilSize, "stencilSize");
-	shader->SetConstant(size, "baseSize");
-
-	for(int pass = 0; pass < 512; ++pass)
-	{
-		float alphaModifier = exp(-(float)pass / 300.0f);
-		float alpha = utility::GetRandom(0.2f, 0.3f) * alphaModifier + 0.02f;
-		shader->SetConstant(alpha, "alpha");
-
-		//glm::vec3 color = palette.Get(utility::GetRandom(0, 1), false, true); //Utility::throwChance(0.5f) ? glm::vec3(0.7f, 0.3f, 0.1f) : glm::vec3(1.0f, 1.0f, 1.0f);
-		Size offset(utility::GetRandom(0, size.x) - stencilSize.x / 2, utility::GetRandom(0, size.y) - stencilSize.y / 2);
-		//Size offset(0, 0);
-		shader->SetConstant(offset, "offset");
-
-		//glm::vec3 color = utility::RollDice(0.5f) ? glm::vec3(1.0f, 0.5f, 0.0f) : glm::vec3(0.95f, 0.81f, 0.72f);
-		//Color color = palette.GetColor(0, true, true);
-		Color color = basePalette.GetColor();
-		shader->SetConstant(color, "color");
-
 		Index stencilIndex = utility::GetRandom(0, 15);
-		shader->SetConstant(stencilIndex, "stencilIndex");
+		auto stencil = StencilManager::Get("Paper", stencilIndex);
 
-		Index mode = 2;
-		shader->SetConstant(mode, "mode");
+		auto stencilSize = stencil->GetSize();
 
-		shader->DispatchCompute(stencilSize / 4);
+		float alphaModifier = exp(-(float)pass / 700.0f);
+		Float alpha = utility::GetRandom(0.2f, 0.3f) * alphaModifier + 0.02f;
+
+		Size offset = Size(utility::GetRandom(0, size.x) - stencilSize.x / 2, utility::GetRandom(0, size.y) - stencilSize.y / 2);
+
+		Color color = basePalette.GetColor();
+
+		stencil->Apply(buffers_.Get("diffuse"), size, alpha, color, offset);
 	}
-
-	shader->Unbind();
 }
 
 void InterfacePainter::SetStage(Stages stage)

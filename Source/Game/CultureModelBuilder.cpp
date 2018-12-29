@@ -144,7 +144,7 @@ void CultureModelBuilder::GenerateTextures(World& world)
 	Grid <Float> distortionAngles(textureSize.x, textureSize.y);
 	//Grid <Float> distortionRanges(textureSize.x, textureSize.y);
 
-	Perlin::Generate(textureSize, -0.1f, 0.5f, 1.0f);
+	Perlin::Generate(textureSize, 0.0f, 0.5f, 1.0f);
 	Perlin::Download(&distortionAngles);
 
 	//Perlin::Generate(textureSize, 0.15f, 0.5f, 1.0f);
@@ -162,7 +162,7 @@ void CultureModelBuilder::GenerateTextures(World& world)
 
 		auto verticalOffset = textureIndex * roadAlpha.GetHeight();
 
-		const float DIRECTION_MODIFIER = 100.0f;
+		const float DIRECTION_MODIFIER = 150.0f;
 		for(int x = 0; x < roadAlpha.GetWidth(); ++x)
 			for(int y = 0; y < roadAlpha.GetHeight(); ++y)
 			{

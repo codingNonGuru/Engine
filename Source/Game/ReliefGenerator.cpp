@@ -31,11 +31,11 @@ Size detailMapSize = Size(4096, 4096);
 
 Grid <Float> detailMap = Grid <Float> (detailMapSize.x, detailMapSize.y);
 
-const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 100.0f;
+const float ReliefGenerator::DETAIL_STRENGTH_MODIFIER = 150.0f;
 
 const int ReliefGenerator::DETAIL_RESOLUTION = 16;
 
-const int ReliefGenerator::DETAIL_TILE_COUNT = 8;
+const int ReliefGenerator::DETAIL_TILE_COUNT = 4;
 
 const float ReliefGenerator::DETAIL_STRENGTH = DETAIL_STRENGTH_MODIFIER / Float(DETAIL_TILE_COUNT);
 

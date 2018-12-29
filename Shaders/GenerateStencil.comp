@@ -4,7 +4,6 @@
 layout (location = 0) uniform uvec2 offset;
 layout (location = 1) uniform uvec2 stencilSize;
 layout (location = 2) uniform uvec2 sourceSize;
-layout (location = 3) uniform uint stencilIndex;
 
 layout (std430, binding = 0) buffer STENCIL {
 	float stencil[];
@@ -20,7 +19,7 @@ void main()
 {
 	uint x = gl_GlobalInvocationID.x;
 	uint y = gl_GlobalInvocationID.y;
-	uint index = stencilIndex * stencilSize.x * stencilSize.y + y * stencilSize.x + x;
+	uint index = y * stencilSize.x + x;
 	
 	float excentricity = pow(float(x) - float(stencilSize.x) / 2.0f, 2.0f) + pow(float(y) - float(stencilSize.y) / 2.0f, 2.0f);
 	//excentricity = pow(excentricity, 2.0f);
