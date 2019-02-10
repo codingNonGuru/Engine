@@ -71,6 +71,7 @@ public:
 	static Word const SHADOW_MAP;
 	static Word const ROAD_STENCIL;
 	static Word const ROAD_DETAIL;
+	static Word const STEPPE_DIFFUSE;
 	static int const COUNT;
 };
 

@@ -58,6 +58,13 @@ enum class TextureFormats
 	DEPTH_BYTE
 };
 
+enum class ImageFormats
+{
+	RGB,
+	RGBA,
+	ALPHA
+};
+
 enum class AnimationValueTypes
 {
 	FLOAT,

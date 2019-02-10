@@ -82,8 +82,4 @@ void main()
 		rgbaBase[baseIndex].g = finalAlpha * color.g + rgbaBase[baseIndex].g * (1.0f - finalAlpha);
 		rgbaBase[baseIndex].b = finalAlpha * color.b + rgbaBase[baseIndex].b * (1.0f - finalAlpha);
 	}
-	
-	/*rgbaBase[baseIndex].r = 1.0f;
-	rgbaBase[baseIndex].g = 0.5f;
-	rgbaBase[baseIndex].b = 0.0f;*/
 }

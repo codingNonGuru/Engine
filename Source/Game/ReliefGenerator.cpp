@@ -16,7 +16,7 @@
 
 enum class Buffers
 {
-	TERRAIN, CARVE, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY, PERLIN_DETAIL, HIGH_DETAIL_TERRAIN
+	TERRAIN, CARVE, GRADIENT, KERNEL, PARTICLE, PARTICLE_VELOCITY, PERLIN_DETAIL, HIGH_DETAIL_TERRAIN, STEPPE_DIFFUSE
 };
 
 Map <DataBuffer, Buffers> buffers = Map <DataBuffer, Buffers> (16);
@@ -28,6 +28,8 @@ Map <Texture*> ReliefGenerator::modelTextures_ = Map <Texture*> (TerrainModelTex
 Shader* shader = nullptr;
 
 Size detailMapSize = Size(4096, 4096);
+
+Size steppeTextureSize = Size(1024, 1024);
 
 Grid <Float> detailMap = Grid <Float> (detailMapSize.x, detailMapSize.y);
 
@@ -318,6 +320,12 @@ void ReliefGenerator::SetupBuffers(World& world)
 		buffer->Generate(highDetailArea * sizeof(Float));
 	}
 
+	buffer = buffers.Add(Buffers::STEPPE_DIFFUSE);
+	if(buffer)
+	{
+		buffer->Generate(steppeTextureSize.x * steppeTextureSize.y * sizeof(Float4));
+	}
+
 	shader = ShaderManager::GetShader("GenerateRelief");
 }
 
@@ -484,4 +492,30 @@ void ReliefGenerator::GenerateModel(World& world)
 
 	texture = new Texture(detailSize, TextureFormats::ONE_FLOAT, *Perlin::GetResultBuffer());
 	*modelTextures_.Add(TerrainModelTextures::ROAD_DETAIL) = texture;
+}
+
+void ReliefGenerator::GenerateSteppeTextures()
+{
+	auto image = new Image(steppeTextureSize, Color::RED, ImageFormats::RGB);
+
+	Length passCount = 1024;
+	for(Index pass = 0; pass < passCount; ++pass)
+	{
+		Index stencilIndex = utility::GetRandom(0, 15);
+		auto stencil = StencilManager::Get("Paper", stencilIndex);
+
+		auto stencilSize = stencil->GetSize();
+
+		float alphaModifier = exp(-(float)pass / 700.0f);
+		Float alpha = utility::GetRandom(0.2f, 0.3f) * alphaModifier + 0.02f;
+
+		Size offset = Size(utility::GetRandom(0, steppeTextureSize.x) - stencilSize.x / 2, utility::GetRandom(0, steppeTextureSize.y) - stencilSize.y / 2);
+
+		Color color = basePalette.GetColor();
+
+		stencil->Apply(image, alpha, color, offset);
+	}
+
+	auto texture = new Texture(steppeTextureSize, TextureFormats::FOUR_FLOAT, image);
+	*modelTextures_.Add(TerrainModelTextures::STEPPE_DIFFUSE) = texture;
 }

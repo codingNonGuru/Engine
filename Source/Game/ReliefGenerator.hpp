@@ -20,6 +20,8 @@ class ReliefGenerator
 
 	static void FillWorld(World&);
 
+	static void GenerateSteppeTextures();
+
 	static const float DETAIL_STRENGTH_MODIFIER;
 
 public:

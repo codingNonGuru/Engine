@@ -4,6 +4,7 @@
 
 #include "InterfacePainter.hpp"
 
+#include "../Image.hpp"
 #include "Interface/Element.hpp"
 #include "Texture.hpp"
 #include "TextureManager.hpp"
@@ -16,10 +17,11 @@
 #include "Utility/Kernel.hpp"
 #include "Utility/Utility.hpp"
 #include "Utility/Palette.hpp"
-#include "Stencil.hpp"
 #include "StencilManager.hpp"
 
-Map <DataBuffer, Word> InterfacePainter::buffers_ = Map <DataBuffer, Word> (16);
+Map <Image> InterfacePainter::images_ = Map <Image> (16);
+
+Map <DataBuffer> InterfacePainter::buffers_ = Map <DataBuffer> (16);
 
 Map <Array <ElementTextureSet>, InterfacePainter::ElementTextureClass> InterfacePainter::textureSets_ = Map <Array <ElementTextureSet>, ElementTextureClass> (16);
 
@@ -57,12 +59,11 @@ void InterfacePainter::Initialize()
 	basePalette.Add(Color(1.0f, 0.3f, 0.0f), Range(-0.6f, -0.0f), Range(0.0f, 1.0f), Weight(0.5f));
 
 	Size canvasSize(2048, 2048);
-	int pixelCount = canvasSize.x * canvasSize.y;
 
-	*buffers_.Add("diffuse") = DataBuffer(pixelCount * 16);
-	*buffers_.Add("cache") = DataBuffer(pixelCount * 16);
-	*buffers_.Add("edgeBlur") = DataBuffer(pixelCount * 4);
-	*buffers_.Add("edgeBlurSwap") = DataBuffer(pixelCount * 4);
+	*images_.Add("diffuse") = Image(canvasSize, ImageFormats::RGBA);
+	*images_.Add("cache") = Image(canvasSize, ImageFormats::RGBA);
+	*images_.Add("edgeBlur") = Image(canvasSize, ImageFormats::ALPHA);
+	*images_.Add("edgeBlurSwap") = Image(canvasSize, ImageFormats::ALPHA);
 
 	SetupKernels();
 
@@ -140,7 +141,7 @@ void InterfacePainter::GenerateStencils()
 	{
 		glm::uvec2 offset(x * stencilSize.x, y * stencilSize.y);
 
-		auto stencil = new Stencil(stencilSize, perlinBuffer, sourceSize, offset);
+		auto stencil = new Image(stencilSize, perlinBuffer, sourceSize, offset);
 		StencilManager::Add(stencil, "Paper", index);
 
 		x++;
@@ -156,17 +157,16 @@ void InterfacePainter::GeneratePaper(Size size, ElementShapes shape)
 {
 	Perlin::Generate(size, FocusIndex(0.2f), ContrastThreshold(0.5f), ContrastStrength(4.0f));
 
-	Size computeSize(size.x / 16, size.y / 16);
-
 	SetupPaperGenerator(size);
 
-	Clear(paperGenerationShader, computeSize, shape);
+	auto image = images_.Get("diffuse");
+	image->Setup(size, baseColor);
 
 	currentKernel = kernelBuffers.Get("tiny");
 
-	Blur(computeSize);
+	Blur(size);
 
-	ConvertBlurToAlpha(computeSize);
+	ConvertBlurToAlpha(size);
 }
 
 void InterfacePainter::GenerateShadow(Size size, Texture*& texture)
@@ -175,7 +175,7 @@ void InterfacePainter::GenerateShadow(Size size, Texture*& texture)
 
 	currentKernel = kernelBuffers.Get("small");
 
-	Blur(size / 16);
+	Blur(size);
 
 	Grid <float> shadowMap(size.x, size.y);
 	buffers_.Get("edgeBlurSwap")->Download(&shadowMap);
@@ -193,9 +193,9 @@ void InterfacePainter::HighlightEdges(Size size, const char* kernelName)
 
 	currentKernel = kernelBuffers.Get(kernelName);
 
-	Blur(size / 16);
+	Blur(size);
 
-	ConvertBlurToColor(paperGenerationShader, size / 16);
+	ConvertBlurToColor(paperGenerationShader, size);
 }
 
 void InterfacePainter::SetupPaperGenerator(Size size)
@@ -208,17 +208,6 @@ void InterfacePainter::SetupPaperGenerator(Size size)
 	paperGenerationShader->Bind();
 
 	paperGenerationShader->SetConstant(size, "size");
-}
-
-void InterfacePainter::Clear(Shader* shader, Size computeSize, ElementShapes shape)
-{
-	SetStage(Stages::CLEAR);
-
-	shader->SetConstant(baseColor, "baseColor");
-
-	shader->SetConstant((int)shape, "shape");
-
-	shader->DispatchCompute(computeSize);
 }
 
 void InterfacePainter::Crop(Size size, Size sourceSize, Size offset, ElementShapes shape)
@@ -238,7 +227,7 @@ void InterfacePainter::Crop(Size size, Size sourceSize, Size offset, ElementShap
 	cropShader->Unbind();
 }
 
-void InterfacePainter::Blur(Size computeSize)
+void InterfacePainter::Blur(Size size)
 {
 	currentKernel->Buffer_->Bind(4);
 
@@ -247,32 +236,34 @@ void InterfacePainter::Blur(Size computeSize)
 	int filterSize = currentKernel->Kernel_->GetSide();
 	paperGenerationShader->SetConstant(filterSize, "filterSize");
 
-	paperGenerationShader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(size / 16);
 
 	SetStage(Stages::BLUR_VERTICALLY);
 
 	filterSize = currentKernel->Kernel_->GetSide();
 	paperGenerationShader->SetConstant(filterSize, "filterSize");
 
-	paperGenerationShader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(size / 16);
 }
 
-void InterfacePainter::ConvertBlurToAlpha(Size computeSize)
+void InterfacePainter::ConvertBlurToAlpha(Size size)
 {
 	SetStage(Stages::CONVERT_BLUR_TO_ALPHA);
 
-	paperGenerationShader->DispatchCompute(computeSize);
+	paperGenerationShader->DispatchCompute(size / 16);
 }
 
-void InterfacePainter::ConvertBlurToColor(Shader* shader, Size computeSize)
+void InterfacePainter::ConvertBlurToColor(Shader* shader, Size size)
 {
 	SetStage(Stages::CONVERT_BLUR_TO_COLOR);
 
-	shader->DispatchCompute(computeSize);
+	shader->DispatchCompute(size / 16);
 }
 
 void InterfacePainter::ApplyBrushes(Size size)
 {
+	auto diffuseImage = images_.Get("diffuse");
+
 	Length passCount = (size.x * size.y) / 800;
 	for(Index pass = 0; pass < passCount; ++pass)
 	{
@@ -288,7 +279,7 @@ void InterfacePainter::ApplyBrushes(Size size)
 
 		Color color = basePalette.GetColor();
 
-		stencil->Apply(buffers_.Get("diffuse"), size, alpha, color, offset);
+		stencil->Apply(diffuseImage, alpha, color, offset);
 	}
 }
 
@@ -338,9 +329,9 @@ Texture* InterfacePainter::GenerateBaseTexture(Size size, Size sourceSize, Size 
 
 	currentKernel = kernelBuffers.Get("tiny");
 
-	Blur(size / 16);
+	Blur(size);
 
-	ConvertBlurToAlpha(size / 16);
+	ConvertBlurToAlpha(size);
 
 	HighlightEdges(size, "medium");
 
@@ -403,7 +394,7 @@ void InterfacePainter::PaintInterface()
 
 	for(int index = 0; index < textureSetArray->GetCapacity(); ++index)
 	{
-		size = Size(224, 224);
+		size = Size(256, 256);
 		baseTexture = GenerateBaseTexture(size, Size(1024, 1024), Size(0, (index % 4) * size.y), ElementShapes::ROUND);
 		GenerateShadow(size, shadowTexture);
 		*textureSetArray->Allocate() = ElementTextureSet(baseTexture, shadowTexture);

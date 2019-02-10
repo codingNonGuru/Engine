@@ -57,7 +57,6 @@ vec2 getGradient(uint x, uint y, int order)
 	if(y == size.y)
 		y = 0; 
 
-	//uint shrinkedIndex = y * size.x + x;
 	uint shrinkedIndex = (y / order) * (((size.x - 1) / order) + 1) + x / order;
 
 	float angle = getRandomValue(timeSeed + shrinkedIndex, 0.0f, 6.2831f * 2.0f);
@@ -129,7 +128,6 @@ void main()
 
 	sum = clamp(sum, 0.0f, 1.0f);
 	sum = pow(sum, pow(contrastStrength, 32.0f * contrast - 32.0f * sum));
-	//sum = sum * (range.y - range.x) + range.x;
 
 	result[index] = sum;
 }

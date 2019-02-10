@@ -2,7 +2,7 @@
 
 #include "Conventions.hpp"
 
-class Stencil;
+class Image;
 
 class StencilManager
 {
@@ -19,10 +19,10 @@ class StencilManager
 		bool operator==(Identifier& other) {return Name_ == other.Name_ && Index_ == other.Index_;}
 	};
 
-	static Map <Stencil*, Identifier> stencils_;
+	static Map <Image*, Identifier> stencils_;
 
 public:
-	static void Add(Stencil*, Word, Index);
+	static void Add(Image*, Word, Index);
 
-	static Stencil* Get(Word, Index);
+	static Image* Get(Word, Index);
 };

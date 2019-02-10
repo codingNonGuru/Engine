@@ -2,9 +2,9 @@
 
 #define STENCIL_CAPACITY 128
 
-Map <Stencil*, StencilManager::Identifier> StencilManager::stencils_ = Map <Stencil*, Identifier> (STENCIL_CAPACITY);
+Map <Image*, StencilManager::Identifier> StencilManager::stencils_ = Map <Image*, Identifier> (STENCIL_CAPACITY);
 
-void StencilManager::Add(Stencil* stencil, Word name, Index index)
+void StencilManager::Add(Image* stencil, Word name, Index index)
 {
 	auto stencilPointer = stencils_.Add(Identifier(name, index));
 	if(stencilPointer == nullptr)
@@ -16,7 +16,7 @@ void StencilManager::Add(Stencil* stencil, Word name, Index index)
 	*stencilPointer = stencil;
 }
 
-Stencil* StencilManager::Get(Word name, Index index)
+Image* StencilManager::Get(Word name, Index index)
 {
 	return *stencils_.Get(Identifier(name, index));
 }

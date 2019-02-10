@@ -5,6 +5,7 @@
 #include "Game/Types.hpp"
 
 class Texture;
+class Image;
 class DataBuffer;
 class Shader;
 
@@ -48,7 +49,9 @@ class InterfacePainter
 		}
 	};
 
-	static Map <DataBuffer, Word> buffers_;
+	static Map <Image> images_;
+
+	static Map <DataBuffer> buffers_;
 
 	static Map <Array <ElementTextureSet>, ElementTextureClass> textureSets_;
 
@@ -57,8 +60,6 @@ class InterfacePainter
 	static void SetupKernels();
 
 	static void SetupPaperGenerator(Size);
-
-	static void Clear(Shader*, Size, ElementShapes);
 
 	static void Blur(Size);
 
